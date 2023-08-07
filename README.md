@@ -1,13 +1,5 @@
-This document describes/defines FILL-THIS-OUT in the [Virtual
-Observatory](https://ivoa.net)
+An IVOA note describing the IVOAExecutionPlanner and IVOAExecutionWorker services and the associated IVOAExecutionPlanner data model.
 
-Stable versions of this document are available through the [IVOA
-document repository](http://ivoa.net/documents/).
-
-To build a PDF version this document, you will need a reasonably
-complete LaTeX installation, a sufficiently capable `make`, preferably
-[latexmk](https://personal.psu.edu/~jcc8/software/latexmk/) and probably
-[rsvg-convert](https://wiki.gnome.org/Projects/LibRsvg). For further
-details, see [ivoatexDoc](https://ivoa.net/documents/Notes/IVOATex/).
+This is the second note describing these services, intended to be a prototype for an IVOA specification.
 
 This document is distributed under CC-BY-SA.
