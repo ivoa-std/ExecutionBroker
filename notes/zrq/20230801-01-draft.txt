@@ -1,0 +1,506 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (C) 2023 by Wizzard Solutions Ltd, wizzard@metagrid.co.uk
+#
+#     This information is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This information is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   </meta:licence>
+# </meta:header>
+#
+# AIMetrics: []
+#
+
+    Target:
+
+        Initial draft
+
+    Result:
+
+        Work in progress ...
+
+# -----------------------------------------------------
+
+* Introduction
+
+The ExecPlanning group of specifications define a set of complimentary web services and a common data model,
+ExecutionPlanner, ExecutionWorker and the ExecutionPlanningDataModel.
+which are are designed to work together to provide service discovery and asynchronous execution for a wide range of different types of task.
+
+* ExecutionPlanner – a discovery service to find execution platforms and offer resource reservations
+* ExecutionWorker – an asynchronous service for executing a specific task (UWS pattern)
+* ExecutionPlanning data model – common data model for describing executable tasks, service capabilities and resource reservations.
+
+** Definitions
+
+The terms, task, job and workflow, can have different and sometimes overlapping meanings.
+For clarity, the ExecPlanning documents will use the following definitions :
+
+Task - An identifiable execution step that needs to be done.
+Task description - A description of an executable task and the resources needed to execute it.
+Job - The assignment of a task to a worker.
+Job record - An entry in a database tracking the status of job as it is executed.
+
+Workflow - A document describing a sequence of tasks, which could itself, be considered as an executable task.
+
+** Examples
+
+The square root of a number - this is a mathematical concept
+
+Calculating the square root of a number using successive approximation - this is an algorithm for implemeting the mathematical concept
+
+A Python program to calculate the square root of a number using successive approximation - this is an 'executable thing' that implements the algorithm.
+To be able to use this 'executable thing' you would need to know what environment it requires. In this case, a system with the Python 3 interpreter
+installed along with specifc set of 3rd Python modules.
+
+A Jupyter notebook that demonstrates how to use the Python program to calculate the square root of a number using successive approximation.
+This is another 'executable thing' that provides an interactive environment that enables the user to experiment with using the Python program.
+To be able to use this 'executable thing' you would need to know what environment it requires. In this case, a system with the Jupyter notebook
+platform installed along with specifc set of 3rd Python modules.
+
+An OCI container that contains the Python program to calculate the square root of a number using successive approximation
+This is another 'executable thing' that provides either an interactive environment that enables the user to experiment with using the Python program via the command line,
+or a batch mode executable that could be used to apply the Python program to a large dataset.
+To be able to use this 'executable thing' you would need to know what environment it requires. In this case, a system with the OCI container runtime installed.
+
+A workflow that combines this Python program with a number of other steps to create a larger composite.
+To be able to use this 'executable thing' you would need to know what environment it requires. In this case, a system with the apropriate workflow language interpreter installed.
+
+- what is a workflow exactly ?
+
+* Conversation
+
+The core idea behind the ExecutionPlanning specifications is based on a conversation between the client and one or more ExecutionPlanner
+services to describe a task and the resources needed to execute it and to discover where, how, and when, it can be executed.
+
+The conversation starts with the client sending a question describing the task it wants executed to one or more ExecutionPlanner
+services, which responds with a top level YES/NO answer, and if the answer is YES, one or more offers describing where how, and when,
+the task could be executed.
+
+The client chooses which of the offers it wants to use and sends sends a message back to that ExecutionPlanner service accepting the offer.
+The ExecutionPlanner will then cancel the other offers it made and reserves the resources described by the accepted the offer.
+
+The client then uses the connection details in the offer to send the request to the appropriate ExecutionWorker service which will
+execute the job at the appropriate time.
+
+The client does not need have to cancel the offers made by the other ExecutionPlanner services. Offers are only valid for a short period
+of time and expire naturally when they reach the end of their lifetime.
+
+* Core questions
+
+The task description part of the conversation is best explained thinking of it as a series of questions
+that can be used to discover where how, and when, to execute a task.
+
+**
+Level 1 - the executable task
+Can this platform execute this <task> ?
+
+At the simplest level we just want to check whether the platform is able to execute a particular type of task.
+For example, _is this platform able to run a Jupyter notebook?_
+
+In order to do this the request needs to specify the task type, e.g. Jupyter notebook,
+along with details about the task, e.g. where to fetch it from and how to execute it.
+
+The ExecutionPlanner response would be YES or NO, followed by a list of offers for when and where the task could be executed.
+
+In order to keep the specification open ended, each particular type of task would be described in a separate extension to the core ExecutionPlanningDataModel.
+The core data model has two fields, a URI identifying the task type, and place holder for details about the task.
+
+```
+    task:
+      # A URI identifying the basic type of task.
+      # e.g.
+      # https://www.purl.org/ivoa-net/task-type/oci-container
+      # https://www.purl.org/ivoa-net/task-type/jupyter-notebook
+      type: "any-URI"
+
+      # Task details, specific to the task-type.
+      spec: {}
+```
+
+The core ExecutionPlanning specification defines an initial set of the most common task types, e.g. OCI container, Jupyter notebook etc.
+Then the plug-in extension pattern makes it easy for 3rd parties to develop new types of tasks appropriate for their science domain.
+
+A service that doesn’t recognize a particular task type can simply reply NO to an execution request.
+
+```
+Request  - Can this platform execute <unkown-task-type> ?
+Response - NO
+```
+
+The data model extension for a task type would define the meta-data needed to describe that particular type of task.
+
+For example, the task description for executing a Jupyter notebook would describe where to fetch the source code for the notebook from.
+```
+    task:
+      # The URI for the task type
+      type: "https://.../jupyter-notebook"
+
+      # Task details, specific to the Jupyter notebook task type.
+      spec:
+        notebook: "https://.../example.jpnb"
+```
+
+The task description for executing an OCI container would describe what system architecture the container is is built for
+and where to fetch the binary image from.
+
+```
+    task:
+      # The URI for the task type
+      type: "https://.../oci-container"
+
+      # Task details, specific to the OCI-container task-type.
+      spec:
+        arch:  "..."
+        repo:  "..."
+        image: "..."
+```
+
+Details of the core task types is defined in section xxx.
+
+**
+Level 2 - resources
+Can this platform provide the <resources> needed to execute this <task> ?
+
+The next level checks that the execution platform can provide the resources needed to execute the task.
+
+***
+Level 2a - compute resources
+
+In order to do this the request would not only describe the task itself,
+but also the minimum level of compute resources in terms of gpus, cpu cores, memory, and disc space etc,
+needed to execute it.
+
+The metadata for describing compute resources is, in most cases, common to all types of task,
+so the data model for these requirements are defined as part of the core ExecutionPlanning data model.
+
+It is important to note that all of the resource requirements are optional.
+So a request to execute a simple Jupyter notebook would not need to include any resource details.
+
+```
+    task:
+      type: "https://.../jupyter-notebook"
+      spec:
+        notebook:  "https://.../example.jpnb"
+```
+
+As long as this Jupyter notebook only needs a minimal set of resources to run, e.g. 2 cpu cores,
+2G of memory and 20G of disc space, then this task will execute pretty much anywere.
+
+However, if the Jupyter notebook needs a specific type of GPU to function properly,
+then this needs to be added to the request by specifying a compute environment that
+provides that specific type of GPU.
+
+```
+    task:
+      type: "https://.../jupyter-notebook"
+      spec:
+        notebook: "https://.../example.jpnb"
+    resources:
+      compute:
+      - name: "example-one"
+        gpu:
+          type: "https://.../AMD-xx"
+```
+
+With this detail added to the request, platforms that are not able to provide this kind of GPU would simply reply NO.
+
+```
+Request  - Can this platform provide a machine with an AMD-xx GPU to execute a jupyter-notebook ?
+Response - NO
+```
+
+Note that a platform does not need to know what an "AMD-xx GPU" is to be able to reply with a sensible aswer.
+If a platform receives a request for resource requirement that they don't understand, they should simply reply NO.
+
+The only platforms that reply YES are ones that understand what an AMD-xx GPU is and are able to provide
+a compute resource with one.
+
+```
+Request  - Can this platform provide a compute resource with an AMD-xx GPU to execute a jupyter-notebook ?
+Response - YES
+```
+
+The data model for describing compoute resources also includes elements for specifying the size and number of
+resources such as cpu cores, memory and storage.
+
+If the Jupyter notebook needs a minimum of 8 cpu cores and 16G bytes of memory to be able to perform its calculations,
+then this can be added to the required compute resources.
+
+```
+    task:
+      type: "https://.../jupyter-notebook"
+      spec:
+        notebook: "https://.../example.jpnb"
+    resources:
+      compute:
+      - name: "example-one"
+        min-cores:   8
+        min-memory: 16Gb
+        gpu:
+          type: "https://.../AMD-xx"
+
+```
+
+All of the elements for specifying the size or number of compute resources are defined in the data model as pairs of minimum and maximum values.
+This allows a conversation to occur between the ExecutionPlanner and the client to discover the best platform to execute the task on.
+
+The client requests the minimun resources it needs, and the service may respond with an offer to provide a higher level of resources if they are available.
+
+For example, if a platform is able to provide double the compute resources, 16G of memory and 32 cores,
+then it may indicate this by specifying higher maximum values in its response.
+
+```
+    ....
+    resources:
+      compute:
+      - name: "example-one"
+        min-cores:   8
+        max-cores:  16
+        min-memory: 16Gb
+        max-memory: 32Gb
+        gpu:
+          type: "https://.../AMD-xx"
+```
+
+This response represents an offer to start with a minimum of 8 cores and 16G of memory as reqiuested,
+with the option to use a maximum of 16 cores and 32G of memory if needed.
+
+This is slightly different to a case where a platform like Openstack which allocates resources
+in specific blocks, defined by the set by the set of virtual machine 'flavors' available on that
+paerticular platform.
+If the smallest flavor of virtual machine available on the platform has 16 cores and 24G of memory,
+then the service can represent that by making an offer with higher minimum values.
+
+```
+    ....
+    resources:
+      compute:
+      - name: "example-one"
+        min-cores:  16
+        max-cores:  16
+        min-memory: 24Gb
+        max-memory: 32Gb
+        gpu:
+          type: "https://.../AMD-xx"
+```
+
+This response represents an offer to start with a minimum allocation of 16 cores and 24G of memory,
+with the oprion to use up to a maximum 32G of memory if needed.
+
+An executionPlanner MAY NOT make an offer with less than the minimum resources requested.
+For example, if an Openstack platform only has a tiny virtual machine flavor available,
+with 2 cpu cores and only 2G of memory, then it MAY NOT make an offer with less than
+the requested minimums.
+```
+    ....
+    resources:
+      compute:
+      - name: "example-one"
+        min-cores:   8
+        max-cores:   2
+        min-memory: 16Gb
+        max-memory:  2Gb
+        gpu:
+          type: "https://.../AMD-xx"
+```
+
+Although it is technically possible to resize virtual machines,
+these minimum and maximum values are more applicable to something like a Kubernetes cluster
+where the execution can start with a minimum configuration and then scale on demand
+up to a maximum limit.
+
+Note that the term 'compute resource' specifically avoids stating whether the the
+notebook is run in a virtual machine or a Kubernetes cluster.
+As far as the user is concerned, it doesn't matter, as long as the compute resource provides
+sufficient cpu cores and memory for the noteboot to execute.
+
+If a particular task does require a specific type of compute resource,
+for example a Helm chart that needs a particular version of Kubernetes,
+then then this can be added to the compute resource requirements.
+
+```
+    ....
+    task:
+      type: "https://.../helm-chart"
+      spec:
+        ....
+    resources:
+      compute:
+      - name: "example-two"
+        type: "https://.../kubernetes"
+        kubernetes:
+          version: "1.25.4"
+        ....
+```
+
+Full details of the data mode for decribing compute resources is given in section xx.
+
+***
+Level 2b - storage resources
+
+The resources section of the request can also be used to specify storage resources.
+
+There are two main types of storage resources.
+* External storage resources that are managed by an external provider.
+* Internal storage resources that are managed by the execution platform.
+
+Within that there are two main types of internal storage resources:
+* Ephemeral storage resources managed by the system are available for the duration of the job, and released as soon as the job is completed.
+* Persistent storage resources managed by the system exist beyond the lifetime of the job, this type of storage is created before the job starts and remains after the job has been completed.
+
+The simplest to describe are the ephemeral storage resources managed by the execution platform.
+For example, if the selected Jupyter notebook requires 1Tbyte of scratch space to perform its calculations,
+then this can be added to the request by defining an ephemeral storae resource.
+
+```
+    task:
+      type: "https://.../jupyter-notebook"
+      spec:
+        notebook: "https://.../example.jpnb"
+    resources:
+      ....
+      storage:
+      - name: "scratch-space"
+        type: "https://.../ephemeral"
+        size: 1024Gb
+```
+
+To define how the Jupyter notebook can access this storage we need to add a corresponding volume element to the compute resource
+that describes where to mount the storage volume.
+
+```
+    task:
+      type: "https://.../jupyter-notebook"
+      spec:
+        notebook: "https://.../example.jpnb"
+    resources:
+      compute:
+      - name: "example-one"
+        ....
+        volumes:
+        - name: "scratch-space"
+          path: "/temp"
+          mode: "rw"
+      storage:
+      - name: "scratch-space"
+        type: "https://.../ephemeral"
+        size: 1024Gb
+```
+
+This part of the ExecutionPlanning data model, separating the details of how a storage resource is implemenmted from the details of
+how is mounted inside a computing resource, is based on the pattern used by Kubernetes to describe volumes and their mount points within containers.
+
+This pattern can also be used to define a storage resource that imports data from an external source.
+For example, if the user wanted to use the notebook to analyse data stored in an external S3 system,
+this can be done using a storage resource to describes where the data is and how to access it,
+
+```
+    ....
+    resources:
+      ....
+      storage:
+      - name: "source-data"
+        type: "https://.../amazon-S3"
+        endpoint: "https://..."
+        bucket: "example-data"
+```
+
+and then adding a corresponding volume mount to describe how to make the storage resource assessible from inside the compute resource.
+```
+    ....
+    resources:
+      compute:
+      - name: "example-one"
+        ....
+        volumes:
+        - name: "source-data"
+          path: "/data"
+          mode: "r"
+```
+
+Again, this pattern of separating how the data is stored outside the system and how it appears inside the compute resource
+borrows heavily from the pattern used by Kubernetes to describe Persistent Volumes (PV) and Persistet Volume Claims (PVC).
+
+The same pattern can be used to describe a persistent storage resource that can be used to save the analysis results,
+by defining a persistent storage resource that will be allocated by the system
+```
+    ....
+    resources:
+      ....
+      storage:
+      - name: "result-output"
+        type: "https://.../persistent"
+        lifetime: "1D"
+        size: 100Gb
+```
+
+and a corresponding volume mount to describe how to make the storage resource assessible inside the compute resource.
+```
+    ....
+    resources:
+      compute:
+      - name: "example-one"
+        ....
+        volumes:
+        - name: "result-output"
+          path: "/results"
+          mode: "rw"
+```
+
+By setting the storage resource type to "https://.../persistent", the client is asking the ExecutionPlanner service
+to take care of allocating the storage and manage its lifecycle for us.
+
+In this situation the ExecutionPlanner adds the details of how the storage is implemented to the offer that it makes.
+
+For example, the execution platform may have a Rucio storage system which it uses to store user generated data.
+In which case it would update the description of the persistent storage resource
+with details of how the client can access the results after the task completes.
+
+```
+    ....
+    resources:
+      ....
+      storage:
+      - name: "result-output"
+        type: "https://.../rucio"
+        endpoint: "http://...."
+        objectid: "cdc78e7d-8032-497e-9a5b-01c720ea2223"
+        lifecycle: "managed"
+        lifetime: "1D"
+        size: 100Gb
+```
+
+
+
+**
+Level 3 - user identity
+Can this platform provide <identity> with <resources> and <environment> to execute this <task> ?
+
+Description of task plus the software environment and compute resources required linked to a specific identity.
+
+This level assets that the user account has sufficient access rights and/or resource quota needed to perform the task.
+
+....
+....
+
+
+**
+Level 4 - date and time
+<when> can this platform provide <identity> with <resources> and <environment> to execute this <task> ?
+
+Description of task plus the resources required linked to a specific identity within a time period.
+
+
+
+

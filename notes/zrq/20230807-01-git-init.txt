@@ -1,0 +1,106 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (C) 2023 by Wizzard Solutions Ltd, wizzard@metagrid.co.uk
+#
+#     This information is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This information is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   </meta:licence>
+# </meta:header>
+#
+#zrq-notes-time
+#zrq-notes-indent
+#zrq-notes-crypto
+#zrq-notes-ansible
+#zrq-notes-osformat
+#
+# AIMetrics: []
+#
+
+    Target:
+
+        Create the initial document template for ExecPlanner note 2.
+
+    Result:
+
+        Work in progress ...
+
+# -----------------------------------------------------
+
+    #
+    # Create a new GitHub repository.
+    # No template, no license, no README.
+    #
+
+# -----------------------------------------------------
+# Initialise our local copy and push it to our new GitHub repository.
+#[user@desktop]
+
+    git config --global init.defaultBranch main
+
+    DOCNAME=ExecPlannerNote2
+
+    mkdir ${DOCNAME:?}
+    pushd ${DOCNAME:?}
+        mkdir github-zrq
+        pushd github-zrq
+
+            git init
+            git submodule add https://github.com/ivoa-std/ivoatex
+            sh ivoatex/make-templates.sh "${DOCNAME:?}"
+            git commit -m "Creating initial templates for ${DOCNAME:?}"
+
+            git branch -M main
+            git remote add origin 'git@github.com:Zarquan/ExecPlannerNote2.git'
+            git push --set-upstream origin main
+
+--START--
+Initialized empty Git repository in /var/local/projects/IVOA/EP-TDL/ExecPlannerNote2/github-zrq/.git/
+--END--
+
+--START--
+Cloning into '/var/local/projects/IVOA/EP-TDL/ExecPlannerNote2/github-zrq/ivoatex'...
+remote: Enumerating objects: 1422, done.
+remote: Counting objects: 100% (171/171), done.
+remote: Compressing objects: 100% (42/42), done.
+remote: Total 1422 (delta 134), reused 137 (delta 129), pack-reused 1251
+Receiving objects: 100% (1422/1422), 2.15 MiB | 6.73 MiB/s, done.
+Resolving deltas: 100% (920/920), done.
+--END--
+
+--START--
+[main (root-commit) 0195ac2] Creating initial templates for ExecPlannerNote2
+ 7 files changed, 588 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 .gitmodules
+ create mode 100644 ExecPlannerNote2.tex
+ create mode 100644 LICENSE
+ create mode 100644 Makefile
+ create mode 100644 README.md
+ create mode 160000 ivoatex
+--END--
+
+--START--
+Enumerating objects: 8, done.
+Counting objects: 100% (8/8), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (8/8), done.
+Writing objects: 100% (8/8), 8.95 KiB | 2.24 MiB/s, done.
+Total 8 (delta 0), reused 0 (delta 0), pack-reused 0
+To github.com:Zarquan/ExecPlannerNote2.git
+ * [new branch]      main -> main
+branch 'main' set up to track 'origin/main'.
+--END--
+
+
+
