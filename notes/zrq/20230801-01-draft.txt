@@ -172,7 +172,7 @@ Details of the core task types is defined in section xxx.
 Level 2 - resources
 Can this platform provide the <resources> needed to execute this <task> ?
 
-The next level checks that the execution platform can provide the resources needed to execute the task.
+This level checks that the execution platform can provide the resources needed to execute the task.
 
 ***
 Level 2a - compute resources
@@ -416,7 +416,7 @@ this can be done using a storage resource to describes where the data is and how
         bucket: "example-data"
 ```
 
-and then adding a corresponding volume mount to describe how to make the storage resource assessible from inside the compute resource.
+and a corresponding volume mount to describe how to make the resource assessible from inside the compute resource.
 ```
     ....
     resources:
@@ -459,13 +459,12 @@ and a corresponding volume mount to describe how to make the storage resource as
 ```
 
 By setting the storage resource type to "https://.../persistent", the client is asking the ExecutionPlanner service
-to take care of allocating the storage and manage its lifecycle for us.
+to take care of allocating the storage and manage its lifecycle.
 
-In this situation the ExecutionPlanner adds the details of how the storage is implemented to the offer that it makes.
-
-For example, the execution platform may have a Rucio storage system which it uses to store user generated data.
-In which case it would update the description of the persistent storage resource
-with details of how the client can access the results after the task completes.
+For example, the execution platform may have a Rucio storage system which it uses for user generated data.
+In which case the service would respond with an offer for storing the
+resource in the Rucio system along with details of how the client can
+access the it.
 
 ```
     ....
@@ -480,26 +479,401 @@ with details of how the client can access the results after the task completes.
         lifetime: "1D"
         size: 100Gb
 ```
+making an offer with a the lifecycle set to "managed" and a lifetime of "1D"
+means that the service will manage the lifecycle automatically
+and the resource will be avalable for a day after the job completes.
 
+It is important to note that ther storage is proposed, but not yet allocated.
+The persistent storage is only allocated if the client accepts this particular offer.
+This allows a service to make multiple offers with different options for the persistent storage,
+allowing the client to select and accept the one that best fits its use case.
 
+See section xx for more details about the time sequence for making and accepting offers.
 
 **
 Level 3 - user identity
 Can this platform provide <identity> with <resources> and <environment> to execute this <task> ?
 
-Description of task plus the software environment and compute resources required linked to a specific identity.
+This level checks that the user account making the request has sufficient access rights and resource quota to perform the task.
 
-This level assets that the user account has sufficient access rights and/or resource quota needed to perform the task.
+This level uses the same pattern of plugin extensions to handle different authentication methods.
+The core data model for the request and response defines two elements, a URI that identifies the type of authentication method, and
+and a place holder for additional details for that authentication method.
 
-....
-....
+```
+    auth:
+      # A URI identifying the authentication method.
+      # e.g.
+      # https://www.purl.org/ivoa-net/auth-type/....
+      # https://www.purl.org/ivoa-net/auth-type/....
+      type: "any-URI"
 
+      # Additional details, specific to the authentication method.
+      spec: {}
+```
+
+If the authentication method is one of the methods defined by the IVOA SSO specification,
+then all that is required is the URI to indicate which of the IVOA SSO methods
+is being used for this request.
+The rest of the authentication information is supplied in the HTTP headers,
+as described in the IVOA SSO specification.
+
+However, this pattern also allows an ExecutionPlanner instance to accept
+an authentication method that is not covered by the IVOA SSO specification.
+
+This means that the ExecutionPlanner web service can be deployed in other domains,
+outside the IVOA, without requiring the domain to adopt the IVOA SSO specification.
+
+A client is free to use any authentication method, including one not defined or endorsed
+by the IVOA SSO specification. It is up to the service to decide how it handles the
+authentication infomation supplied.
+
+If the ExecutionPlanner service does not understand the authentication method it can
+choose one of three options for handling the response.
+* It MAY simply ignore the authentication and treat the request as an anonymous request.
+* It MAY accept the HTTP request by reject the web-service request, responding with a valid REST response saying "NO,
+this service cannot run the task because the requested authentication method is not supported",
+* It MAY reject the HTTP request and return a 401 Unauthorized response.
+
+Including details of the authentication method in the response offers allows the service to
+communicate to the client which authentication method was accepted.
+
+In the case of a service downgrading or ignoring an authentication method that is doesn't understand,
+the service would indicate this by responding with an offer specifying an anonymous request with no authentication.
+
+----
+
+Extension - allow more than one auth method in the same request ?
+A client may supply more than one authentication method in a request. For example by
+providing the header fields for a BASIC username/password authentication and an x509 certificate
+in the same request.
+In this case, the service may respond with three offers,
+one for an anonymous request with no authentication,
+one for the BASIC username/password authentication,
+and one for the x509 certificate.
+
+----
+
+Note that an IVOA Registry entry for an ExecutionPlanner service MAY include details of the authentication
+methods the ExecutionPlanner service accepts, as defined in the IVOA SSO specification. However it is not required.
+
+The ExecutionPlanner specification is designed to work alongside the other IVOA specificationms,
+but it does not require them to function.
+
+----
 
 **
 Level 4 - date and time
 <when> can this platform provide <identity> with <resources> and <environment> to execute this <task> ?
 
-Description of task plus the resources required linked to a specific identity within a time period.
+This level enables the client and server to have a conversation about when the task would be executed.
+
+The client can specify a range of times when it would like to start the task, and the minimum duration
+needed to complete the task.
+
+The service can respond with one more offers that specify when the task will start and the maximum duration
+that the task will be allowed to consume.
+It is then up to the client to select which of the offers best suites the use case.
+
+Start times in request and response are expressed as an array of time intervals, as defined by ISO 8601.
+Specifically, type 1, 2 or 3 intervals, excluding type 4 intervals (duration only) and excluding repeats.
+* <start>/<end>
+* <start>/<duration>
+* <duration>/<end>
+
+Note that the duration part of the interval applies to the start time, specifying the
+range of allowed start times.
+
+If no duration is specified, then this means an absolute start time, e,g, 11:30.
+```
+time:
+- start: "2023-09-14T11:30Z"
+```
+
+If an end is specified, then this means the start time may be somewhere between the start and end times, e,g, between 11:30 and 12:00.
+```
+time:
+- start: "2023-09-14T11:30Z/T12:00Z"
+```
+
+If a duration is specified, then this means the start time may be somewhere between the start and the start plus the duration, e,g, between 11:30 and 12:00.
+```
+time:
+- start: "2023-09-14T11:30Z/PT30M"
+```
+
+The maximum and minimum execution duration are expressed as time periods, as defined by ISO 8601.
+
+For example, for the unattended batch mode execution of an OCI container, the user might not be concerned about
+when the task starts, but they amy want to specify the minimum duration needed to complete the task.
+
+In which case the client simply may request a minimum duration of one hour.
+```
+time:
+- minduration: "1H"
+```
+
+The service respond with more than one offer that start at different times and set different values for the
+maximum duration.
+
+It may offer a maximum duration of one hour starting at 11am on Monday 14th.
+```
+time:
+- start: "2023-09-14T11:30Z"
+  minduration: "1H"
+  maxduration: "1H"
+```
+
+It may also offer two hours execution starting between 10pm and 11pm.
+```
+time:
+- start: "2023-09-14T22:00Z/PT1H"
+  minduration: "P1H"
+  maxduration: "P2H"
+```
+
+If all of the other parameters are the same, compute and storage resources, then the
+service may offer more than one time slot in the same offer.
+
+```
+time:
+- start: "2023-09-14T11:30Z"
+  minduration: "1H"
+  maxduration: "1H"
+- start: "2023-09-14T22:00Z/PT1H"
+  minduration: "P1H"
+  maxduration: "P2H"
+```
+
+Alternatively, if the compute resources are different, then the service would have to include
+two offers in the response.
+
+For example, if the client asks for 2 cores, 2Gb of memory for 1 hour sometime on Monday the 14th:
+- task:
+  ...
+  resources:
+    compute:
+      mincores: 2
+      minmemory: 2Gb
+  time:
+  - start: "2023-09-14/P1D"
+    minduration: "P1H"
+```
+
+The service can respond with 2 offers, the minimum
+2 cores and 2Gb of memory for 1 hour starting at
+11:30am, or 8 cores and 8Gb of memory for 4 hours starting
+sometime between 10pm and 11pm.
+
+```
+offers:
+- task:
+  ...
+  resources:
+    compute:
+      mincores: 2
+      maxcores: 2
+      minmemory: 2Gb
+      maxmemory: 2Gb
+  time:
+  - start: "2023-09-14T11:30Z"
+    minduration: "P1H"
+    maxduration: "P1H"
+
+- task:
+  ...
+  resources:
+    compute:
+      mincores: 2
+      maxcores: 8
+      minmemory: 2Gb
+      maxmemory: 8Gb
+  time:
+  - start: "2023-09-14T22:00Z/PT1H"
+    minduration: "P1H"
+    maxduration: "P4H"
+```
+
+It is then up to the client to decide which offer better suites their use case.
+Accept the limited offer in the morning, or accept the later offer with more resources and more time.
+
+*
+Use cases
+
+** General requirements.
+
+Operate alongside, but not require, the other IVOA specifications.
+
+* The ExecutionPlanner specification should not include any astronomy or IVOA specific elements.
+* An ExecutionPlanner services MAY be registered in the IVOA registry, but it is not required.
+* An ExecutionPlanner services MAY follow the IVOA SSO authentication specification, but it may use other authentication methods if it needs to.
+
+This is to lower the barrier to entry and to allow the ExecutionPlanner to be used by other projects in other science domains, outside the scope of the IVOA.
+
+** Client side use cases.
+
+A simple JupyterNotebook.
+
+A JupyterNotebook, with metadata provided by the user.
+cpu, memory and gpu
+
+A JupyterNotebook, with metadata provided by the developer.
+cpu, memory and gpu
+abstract data reference
+
+An OCI container, unattended batch mode execution.
+cpu, memory and gpu
+
+An OCI container, interactive command line.
+cpu, memory and gpu
+startdate
+single user
+
+An OCI container, interactive command line.
+cpu, memory and gpu
+startdate
+workshop
+
+A Helm chart, multiple compute resources
+Zeppelin and Spark platform
+cpu, memory and gpu
+startdate
+single user
+
+A Helm chart, multiple compute resources
+Zeppelin and Spark platform
+cpu, memory and gpu
+startdate
+workshop
+
+*
+Request and response
+
+Details of the request and response messages.
+Timeline of request, offer and accept.
+
+*
+ExecutionWorker
+
+Derived from IVOA UWS, using the same data model. Request and response serialization TBD.
+Accepting an offer starts a job on an ExecutionWorker, status PENDING until the job is started automatically at the start time given in the offer.
+ExecutionPlanner accept response contains the Job URL at the ExecutionWorker.
+User can cancel the Job anytime up until the end.
+
+*
+Architecture
+
+The ExecutionPlanner and ExecutionWorker service specifications are designed to be used at multiple levels
+within an organization.
+
+** Project level use cases
+
+At the low level, an ExecutionPlanner and ExecutionWorker pair may be implemented as a
+single web-application linked to a simple Docker execution service.
+The configuration may be hard coded to only accept a fixed white list of container images
+and a fixed allocation of compute resources for each job.
+
+e.g. container images xxxx and yyyy, 2 cpu cores, 2G of memory, max 1HR duration.
+
+A project or organization may deploy several of these low level services,
+providing a range of different capabilities.
+
+Given a new task to execute a client can poll each of the services to see which one will
+make an offer to execute it.
+
+The client does not need to have any prior knowledge about the services apart from their
+endpoint address and perhaps the version of the API that they implement.
+This information could come from an IVOA Registry instance, or it could simply
+be provided in a configuration file for the client.
+
+A more flexible architecture could add another ExecutionPlanner service
+a level above the low level task specific services.
+This service would be configured with the list of local task specific services
+and act as an aggregator service sitting between the client and the low level services.
+This aggregator service would forward a copy of each request it receives to each of the low level services and
+then aggregate the offers from the individual responses into a single response that is sent back to the client.
+
+A simple aggregator service would just forward every request to all the low level services below it,
+regardless of what the request contained.
+
+A more complex aggregator service may have some prior knowledge about what types of task or compute resources
+each of the lower level services were able to offer, enabling it to make more informed decisions about
+which low level serviecs to send the requests to.
+
+Another aggregator service have an understanding of the location of data sets within the organization and
+be able to route requests for tasks to different low level services depending on which data sets the tasks required.
+
+The aggregator services may expose the low level UWS ExecutionWorker endpoints in its responses,
+or it may also implement an ExecutionWorker interface that acts as a proxy for the low level
+ExecutionWorker services.
+
+This configuration could be used to provide an ExecutionPlanner and ExecutionWorker service interface
+that bridged a firewall. Providing a public interface for external clients and forwarding the requests
+to internal ExecutionPlanner and ExecutionWorker services that are not accessible from outside the firewall.
+
+A large organization with multiple sites may deploy a single high level ExecutionPlanner/ExecutionWorker
+interface that handles task execution for the whole organization, forwarding the requests to a mid-level
+ExecutionPlanner/ExecutionWorker at each sitem which in torn forwards the requests to individual low-level
+task specific ExecutionPlanner/ExecutionWorker services within the sites.
+
+The implementation at each level may be different, providing different levels of routing
+and aggregation based on internal knowledge of the capabilities of the level below,
+but the ExecutionPlanner and ExecutionWorker interfaces are the same at every level
+in the organization.
+
+This could be expanded to include another level of ExecutionPlanner/ExecutionWorker services that
+cross organization bondaries, allowing users to access services from different projects and organizations.
+
+Example:
+
+SKA,
+regional centers
+local data centers
+
+LSST,
+regional centers
+local data centers
+
+CTA,
+regional centers
+local data centers
+
+CERN,
+regional centers
+local data centers
+
+* Known unknowns
+
+**
+Data location
+
+At the moment, we don't have a good way to describe the location of a computing or data resource.
+Nor do we have a way of calculating the proximity in time and space bnetween them.
+
+    Group based - is a member of <data center north>
+    Time based - would take <20min to transfer 10Gbytes>
+
+At the moment we don't have a good vocabulary for describing data access speeds.
+If a data resource is far away from a compure resource, then access speed will be slow.
+The closer they are the faster the access speed will be.
+
+Moving the data to the code can be an expensive operation.
+It takes time, bandwidth and in some cases money to move data between locations.
+
+Moving the code to the data can be an expensive operation.
+A service provider closer to the data may have less compute resources.
+
+We need a vocabulary to be able to describe location, proximity and access speed
+to be able to talk about choices between data and compute resource locations.
+
+
+
+
+
+
+
+
+
 
 
 
