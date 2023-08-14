@@ -33,50 +33,92 @@
 
 * Introduction
 
-The ExecPlanning group of specifications define a set of complimentary web services and a common data model,
-ExecutionPlanner, ExecutionWorker and the ExecutionPlanningDataModel.
-which are are designed to work together to provide service discovery and asynchronous execution for a wide range of different types of task.
+The ExecutionPlanner specification defines the ExecutionPlanner and ExecutionWorker web-services, and a common data model
+for describing executable tasks.
+Designed to provide a common interface for service discovery, resource allocation and asynchronous execution of executable tasks
+across a heterogeneous federation of different execution platforms.
 
-* ExecutionPlanner – a discovery service to find execution platforms and offer resource reservations
-* ExecutionWorker – an asynchronous service for executing a specific task (UWS pattern)
-* ExecutionPlanning data model – common data model for describing executable tasks, service capabilities and resource reservations.
+* ExecutionPlanner service – a discovery service to find execution platforms, allocate resources and schedule execution
+* ExecutionWorker service – an asynchronous service for executing a specific task (UWS pattern)
+* ExecutionPlanner data model – common data model for describing executable tasks and resource requirements.
 
-** Definitions
+** Common terms
 
-The terms, task, job and workflow, can have different and sometimes overlapping meanings.
-For clarity, the ExecPlanning documents will use the following definitions :
+Task, job, and workflow, can have different and sometimes overlapping meanings.
+This document is based on the following definitions :
 
-Task - An identifiable execution step that needs to be done.
-Task description - A description of an executable task and the resources needed to execute it.
+Task - An executable component e.g. a Python program or a JupyterNotebook and a description of the resources needed to execute it.
 Job - The assignment of a task to a worker.
 Job record - An entry in a database tracking the status of job as it is executed.
-
 Workflow - A document describing a sequence of tasks, which could itself, be considered as an executable task.
 
-** Examples
+If we start by thinking of a science domain function that we want to perform.
+For example, the mathematical concept of the square root of a number.
 
-The square root of a number - this is a mathematical concept
+We can calculate the square root of a number using a numerical analysis
+algorithm that makes successive approximations of the result.
 
-Calculating the square root of a number using successive approximation - this is an algorithm for implemeting the mathematical concept
+We can write a Python program to use this algorithm to calculate the square root of a number.
+This is the first identifiable 'executable thing' in our example.
 
-A Python program to calculate the square root of a number using successive approximation - this is an 'executable thing' that implements the algorithm.
-To be able to use this 'executable thing' you would need to know what environment it requires. In this case, a system with the Python 3 interpreter
-installed along with specifc set of 3rd Python modules.
+To be able to use this 'executable thing' you would need to allocate a computing resource with the appropriate
+hardware and software environment. In this case, a computing resource with the Python interpreter installed
+along with any 3rd Python modules equired by the program. This environment is often referred to as a 'Python runtime'.
 
-A Jupyter notebook that demonstrates how to use the Python program to calculate the square root of a number using successive approximation.
-This is another 'executable thing' that provides an interactive environment that enables the user to experiment with using the Python program.
-To be able to use this 'executable thing' you would need to know what environment it requires. In this case, a system with the Jupyter notebook
-platform installed along with specifc set of 3rd Python modules.
+In the context of a science platform, a common pattern is to provide this environment using an OCI container
+to package a basic operating system, the Python interpreter, and the Python program, as a single binary object.
 
-An OCI container that contains the Python program to calculate the square root of a number using successive approximation
-This is another 'executable thing' that provides either an interactive environment that enables the user to experiment with using the Python program via the command line,
-or a batch mode executable that could be used to apply the Python program to a large dataset.
-To be able to use this 'executable thing' you would need to know what environment it requires. In this case, a system with the OCI container runtime installed.
+This package, or container, is itself an 'executable thing'. One which requires a different execution
+environment than the bare Python program. The key concept behind the OCI container pattern is
+to package programs as binary objects that all use a common execution environment, commonly referred
+to as the container runtime or container engine.
 
-A workflow that combines this Python program with a number of other steps to create a larger composite.
-To be able to use this 'executable thing' you would need to know what environment it requires. In this case, a system with the apropriate workflow language interpreter installed.
+To be able to use this 'executable thing' you would need to allocate a computing resource with the appropriate
+hardware and software environment. In this case, a computing resource with the OCI container runtime installed.
 
-- what is a workflow exactly ?
+We could also create a Jupyter notebook that demonstrates how to use our Python program.
+This is the third 'executable thing' in our example. One which provides an interactive environment
+for the user to experiment with.
+
+As before, to be able to use this 'executable thing' we would need to allocate a computing resource with
+the appropriate hardware and software environment.
+In this case, a computer with the Jupyter notebook platform installed along with specifc set of 3rd Python modules.
+In the context of a science platform, a common pattern is to provide this environment as a web-service
+with a HTTP web interface that allows the user to connect to the Jupyter notebook via a web browser.
+
+From one algorithm that implements a science domain function, we have create three different 'executable things'.
+A Python program, an OCI container packaging the Python program and its dependencies, and a Jupyter notebook
+that demonstrates how to use the Python progran.
+
+Each of these 'executable things' requires a different computing environment to execute.
+A basic Python runtime, the OCI container runtime, and a Jupyter notebook service.
+
+We may also want to consider the data that we are applying the algorithm to.
+If we are learning how to use algorithm, then a basic computing resource would be sufficient
+to experiment with.
+However, if we have a data set of ten million numbers that we want to process, then we may
+need to consider adding extra storage to store our input data and our results.
+
+It may also be worth using a GPU to accelerate the calculation steps for such a large data set.
+
+In terms of the ExecutionPlanner, a task description describes an 'executable thing',
+like our OCI container or our Jupyter notebook, and the resources needed to execute it.
+The number of cpu cores and amount of memory it needs, whether it needs a GPU,
+the location of the input data, the storage space needed to perform the calculation
+and the space needed to save the results.
+
+Stepping up a level, we could use a workflow language to map out a sequence of
+executable steps that combine things like our square root calculation to perform
+a higher level science goal.
+
+In the context of the ExecutionPlanner, a workflow described by a workflow language is
+functionally equivalent to a program described in a programming language.
+
+In terms of service discovery, resource allocation and execution scheduling,
+asking 'can you run this workflow' is functionally equivalent to asking 'can you run this program.'
+They both require computing resources with the appropriate software and hardware installed.
+
+
 
 * Conversation
 
