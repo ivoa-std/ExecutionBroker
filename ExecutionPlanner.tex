@@ -1,6 +1,49 @@
 \documentclass[11pt,a4paper]{ivoa}
 \input tthdefs
 
+\usepackage{xspace}
+% Standard terms used throughout the document,
+% defined as macro commands to maintain consistency
+\newcommand{\xml} {XML\xspace}
+\newcommand{\json} {JSON\xspace}
+\newcommand{\yaml} {YAML\xspace}
+\newcommand{\webservice} {webservice\xspace}
+
+\newcommand{\uws} {UWS\xspace}
+\newcommand{\uwsce} {UWS-CE\xspace}
+
+\newcommand{\ivoa} {IVOA\xspace}
+\newcommand{\execplan} {Execution Planner\xspace}
+\newcommand{\ivoaexecplan} {IVOA Execution Planner\xspace}
+
+\newcommand{\docker} {Docker\xspace}
+\newcommand{\dockercompose} {Docker Compose\xspace}
+
+\newcommand{\binderhub} {BinderHub\xspace}
+\newcommand{\jupyter} {Jupyter\xspace}
+\newcommand{\jupyterhub} {JupyterHub\xspace}
+\newcommand{\jupyternote} {Jupyter notebook\xspace}
+
+\newcommand{\esap} {ESAP\xspace}
+\newcommand{\escape} {ESCAPE\xspace}
+\newcommand{\datalake} {DataLake\xspace}
+\newcommand{\rucio} {Rucio\xspace}
+
+\newcommand{\python} {Python\xspace}
+\newcommand{\pythonprog} {Python program\xspace}
+
+\newcommand{\apache} {Apache\xspace}
+\newcommand{\spark} {Spark\xspace}
+\newcommand{\pyspark} {PySpark\xspace}
+\newcommand{\zeppelin} {Zeppelin\xspace}
+\newcommand{\zeppelinnote} {Zeppelin notebook\xspace}
+
+\newcommand{\codeword}[1] {\texttt{#1}}
+\newcommand{\footurl}[1] {\footnote{\url{#1}}}
+
+\newcommand{\dataset} {dataset\xspace}
+\newcommand{\scienceplatform} {Science Platform\xspace}
+
 \title{IVOA Execution Planner}
 
 % see ivoatexDoc for what group names to use here; use \ivoagroup[IG] for
@@ -19,7 +62,31 @@
 
 \begin{document}
 \begin{abstract}
-???? Abstract ????
+
+One of the long term goals of the IVOA has been to enable users to
+\textit{`move the code to the data`}.
+As the size and complexity of the \dataset{}s available in the VO increases
+this is becoming more and more important.
+
+The \ivoaexecplan provides a step towards making this possible.
+
+The \ivoaexecplan is designed to address a specific question;
+given an \textit{`executable thing`}, e.g. a \pythonprog or \jupyternote,
+what facilities are available to run it?
+
+To do this, the \ivoaexecplan specification defines two components;
+a data model for describing an executable program
+and the resources needed to execute it,
+and a \webservice API for querying the VO to find services
+that are able to execute it.
+
+Together these components enable a user to ask a simple question
+\textit{"Where (and when) can I execute my program?"}
+
+This in turn enables \scienceplatform{}s to share code between different platforms.
+Allowing a user to develop their code on one platform and then apply it to a different
+\dataset by sending it to execute on another platform.
+
 \end{abstract}
 
 \section*{Acknowledgments}
