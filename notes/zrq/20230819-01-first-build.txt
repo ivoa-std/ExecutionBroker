@@ -1,0 +1,114 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (C) 2023 by Wizzard Solutions Ltd, wizzard@metagrid.co.uk
+#
+#     This information is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This information is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   </meta:licence>
+# </meta:header>
+#
+#zrq-notes-time
+#zrq-notes-indent
+#zrq-notes-crypto
+#zrq-notes-ansible
+#zrq-notes-osformat
+#
+# AIMetrics: []
+#
+
+    Target:
+
+        First attemopt to build a Latex document.
+        Using the instructions from https://github.com/ivoa-std/ivoatex#readme
+
+    Result:
+
+        Work in progress ...
+
+# -----------------------------------------------------
+# Start an empty Debian container.
+#[user@desktop]
+
+    podman run \
+        --rm \
+        --tty \
+        --interactive \
+        --volume "$(pwd):/document:rw,z" \
+        debian \
+            bash
+
+    apt-get update
+
+    time \
+        apt-get install \
+            build-essential \
+            cm-super \
+            ghostscript \
+            latexmk \
+            librsvg2-bin \
+            librsvg2-bin \
+            texlive-latex-extra \
+            texlive-bibtex-extra \
+            xsltproc \
+            zip
+
+--START--
+....
+....
+0 upgraded, 438 newly installed, 0 to remove and 0 not upgraded.
+Need to get 580 MB of archives.
+After this operation, 1912 MB of additional disk space will be used.
+Do you want to continue? [Y/n]
+....
+....
+real 5m35.601s
+user 2m22.771s
+sys  0m49.186s
+--END--
+
+
+    cd /document/
+
+    ls -1
+
+--START--
+ExecutionPlanner.tex
+LICENSE
+Makefile
+README.md
+ivoatex
+notes
+--END--
+
+    make
+
+--START--
+....
+....
+Output written on ExecutionPlanner.pdf (3 pages, 170316 bytes).
+Transcript written on ExecutionPlanner.log.
+Latexmk: Getting log file 'ExecutionPlanner.log'
+Latexmk: Examining 'ExecutionPlanner.fls'
+Latexmk: Examining 'ExecutionPlanner.log'
+Latexmk: Found input bbl file 'ExecutionPlanner.bbl'
+Latexmk: Log file says output to 'ExecutionPlanner.pdf'
+Latexmk: Found bibliography file(s):
+  ./ivoatex/docrepo.bib
+  ./ivoatex/ivoabib.bib
+Latexmk: All targets () are up-to-date
+--END--
+
+
+
+
