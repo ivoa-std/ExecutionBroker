@@ -91,6 +91,7 @@ ivoatex
 notes
 --END--
 
+    make role_diagram.pdf
     make
 
 --START--
@@ -108,7 +109,6 @@ Latexmk: Found bibliography file(s):
   ./ivoatex/ivoabib.bib
 Latexmk: All targets () are up-to-date
 --END--
-
 
 
 
