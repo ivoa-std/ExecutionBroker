@@ -37,10 +37,10 @@ of the various sections) to have the box centered.
 
 <archdiag xmlns="http://ivoa.net/archdiag">
   <!-- Registry: x=55, y=150..450 -->
+  <rec name="Reg.Intf" x="75" y="205" w="50"/>
   <!--+
   <rec name="VOResource" x="64.5" y="155" w="71"/>
   <rec name="RegTAP" x="76" y="180" w="48"/>
-  <rec name="Reg.Intf" x="75" y="205" w="50"/>
   <rec name="Resource M.D." x="58" y="230" w="84"/>
   <rec name="TAPRegExt" x="67.5" y="255" w="65"/>
   <rec name="VODataService" x="57.5" y="350" w="85"/>
