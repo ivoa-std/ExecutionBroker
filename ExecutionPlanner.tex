@@ -52,12 +52,72 @@
 \newcommand{\datascience} {data~science}
 \newcommand{\scienceplatform} {science~platform}
 
-\newcommand{\executablething}  {\textit{executable~thing}}
+\newcommand{\executablething} {\textit{executable~thing}}
+\newcommand{\excutabletask} {\textit{task}}
+\newcommand{\workerjob} {\textit{job}}
 
 \newcommand{\cpu} {CPU}
 \newcommand{\gpu} {GPU}
 
-\hyphenation{Con-tai-ner-Node}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\colorlet{punct}{red!60!black}
+\definecolor{html-gray}{HTML}{EEEEEE}
+\definecolor{light-gray}{gray}{0.95}
+\definecolor{delim}{RGB}{20,105,176}
+\colorlet{numb}{magenta!60!black}
+
+\lstset{
+    basicstyle=\small\ttfamily,
+    columns=fullflexible,
+    frame=none,
+    backgroundcolor=\color{light-gray},
+    stepnumber=1,
+    %numbers=left,
+    numbers=none,
+    numberstyle=\small,
+    numbersep=8pt,
+    %xleftmargin=\parindent,
+    xrightmargin=1cm,
+    showstringspaces=false,
+    keepspaces=true,
+    breaklines=true,
+    linewidth=14cm,
+    frame=none
+}
+
+% https://tex.stackexchange.com/questions/83085/how-to-improve-listings-display-of-json-files
+% https://tex.stackexchange.com/a/83100
+% https://tex.stackexchange.com/questions/10828/indent-a-code-listing-in-latex
+% https://tex.stackexchange.com/a/10831
+\lstdefinelanguage{json}{
+    literate=
+     *{0}{{{\color{numb}0}}}{1}
+      {1}{{{\color{numb}1}}}{1}
+      {2}{{{\color{numb}2}}}{1}
+      {3}{{{\color{numb}3}}}{1}
+      {4}{{{\color{numb}4}}}{1}
+      {5}{{{\color{numb}5}}}{1}
+      {6}{{{\color{numb}6}}}{1}
+      {7}{{{\color{numb}7}}}{1}
+      {8}{{{\color{numb}8}}}{1}
+      }
+
+\lstdefinelanguage{yaml}{
+    literate=
+     *{0}{{{\color{numb}0}}}{1}
+      {1}{{{\color{numb}1}}}{1}
+      {2}{{{\color{numb}2}}}{1}
+      {3}{{{\color{numb}3}}}{1}
+      {4}{{{\color{numb}4}}}{1}
+      {5}{{{\color{numb}5}}}{1}
+      {6}{{{\color{numb}6}}}{1}
+      {7}{{{\color{numb}7}}}{1}
+      {8}{{{\color{numb}8}}}{1}
+      }
+
+\hyphenation{Exe-cut-able-Thing}
 
 \title{IVOA Execution Planner}
 
@@ -222,7 +282,7 @@ This package, or container, is itself an \executablething{}. One which requires 
 environment than the original \python{} program.
 The key concept behind containerization is to package programs together with the software environment
 they need as single binary object that interfaces with a standard execution environment,
-referred to as the \textit{'container runtime'} or \textit{'container engine'}.
+referred to as the \textit{container runtime} or \textit{container engine}.
 To be able to use this \executablething{} you would need a computing resource with the appropriate
 hardware and software environment. In this case, a computing resource with the OCI container runtime installed.
 
@@ -252,16 +312,139 @@ For a large \dataset{} it may also be worth using a \gpu{} to accelerate the cal
 for such a large \dataset{}.
 
 The \ivoa{} \executionplanner{} \datamodel{} provides a way to describe what each of these \executablething{}s
-is and what resources are needed to execute it.
-
-THis description can include things like number of \cpu cores and amount of memory it needs,
+is and what resources are needed to execute them.
+This can include things like number of \cpu cores and amount of memory it needs,
 whether it needs a \gpu{}, the location of the input data, the storage space needed to perform
 the calculation and the storage space needed to save the results.
+For details on the \ivoa{} \executionplanner{} \datamodel{} see appendix xx.
 
-This metadata description can be passed to an \ivoa{} \executionplanner{} service to discover if it
-is able to provide the resources required to execute this particular \executablething{}.
+In the context of this document, we will use the term \excutabletask{} to refer to the metadata
+describing an \executablething{} and the resources needed to execute it.
+This \excutabletask{} description can be passed to an \ivoa{} \executionplanner{} service to
+discover if the service is able to provide the resources required to execute this particular
+\executablething{}.
 
-For more details on the \ivoa{} \executionplanner{} \datamodel{} see section xx.
+\section{Client-server conversation}
+\label{sec:conversation}
+
+The core idea behind the \ivoa{} \executionplanner{} is based on a conversation between the client
+and one or more \execplanner{} services to discover where, how, and when, an \excutabletask{} can be
+executed.
+
+The conversation starts with the client sending a description of the \excutabletask{} to each of the
+\execplanner{} services, which respond with a top level \codeword{YES|NO} answer, and if
+the answer is \codeword{YES}, a list of offers describing where how, and when, the \excutabletask{}
+can be executed on their platform.
+
+Given a list of offers from the \execplanner{} services, the client can choose which of the offers it
+wants to use and sends a reply to that \execplanner{} service accepting the offer.
+In response the \execplanner{} will cancel any other offers it made, mark the resources descibed in the accepted
+offer as reserved, initiate a \workerjob{} in an \execworker{} service to execute the \excutabletask{}
+and reply with details of how to access the \workerjob{}.
+
+The client can then uses the connection details in the response to contact the \execworker{} service that
+is executing the \excutabletask{} to track the status of the job.
+For further details of the \webservice{} request and response messages see section xxx.
+
+Note that the client does not need to cancel the offers made by the other \execplanner{} services.
+Offers are only valid for a limited period of time, and expire naturally when they reach the end
+of their lifetime.
+
+\subsection{'Can I ..?' questions}
+\label{subsec:questions}
+
+The content of the \excutabletask{} description is best explained by considering a series of
+questions that can be used to discover where how, and when, to execute a \excutabletask{}.
+
+\subsubsection{Level 1 - the \excutabletask{}}
+\label{subsubsec:thetask}
+
+At the simplest level we just want to check whether a platform is able to execute a particular
+type of \excutabletask{}.
+For example, \textit{"Is this platform able to run a \jupyter{} notebook?"}
+
+In order to do this, the request needs to specify the task type, e.g. \jupyter{} notebook,
+along with details about it, e.g. where to fetch the notebook from.
+
+The metadata for this part of the \excutabletask{} description is different for each type of task.
+Rather than try to model every possible type of task, the metadata for each task type is described by
+an extension to the core \datamodel{}.
+
+To support this pattern the core \executionplanner{} \datamodel{} has two fields, \codeword{type},
+a URI identifying the task type, and \codeword{spec}, a place holder for details about the task.
+
+\begin{lstlisting}[language=yaml]
+task:
+  # A URI identifying the basic type of task.
+  # e.g.
+  # https://www.purl.org/ivoa.net/ep/task-type/oci-container
+  # https://www.purl.org/ivoa.net/ep/task-type/jupyter-notebook
+  type: "https://www.purl.org/ivoa.net/ep/task-type/example"
+
+  # The task details, specific to the task-type.
+  spec: {}
+\end{lstlisting}
+
+The \datamodel{} extension for a task type defines the metadata needed to describe that particular type of task.
+For example, the \datamodel{} extension for a \jupyter{} notebook needs to describe where to fetch the source code for the notebook from.
+\begin{lstlisting}[language=yaml]
+task:
+  # A URI identifying the basic type of task.
+  type: "https://www.purl.org/ivoa.net/ep/task-type/jupyter-notebook"
+
+  # The task details, specific to the task-type.
+  spec:
+    notebook: "https://.../example.jpnb"
+\end{lstlisting}
+
+It may also include a reference to a \codeword{requirements.txt} file that describes any additional \python{}
+libraries needed by the notebook.
+\begin{lstlisting}[language=yaml]
+task:
+  # A URI identifying the basic type of task.
+  type: "https://www.purl.org/ivoa.net/ep/task-type/jupyter-notebook"
+
+  # The task details, specific to the task-type.
+  spec:
+    notebook: "https://.../example.jpnb"
+    requirements: "https://.../requirements.txt"
+\end{lstlisting}
+
+The \datamodel{} extension for an \ocicontainer{} task needs to describe what operating system and system architecture
+the container is is built for, and where to fetch the binary image from.
+
+\begin{lstlisting}[language=yaml]
+task:
+  # A URI identifying the basic type of task.
+  type: "https://www.purl.org/ivoa.net/ep/task-type/oci-container"
+
+  # The task details, specific to the task-type.
+  spec:
+    os:    "linux"
+    arch:  "amd64"
+    repo:  "ghcr.io"
+    image: "ivoa/oligia-webtop"
+    version: "ubuntu-2022.01.13"
+\end{lstlisting}
+
+The \executionplanner{} specification defines an initial set of common task types, e.g. \ocicontainer{}, \jupyter{} notebook,
+and \zeppelin{} notebook.
+The extension pattern is designed to make it easy for 3rd parties to develop new types of tasks appropriate for their science domain.
+
+Using the \codeword{type} URI to identify the task type means that service implementations do not need to understand
+all of the different possible task types that a client could request.
+A service that doesn’t recognize a particular task type can simply reply \codeword{NO}.
+
+\begin{lstlisting}[]
+Request  - Can this platform execute <unkown-task-type> ?
+Response - NO
+\end{lstlisting}
+
+For a full listing of the task types included see appendix xxx.
+
+TODO some text about using URIs ...
+
+
 
 \appendix
 \section{Changes from Previous Versions}
