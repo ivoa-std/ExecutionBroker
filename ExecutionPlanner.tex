@@ -290,9 +290,9 @@ installed along with any additional \python{} modules required by the program.
 This environment is often referred to as the \python{} runtime.
 
 In the context of \scienceplatform{}s and \datascience{}, a common pattern is to provide this environment
-using an \oci\footurl{https://opencontainers.org/},
-or \docker\footurl{https://docs.docker.com/get-started/what-is-a-container/} container,
-to package the \python{} program and the \python{} runtime together as a single binary object.
+using an OCI\footurl{https://opencontainers.org/},
+or Docker\footurl{https://docs.docker.com/get-started/what-is-a-container/} container,
+to package the \python{} program and runtime together as a single binary object.
 This package, or container, is itself an \executablething{}. One which requires a different execution
 environment than the original \python{} program.
 The aim of containerization is to package \executablething{}s together with the software environment
@@ -947,7 +947,7 @@ This is equivalent to asking:
 There are two ways for the \execplanner{} service to check the user's identity,
 using implicit and explicit authentication.
 
-The implicit method is for the client to authenticate to the \execplanner{} \service{}
+The implicit method is for the client to authenticate to the \execplanner{} service
 as normal and the service will use the identity from the request headers to check if the
 user has sufficient access rights and resource quota to execute the \job{}.
 
@@ -1244,7 +1244,7 @@ that can be used to control the state of a \job{}.
 
 The \codeword{triggers} section of the \datamodel{} allows the client to
 set up \webservice{} endpoints that will trigger actions that control the
-state of a \job{} in an \executionworker service.
+state of a \job{} in an \execworker service.
 
 The simplest of these \webservice{} calls is a \codeword{value-update} endpoint.
 This sets up a \codeword{POST} \webservice{} endpoint that a remote system can
