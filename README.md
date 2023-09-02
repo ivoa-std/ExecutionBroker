@@ -1,5 +1,5 @@
-An IVOA note describing the IVOAExecutionPlanner and IVOAExecutionWorker services and the associated IVOAExecutionPlanner data model.
+[![PDF-Preview](https://img.shields.io/badge/Preview-PDF-blue)](../../releases/download/auto-pdf-preview/ExecutionPlanner-draft.pdf)
 
-This is the second note describing these services, intended to be a prototype for an IVOA specification.
+An initial draft for the IVOA ExecutionPlanner and ExecutionWorker web-services and the associated data model.
 
 This document is distributed under CC-BY-SA.
