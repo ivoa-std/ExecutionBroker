@@ -1,18 +1,18 @@
-*.blg
-*.toc
-*.out
-*.pdf
+ivoatexmeta.tex
+gitmeta.tex
+role_diagram.svg
+ExecutionPlanner.pdf
 *.aux
 *.bbl
-ivoatexmeta.tex
-*.log
-*.html
-*.zip
+*.blg
 *.fdb_latexmk
 *.fls
-gitmeta.tex
+*.html
+*.log
+*.out
 *.swp
-role_diagram.svg
+*.toc
+*.zip
 
 # OS-specific
 .DS_Store
