@@ -331,6 +331,38 @@ This can include things like number of \cpu{} cores and amount of memory it need
 whether it needs a \gpu{}, the location of the input data, the storage space needed to perform
 the calculation and the storage space needed to save the results.
 
+\subsection{Type URIs and specifications}
+\label{type-and-spec}
+
+Several parts of the \ivoa{} \executionplanner{} \datamodel{} follow a common pattern, using a URI
+to identify a \codeword{type} followed a \codeword{spec} section to fill in the details.
+This pattern is adopted from a similar pattern used by \kubernetes{} to describe components
+that are deployed using the control interface.
+
+However, the \executionplanner{} \datamodel{} specifically recomends using a resolvable, long lasting,
+URL as the type identifier.
+
+The reasoning behind this is that if a service provider notices several clients are requesting
+\textit{'encabulation'} on their compute nodes, the service provider may not know what this means.
+However, if we use a resolvable URL to identify the type\footurl{https://tinyurl.com/encabulation},
+a service provider can use it to find a human readable description and decide whether they want
+to provide it on their platform.
+
+To the \webservice{} software both of these requests are just a simple string comparison against a
+dictionary of known terms:
+
+\begin{lstlisting}[]
+Request  - Can this platform provide 'encabulation' ?
+Response - YES|NO
+\end{lstlisting}
+
+\begin{lstlisting}[]
+Request  - Can this platform provide 'https://tinyurl.com/encabulation' ?
+Response - YES|NO
+\end{lstlisting}
+
+The second form provides a mechanism for linking the type identifier to a human readable description.
+
 \section{Client-server conversation}
 \label{conversation}
 
@@ -486,7 +518,7 @@ In order to do this the request would not only need to describe the \executable{
 but also the minimum level of compute resources needed in terms of \cpu{} cores, memory, \gpu{}s
 and disc space needed to execute it.
 
-\subsubsection{Level 2a - compute resources}
+\subsubsection{Compute resources}
 \label{compute-resources}
 
 The \datamodel{} for describing compute resources is, in most cases, common to all types of \executable{},
@@ -532,7 +564,8 @@ resources:
   - name: "compute-001"
     type: "https://.../generic-compute"
     spec:
-      gpu:
+      extras:
+      - name: "nvidia-gpu"
         # A URI identifying the type of GPU.
         type: "https://www.techpowerup.com/gpu-specs/nvidia-ad104.g1013"
 \end{lstlisting}
@@ -550,7 +583,7 @@ Note that a platform does not need to know what a  "\nvidiagpu{}" is to be able 
 If a platform receives a request for a resource that it doesn't understand, it MAY simply reply \codeword{NO}.
 
 \begin{lstlisting}[]
-Request  - Can this platform provide <unknown thing> ?
+Request  - Can this platform provide <unknown extra> ?
 Response - NO
 \end{lstlisting}
 
@@ -571,7 +604,8 @@ resources:
   - name: "compute-001"
     type: "https://.../generic-compute"
     spec:
-      gpu:
+      extras:
+      - name: "nvidia-gpu"
         # A URI identifying the type of GPU.
         type: "https://www.techpowerup.com/gpu-specs/nvidia-ad104.g1013"
         # The details, specific to a 'NVIDIA AD104 GPU'.
@@ -1239,7 +1273,7 @@ The final part of the \datamodel{} enables the client to set up
 \webservice{} API calls both to and from the \execplanner{} service
 that can be used to control the state of a \job{}.
 
-\subsubsection{Level 5a - triggers}
+\subsubsection{Actions and triggers}
 \label{triggers}
 
 The \codeword{triggers} section of the \datamodel{} allows the client to
@@ -1310,7 +1344,7 @@ Instead the \execplanner{} service will wait until the start action has been tri
     \item If the trigger is called after the start time range, it has no effect. The \job{} should already have been cancelled.
 \end{itemize}
 
-\subsubsection{Level 5b - callouts}
+\subsubsection{Remote callouts}
 \label{callouts}
 
 The \codeword{callouts} section of the \datamodel{} allows the client to set up one or more remote
@@ -1341,7 +1375,7 @@ callouts:
 The \codeword{callouts} part of the \datamodel{} forms the other half of a callout-trigger pair,
 enabling a client to set up a chain of workflow steps that will be executed one after the other.
 
-\subsubsection{Level 5c - linked worflow}
+\subsubsection{Linked worflow}
 \label{linked-worflow}
 
 If a user wants to set up a 2 step workflow containing step-A and step-B,
@@ -1489,7 +1523,6 @@ The players:
     \item The user who is running the analysis
 \end{itemize}
 
-
 \pagebreak
 
 \section{Request and response}
@@ -1501,19 +1534,28 @@ Timeline of request, offer and accept.
 \subsection{ExecutionPlanner}
 \label{execution-planner}
 
-....
-....
+Simple \codeword{POST} REST webservice.
+Single parameter, the task description.
+
+Response contains 2 values, a simple \codeword{YES} or \codeword{NO}
+and a list of offers.
 
 \subsection{ExecutionWorker}
 \label{execution-worker}
 
 Derived from IVOA UWS, using a similar \datamodel{}.
-Accepting an offer on an \execplanner{} creates a job on the associated \execworker{},
-with status PENDING until the \job{} is started by the \execplanner{}.
-\execplanner{} offer contains the Job URL of the \execworker{}.
-Client can cancel the \job{} at anytime.
-Client can use a HEAD request to check network access at anytime.
 
+Accepting an offer on an \execplanner{} creates a job on the associated \execworker{},
+with status PENDING until the \job{} is started automatically at the designated time.
+
+The offer from the \execplanner{} will contain the URL \job{} in the \execworker{}.
+
+\begin{itemize}
+    \item \execplanner{} is responsible for creating and starting the \job{}.
+    \item Client can use a HEAD request to check network access at anytime.
+    \item Client can use a GET request to check the status of the \job{} at anytime.
+    \item Client can cancel the \job{} at anytime.
+\end{itemize}
 
 \pagebreak
 
@@ -1521,6 +1563,8 @@ Client can use a HEAD request to check network access at anytime.
 \label{general-requirements}
 
 \begin{itemize}
+    \item ....
+    \item ....
     \item ....
 \end{itemize}
 
@@ -1531,11 +1575,11 @@ Client can use a HEAD request to check network access at anytime.
 The \execplanner{} and \execworker{} services are designed to be used at multiple levels within an organization.
 
 At the low level, an \execplanner{} and \execworker{} pair may be implemented as a
-single web-application linked to a simple \docker execution service.
+single web-application linked to a simple \docker{} execution service.
 The configuration may be hard coded to only accept a fixed white list of container images
 and a fixed allocation of compute resources for each job.
 
-e.g. container images xxxx and yyyy, 2 cpu cores, 2G of memory, max 1HR duration.
+e.g. accepts container images xxxx and yyyy, with 2 cpu cores, 2G of memory, max 1HR duration.
 
 A project or organization may deploy several of these low level services,
 providing a range of different capabilities.
@@ -1586,8 +1630,8 @@ in the organization.
 
 This could be expanded to include another level of \execplanner{} and \execworker{} services that
 cross organization bondaries, providing a gateway that allows users from one project to access services
-from other projects and organizations.
-
+from other projects and organizations. This gateway service may also apply a translation layer between
+external public user identifiers and the internal project specific identities.
 
 \begin{itemize}
     \item Project - SKA
@@ -1597,9 +1641,9 @@ from other projects and organizations.
         \item Local data centers
         \item Low level services
         \begin{itemize}
-            \item Slurm batch service
-            \item Docker container service
-            \item JupterHub notebook service
+            \item Slurm batch services
+            \item Docker container services
+            \item Jupter notebook services
         \end{itemize}
     \end{itemize}
 \end{itemize}
@@ -1612,9 +1656,9 @@ from other projects and organizations.
         \item Local data centers
         \item Low level services
         \begin{itemize}
-            \item Slurm batch service
-            \item Docker container service
-            \item JupterHub notebook service
+            \item Slurm batch services
+            \item Docker container services
+            \item Jupter notebook services
         \end{itemize}
     \end{itemize}
 \end{itemize}
@@ -1627,9 +1671,9 @@ from other projects and organizations.
         \item Local data centers
         \item Low level services
         \begin{itemize}
-            \item Slurm batch service
-            \item Docker container service
-            \item JupterHub notebook service
+            \item Slurm batch services
+            \item Docker container services
+            \item Jupter notebook services
         \end{itemize}
     \end{itemize}
 \end{itemize}
@@ -1642,27 +1686,84 @@ from other projects and organizations.
         \item Local data centers
         \item Low level services
         \begin{itemize}
-            \item Slurm batch service
-            \item Docker container service
-            \item JupterHub notebook service
+            \item Slurm batch services
+            \item Docker container services
+            \item Jupter notebook services
         \end{itemize}
     \end{itemize}
 \end{itemize}
 
-
-
-
 \section{Example use cases}
 \label{example-usecases}
 
-\begin{itemize}
-    \item ....
-\end{itemize}
+This section contains a set of examples ranging from very simple to complex, with a complete
+listing of the \datamodel{} used to describe each case.
 
-\section{Even more stuff ...}
-\label{more-stuff}
+Before we get into some of the more complex examples it is wirth re-iterating that all of the
+elements in the \datamodel{} are optional, so it is perfectly legitimate for a simple
+implementation to only accept one of the simplest examples with no extras, and answer
+\codeword{NO} to everything else.
 
+\subsection{Simple notebook}
+\label{simple-notebook}
 
+Just a simple \jupyternotebook{}.
+...
+
+\subsection{Notebook with dates}
+\label{notebook-with-dates}
+
+A \jupyter{} notebook with specific date ranges for start time.
+...
+
+\subsection{Notebook with data}
+\label{notebook-with-data}
+
+A \jupyternotebook{} with specific input data.
+...
+
+\subsection{Notebook with compute}
+\label{notebook-with-compute}
+
+A \jupyternotebook{} with specific input data and compute resources.
+...
+
+\subsection{Simple container}
+\label{simple-container}
+
+A simple \ocicontainer{}.
+...
+
+\subsection{Container with data}
+\label{container-with-data}
+
+An \ocicontainer{} with specific input data.
+...
+
+\subsection{Container with compute}
+\label{container-with-compute}
+
+An \ocicontainer{} with specific input and output data, and compute resources.
+...
+
+\subsection{Container triggering notebook}
+\label{container-triggering-notebook}
+
+An \ocicontainer{} that notifies the user and launches a \jupyternotebook{} session
+when the container finishes executing.
+...
+
+\subsection{Kubernetes Helm chart}
+\label{kubernetes-helm}
+
+A complex Helm chart with multiple elements launched as a single task.
+...
+
+\subsection{Spark cluster}
+\label{spark-cluster}
+
+A complex Spark cluster analysis launched as a single task.
+...
 
 \pagebreak
 \appendix
