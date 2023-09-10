@@ -225,11 +225,11 @@ execution platform.
 \begin{figure}
 \centering
 \includegraphics[width=0.9\textwidth]{role_diagram.pdf}
-\caption{Architecture diagram showing the \ivoa{} \executionplanner{}'s role in the \ivoa}
+\caption{Architecture diagram showing the \ivoa{} \executionplanner{}'s role in the \ivoa{}}
 \label{fig:archdiag}
 \end{figure}
 
-The IVOA Architecture\citep{2010ivoa.rept.1123A} provides a high-level view of how IVOA
+The IVOA Architecture\citep{2010ivoa.rept.1123A} provides a high-level view of how \ivoa{}
 standards work together to connect users and applications with providers of data
 and services.
 Fig.~\ref{fig:archdiag} shows the role the \ivoa{} \executionplanner{} plays within this architecture.
@@ -273,7 +273,7 @@ making it findable within the wider context of the VO.
 To understand the problem that the \ivoa{} \executionplanner{} is trying to solve
 it is useful to describe what an \executablething{} is in this context.
 In general terms, this document refers to something that can be executed, or run,
-as an \executable.
+as an \executable{}.
 
 To explain what this means we can start with a science domain function that we want to perform.
 For example, the mathematical concept of the square root of a number.
@@ -281,7 +281,7 @@ We can calculate the square root of a positive number using the Newton–Raphson
 algorithm\footurl{https://en.wikipedia.org/wiki/Newton\%27s_method}
 which produces successively closer approximations to the result.
 However, in general case, this mathematical description of the algorithm would not be
-considered to be an \executablething.
+considered to be an \executablething{}.
 
 We can write a \pythonprogram{} to use this algorithm to calculate the square root of a number.
 This is the first identifiable \executablething{} in our example.
@@ -332,38 +332,6 @@ This can include things like number of \cpu{} cores and amount of memory it need
 whether it needs a \gpu{}, the location of the input data, the storage space needed to perform
 the calculation and the storage space needed to save the results.
 
-\subsection{Type URIs and specifications}
-\label{type-and-spec}
-
-Several parts of the \ivoa{} \executionplanner{} \datamodel{} follow a common pattern, using a URI
-to identify a \codeword{type} followed a \codeword{spec} section to fill in the details.
-This pattern is adopted from a similar pattern used by \kubernetes{} to describe components
-that are deployed using the control interface.
-
-However, the \executionplanner{} \datamodel{} specifically recomends using a resolvable, long lasting,
-URL as the type identifier.
-
-The reasoning behind this is that if a service provider notices several clients are requesting
-\textit{'encabulation'} on their compute nodes, the service provider may not know what this means.
-However, if we use a resolvable URL to identify the type\footurl{https://tinyurl.com/encabulation},
-a service provider can use it to find a human readable description and decide whether they want
-to provide it on their platform.
-
-To the \webservice{} software both of these requests are just a simple string comparison against a
-dictionary of known terms:
-
-\begin{lstlisting}[]
-Request  - Can this platform provide 'encabulation' ?
-Response - YES|NO
-\end{lstlisting}
-
-\begin{lstlisting}[]
-Request  - Can this platform provide 'https://tinyurl.com/encabulation' ?
-Response - YES|NO
-\end{lstlisting}
-
-The second form provides a mechanism for linking the type identifier to a human readable description.
-
 \section{Client-server conversation}
 \label{conversation}
 
@@ -400,8 +368,8 @@ Note that the client does not need to cancel the offers made by the other \execp
 Offers are only valid for a limited period of time, and expire naturally when they reach the end
 of their lifetime.
 
-A good way of explaining how a client would use the \datamodel{} to describing the \executablething{}
-is to consider a series of questions that a client would ask to discover if a platform has the
+A good way of explaining how a client would use the \datamodel{} to describe the \executablething{}
+that it wants to execute is to think about the questions that a client would ask to discover if a platform has the
 resources available to execute the task.
 
 \subsection{The \executable{}}
@@ -493,7 +461,7 @@ This pattern of using a \codeword{type} URI to identify the type of thing, and t
 \codeword{spec} block to add the type specific details is used in several places in the
 \executionplanner{} \datamodel{}.
 This enables us to keep the core \datamodel{} relatively small, defining the common aspects
-needed to describe an \executablething{} and the resources it needs while allowing the
+needed to describe an \executablething{} and the resources it needs, while allowing the
 \datamodel{} to be extended to describe a wide range of different types of things.
 
 This pattern makes it easy for projects outside the core \ivoa{} community to add new
@@ -519,7 +487,7 @@ In order to do this the request would not only need to describe the \executable{
 but also the minimum level of compute resources needed in terms of \cpu{} cores, memory, \gpu{}s
 and disc space needed to execute it.
 
-\subsubsection{Compute resources}
+\subsubsection{Level 2a - compute resources}
 \label{compute-resources}
 
 The \datamodel{} for describing compute resources is, in most cases, common to all types of \executable{},
@@ -565,8 +533,7 @@ resources:
   - name: "compute-001"
     type: "https://.../generic-compute"
     spec:
-      extras:
-      - name: "nvidia-gpu"
+      gpu:
         # A URI identifying the type of GPU.
         type: "https://www.techpowerup.com/gpu-specs/nvidia-ad104.g1013"
 \end{lstlisting}
@@ -584,7 +551,7 @@ Note that a platform does not need to know what a  "\nvidiagpu{}" is to be able 
 If a platform receives a request for a resource that it doesn't understand, it MAY simply reply \codeword{NO}.
 
 \begin{lstlisting}[]
-Request  - Can this platform provide <unknown extra> ?
+Request  - Can this platform provide <unknown thing> ?
 Response - NO
 \end{lstlisting}
 
@@ -605,8 +572,7 @@ resources:
   - name: "compute-001"
     type: "https://.../generic-compute"
     spec:
-      extras:
-      - name: "nvidia-gpu"
+      gpu:
         # A URI identifying the type of GPU.
         type: "https://www.techpowerup.com/gpu-specs/nvidia-ad104.g1013"
         # The details, specific to a 'NVIDIA AD104 GPU'.
@@ -1274,7 +1240,7 @@ The final part of the \datamodel{} enables the client to set up
 \webservice{} API calls both to and from the \execplanner{} service
 that can be used to control the state of a \job{}.
 
-\subsubsection{Actions and triggers}
+\subsubsection{Level 5a - triggers}
 \label{triggers}
 
 The \codeword{triggers} section of the \datamodel{} allows the client to
@@ -1345,7 +1311,7 @@ Instead the \execplanner{} service will wait until the start action has been tri
     \item If the trigger is called after the start time range, it has no effect. The \job{} should already have been cancelled.
 \end{itemize}
 
-\subsubsection{Remote callouts}
+\subsubsection{Level 5b - callouts}
 \label{callouts}
 
 The \codeword{callouts} section of the \datamodel{} allows the client to set up one or more remote
@@ -1376,7 +1342,7 @@ callouts:
 The \codeword{callouts} part of the \datamodel{} forms the other half of a callout-trigger pair,
 enabling a client to set up a chain of workflow steps that will be executed one after the other.
 
-\subsubsection{Linked worflow}
+\subsubsection{Level 5c - linked worflow}
 \label{linked-worflow}
 
 If a user wants to set up a 2 step workflow containing step-A and step-B,
@@ -1524,6 +1490,7 @@ The players:
     \item The user who is running the analysis
 \end{itemize}
 
+
 \pagebreak
 
 \section{Request and response}
@@ -1535,28 +1502,19 @@ Timeline of request, offer and accept.
 \subsection{ExecutionPlanner}
 \label{execution-planner}
 
-Simple \codeword{POST} REST webservice.
-Single parameter, the task description.
-
-Response contains 2 values, a simple \codeword{YES} or \codeword{NO}
-and a list of offers.
+....
+....
 
 \subsection{ExecutionWorker}
 \label{execution-worker}
 
 Derived from IVOA UWS, using a similar \datamodel{}.
-
 Accepting an offer on an \execplanner{} creates a job on the associated \execworker{},
-with status PENDING until the \job{} is started automatically at the designated time.
+with status PENDING until the \job{} is started by the \execplanner{}.
+\execplanner{} offer contains the Job URL of the \execworker{}.
+Client can cancel the \job{} at anytime.
+Client can use a HEAD request to check network access at anytime.
 
-The offer from the \execplanner{} will contain the URL \job{} in the \execworker{}.
-
-\begin{itemize}
-    \item \execplanner{} is responsible for creating and starting the \job{}.
-    \item Client can use a HEAD request to check network access at anytime.
-    \item Client can use a GET request to check the status of the \job{} at anytime.
-    \item Client can cancel the \job{} at anytime.
-\end{itemize}
 
 \pagebreak
 
@@ -1564,8 +1522,6 @@ The offer from the \execplanner{} will contain the URL \job{} in the \execworker
 \label{general-requirements}
 
 \begin{itemize}
-    \item ....
-    \item ....
     \item ....
 \end{itemize}
 
@@ -1576,11 +1532,11 @@ The offer from the \execplanner{} will contain the URL \job{} in the \execworker
 The \execplanner{} and \execworker{} services are designed to be used at multiple levels within an organization.
 
 At the low level, an \execplanner{} and \execworker{} pair may be implemented as a
-single web-application linked to a simple \docker{} execution service.
+single web-application linked to a simple \docker execution service.
 The configuration may be hard coded to only accept a fixed white list of container images
 and a fixed allocation of compute resources for each job.
 
-e.g. accepts container images xxxx and yyyy, with 2 cpu cores, 2G of memory, max 1HR duration.
+e.g. container images xxxx and yyyy, 2 cpu cores, 2G of memory, max 1HR duration.
 
 A project or organization may deploy several of these low level services,
 providing a range of different capabilities.
@@ -1631,8 +1587,8 @@ in the organization.
 
 This could be expanded to include another level of \execplanner{} and \execworker{} services that
 cross organization bondaries, providing a gateway that allows users from one project to access services
-from other projects and organizations. This gateway service may also apply a translation layer between
-external public user identifiers and the internal project specific identities.
+from other projects and organizations.
+
 
 \begin{itemize}
     \item Project - SKA
@@ -1642,9 +1598,9 @@ external public user identifiers and the internal project specific identities.
         \item Local data centers
         \item Low level services
         \begin{itemize}
-            \item Slurm batch services
-            \item Docker container services
-            \item Jupter notebook services
+            \item Slurm batch service
+            \item Docker container service
+            \item JupterHub notebook service
         \end{itemize}
     \end{itemize}
 \end{itemize}
@@ -1657,9 +1613,9 @@ external public user identifiers and the internal project specific identities.
         \item Local data centers
         \item Low level services
         \begin{itemize}
-            \item Slurm batch services
-            \item Docker container services
-            \item Jupter notebook services
+            \item Slurm batch service
+            \item Docker container service
+            \item JupterHub notebook service
         \end{itemize}
     \end{itemize}
 \end{itemize}
@@ -1672,9 +1628,9 @@ external public user identifiers and the internal project specific identities.
         \item Local data centers
         \item Low level services
         \begin{itemize}
-            \item Slurm batch services
-            \item Docker container services
-            \item Jupter notebook services
+            \item Slurm batch service
+            \item Docker container service
+            \item JupterHub notebook service
         \end{itemize}
     \end{itemize}
 \end{itemize}
@@ -1687,84 +1643,27 @@ external public user identifiers and the internal project specific identities.
         \item Local data centers
         \item Low level services
         \begin{itemize}
-            \item Slurm batch services
-            \item Docker container services
-            \item Jupter notebook services
+            \item Slurm batch service
+            \item Docker container service
+            \item JupterHub notebook service
         \end{itemize}
     \end{itemize}
 \end{itemize}
 
+
+
+
 \section{Example use cases}
 \label{example-usecases}
 
-This section contains a set of examples ranging from very simple to complex, with a complete
-listing of the \datamodel{} used to describe each case.
+\begin{itemize}
+    \item ....
+\end{itemize}
 
-Before we get into some of the more complex examples it is wirth re-iterating that all of the
-elements in the \datamodel{} are optional, so it is perfectly legitimate for a simple
-implementation to only accept one of the simplest examples with no extras, and answer
-\codeword{NO} to everything else.
+\section{Even more stuff ...}
+\label{more-stuff}
 
-\subsection{Simple notebook}
-\label{simple-notebook}
 
-Just a simple \jupyternotebook{}.
-...
-
-\subsection{Notebook with dates}
-\label{notebook-with-dates}
-
-A \jupyter{} notebook with specific date ranges for start time.
-...
-
-\subsection{Notebook with data}
-\label{notebook-with-data}
-
-A \jupyternotebook{} with specific input data.
-...
-
-\subsection{Notebook with compute}
-\label{notebook-with-compute}
-
-A \jupyternotebook{} with specific input data and compute resources.
-...
-
-\subsection{Simple container}
-\label{simple-container}
-
-A simple \ocicontainer{}.
-...
-
-\subsection{Container with data}
-\label{container-with-data}
-
-An \ocicontainer{} with specific input data.
-...
-
-\subsection{Container with compute}
-\label{container-with-compute}
-
-An \ocicontainer{} with specific input and output data, and compute resources.
-...
-
-\subsection{Container triggering notebook}
-\label{container-triggering-notebook}
-
-An \ocicontainer{} that notifies the user and launches a \jupyternotebook{} session
-when the container finishes executing.
-...
-
-\subsection{Kubernetes Helm chart}
-\label{kubernetes-helm}
-
-A complex Helm chart with multiple elements launched as a single task.
-...
-
-\subsection{Spark cluster}
-\label{spark-cluster}
-
-A complex Spark cluster analysis launched as a single task.
-...
 
 \pagebreak
 \appendix
