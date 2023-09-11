@@ -72,6 +72,9 @@
 
 \newcommand{\scalable} {scalable}
 
+% TODO add a citation for the YAML specification.
+% https://yaml.org/spec/
+
 \usepackage{listings}
 \usepackage{xcolor}
 
@@ -338,10 +341,10 @@ the calculation and the storage space needed to save the results.
 Several parts of the \ivoa{} \executionplanner{} \datamodel{} follow a common pattern, using a URI
 to identify a \codeword{type} followed a \codeword{spec} section to fill in the details.
 This pattern is adopted from a similar pattern used by \kubernetes{} to describe components
-that are deployed using the control interface.
+deployed in the system.
 
-However, the \executionplanner{} \datamodel{} specifically recomends using a resolvable, long lasting,
-URL as the type identifier.
+However, the \executionplanner{} \datamodel{} specifically recomends using a long lasting resolvable
+HTTP URL as the type identifier.
 
 The reasoning behind this is that if a service provider notices several clients are requesting
 \textit{'encabulation'} on their compute nodes, the service provider may not know what this means.
@@ -349,7 +352,7 @@ However, if we use a resolvable URL to identify the type\footurl{https://tinyurl
 a service provider can use it to find a human readable description and decide whether they want
 to provide it on their platform.
 
-To the \webservice{} software both of these requests are just a simple string comparison against a
+To the \webservice{} both of these requests are just a simple string comparison against a
 dictionary of known terms:
 
 \begin{lstlisting}[]
@@ -362,7 +365,11 @@ Request  - Can this platform provide 'https://tinyurl.com/encabulation' ?
 Response - YES|NO
 \end{lstlisting}
 
-The second form provides a mechanism for linking the type identifier to a human readable description.
+The second form provides a simple mechanism for linking the type identifier to a human readable description.
+
+While it is possible to use \ivoa{} registry URIs to identify the \codeword{type}, this specification
+recomends using a simple HTTP/S URL. This lowers the barrier to entry and makes it simpler for the end user
+to resolve the URL into a description.
 
 \section{Client-server conversation}
 \label{conversation}
@@ -393,16 +400,12 @@ Request  - I accept <offer>[n]
 Response - <job details>
 \end{lstlisting}
 
-The client can then uses the connection details in the \workerjob{} response to contact
+The client can then use the connection details in the \workerjob{} response to contact
 the \execworker{} service and track its status.
 
 Note that the client does not need to cancel the offers made by the other \execplanner{} services.
 Offers are only valid for a limited period of time, and expire naturally when they reach the end
 of their lifetime.
-
-A good way of explaining how a client would use the \datamodel{} to describing the \executablething{}
-is to consider a series of questions that a client would ask to discover if a platform has the
-resources available to execute the task.
 
 \subsection{The \executable{}}
 \label{executable}
@@ -424,31 +427,37 @@ To support this, the core \datamodel{} defines two fields:
   \item \codeword{spec} - a place holder for type specific details.
 \end{itemize}
 
+% Type URLs
+% https://www.purl.org/ivoa.net/executable-types/example
+% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/example-executable.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
 # Details of the executable.
 executable:
 
   # A URI identifying the type of executable.
-  # e.g.
-  # https://www.purl.org/ivoa.net/ep/task-type/oci-container
-  # https://www.purl.org/ivoa.net/ep/task-type/jupyter-notebook
-  type: "https://www.purl.org/ivoa.net/ep/task-type/example"
+  type: "https://www.purl.org/ivoa.net/executable-types/example"
 
   # The details, specific to the type of executable.
   spec: {}
 \end{lstlisting}
 
+\subsubsection{\jupyternotebook{}}
+\label{jupyternotebook}
 The \datamodel{} for each type of \executable{} defines the metadata needed to
 describe that particular type.
 For example, the \datamodel{} for a \jupyternotebook{} needs to describe where
 to fetch the source code for the notebook from.
+
+% Type URLs
+% https://www.purl.org/ivoa.net/executable-types/jupyter-notebook
+% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/jupyter-notebook.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
 # Details of the executable.
 executable:
   # A URI identifying the type of executable.
-  type: "https://www.purl.org/ivoa.net/ep/task-type/jupyter-notebook"
+  type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
 
   # The details, specific to a Jupyter notebook.
   spec:
@@ -462,7 +471,7 @@ libraries needed to run the notebook.
 # Details of the executable.
 executable:
   # A URI identifying the type of executable.
-  type: "https://www.purl.org/ivoa.net/ep/task-type/jupyter-notebook"
+  type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
 
   # The details, specific to a Jupyter notebook.
   spec:
@@ -470,15 +479,20 @@ executable:
     requirements: "https://.../requirements.txt"
 \end{lstlisting}
 
+\subsubsection{\ocicontainer{}}
+\label{ocicontainer}
 The \datamodel{} for an \ocicontainer{} needs to describe what operating system and system architecture
 the container is built for, and where to fetch the binary image from.
 
+% Type URLs
+% https://www.purl.org/ivoa.net/executable-types/oci-container
+% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/oci-container.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
 # Details of the executable.
 executable:
   # A URI identifying the type of executable.
-  type: "https://www.purl.org/ivoa.net/ep/task-type/oci-container"
+  type: "https://www.purl.org/ivoa.net/executable-types/oci-container"
 
   # The details, specific to an OCI container.
   spec:
@@ -527,14 +541,14 @@ so the \datamodel{} for these requirements are defined as part of the core \exec
 
 It is important to note that all of the resource requirements are optional.
 As in the example from the previous section, a request to execute a simple \jupyternotebook{}
-would not need to include any resource details.
+does not need to include any resource details.
 
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
 # Details of the executable.
 executable:
   # A URI identifying the type of executable.
-  type: "https://www.purl.org/ivoa.net/ep/task-type/jupyter-notebook"
+  type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
 
   # The details, specific to a Jupyter notebook.
   spec:
@@ -549,12 +563,15 @@ However, if this \jupyternotebook{} needs a specific type of \gpu{} to function 
 then it can be added to the request by specifying a compute resource with the specific type
 of \gpu{}.
 
+% Type URLs
+% https://www.purl.org/ivoa.net/resource-types/generic-compute
+% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/generic-compute.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
 # Details of the executable.
 executable:
   # A URI identifying the type of executable.
-  type: "https://www.purl.org/ivoa.net/ep/task-type/jupyter-notebook"
+  type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
   # The details, specific to a Jupyter notebook.
   spec:
     notebook: "https://.../example.jpnb"
@@ -563,14 +580,13 @@ executable:
 resources:
   compute:
   - name: "compute-001"
-    type: "https://.../generic-compute"
+    type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
     spec:
       extras:
       - name: "nvidia-gpu"
         # A URI identifying the type of GPU.
-        type: "https://www.techpowerup.com/gpu-specs/nvidia-ad104.g1013"
+        type: ""
 \end{lstlisting}
-%TODO purl URI for the GPU type.
 
 With this detail added to the request, platforms that are not able to provide this kind of \gpu{}
 would simply reply \codeword{NO}.
@@ -596,6 +612,10 @@ the \executable{}. A \codeword{type} URI to identify the type of \gpu{},
 and a \codeword{spec} section for type specific details,
 e.g. the minimum amount of memory and number of shaders.
 
+% Type URLs
+% https://tinyurl.com/nvidia-ad104
+% https://www.purl.org/ivoa.net/resource-types/nvidia-ad104
+% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/nvidia-ad104.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
   ....
@@ -607,13 +627,80 @@ resources:
     spec:
       extras:
       - name: "nvidia-gpu"
-        # A URI identifying the type of GPU.
-        type: "https://www.techpowerup.com/gpu-specs/nvidia-ad104.g1013"
+        # A URI identifying the type.
+        type: "https://tinyurl.com/nvidia-ad104"
         # The details, specific to a 'NVIDIA AD104 GPU'.
         spec:
           minmemory: 20
           minshaders: 6144
 \end{lstlisting}
+
+This pattern make it easy for projects to add new types of compute resources to their
+platforms. All they need to do is to choose a URL to identify the \codeword{type}
+and they can add their own type specific details to the \codeword{spec} section.
+
+% Type URLs
+% https://tinyurl.com/xilinx-vu19p
+% https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p
+% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/xilinx-vu19p.md
+\begin{lstlisting}[]
+# ExecutionPlanner client request.
+  ....
+# Details of the resources needed.
+resources:
+  compute:
+  - name: "compute-001"
+    type: "https://.../generic-compute"
+    spec:
+      extras:
+      - name: "Xilinx FPGA"
+        # A URI identifying the type.
+        type: "https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p"
+        # The details, specific to a 'Xilinx FPGA'.
+        spec:
+          logicCells: 8938
+          DSPslices:  3840
+\end{lstlisting}
+
+Note that in both these examples, the URL used to identify the \codeword{type}
+uses some level of indirection to make the URL more robust.
+
+At the time of writing, the best resource we could find to describe NVIDIA's AD104 GPU
+is an entry in a database curated by the TECHPOWERUP
+website\footurl{https://www.techpowerup.com/gpu-specs/nvidia-ad104.g1013}.
+While this page provides a lot of useful techical detail about the component,
+the URL itself is vulnerable to changes in the design of the TECHPOWERUP website.
+
+To make this more robust we can use a URL redirect service to create a more permanent
+URL that we have control over\footurl{https://tinyurl.com/nvidia-ad104}.
+If the TECHPOWERUP website is redesigned, we can update
+our redirect to match.
+
+There are several options to choose from:
+\begin{itemize}
+\item A URL shortening service.\\
+      \codeword{[https://tinyurl.com/nvidia-ad104]}
+\item The PURL service\footurl{https://purl.archive.org/} provided by the internet archive\footurl{http://www.archive.org/}.\\
+      \codeword{[https://www.purl.org/ivoa.net/resource-types/nvidia-ad104]}.
+\item A page in our GitHub repository that directs the reader to more resources\footurl{https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/nvidia-ad104.md}.\\
+      \codeword{[https://github.com/..../resource-types/nvidia-ad104.md]}.
+\end{itemize}
+
+Similarly, the best resource we could find to decribe the Xilinx FPGA provided by Amazon AWS
+F1\footurl{https://aws.amazon.com/ec2/instance-types/f1/} instances is the product details
+page on the Xilinx website\footurl{https://www.xilinx.com/products/silicon-devices/fpga/virtex-ultrascale-plus-vu19p.html}.
+Both of these URLs are informative, but are vulnerable to changes in their websites.
+
+To make this more robust, our example uses a PURL redirect to a page in our GitHub repository that describes
+the type of FPGA that our project requires. The page in our GitHub repository can point to additional details about the
+FPGA and the tools needed to use it.
+\begin{itemize}
+%\item A URL shortening service \codeword{[https://tinyurl.com/xilinx-vu19p]}.
+\item A PURL redirect to provide a long lasting URL.\\
+      \codeword{[https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p]}
+\item A page in our GitHub repository describing the FPGA and the tools needed to use it\footurl{https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/xilinx-vu19p.md}.\\
+      \codeword{[https://github.com/..../resource-types/xilinx-vu19p.md]}
+\end{itemize}
 
 \subsubsection{Minimum and maximum}
 \label{minandmax}
@@ -705,9 +792,12 @@ then it MAY NOT offer this resource as it is less than the requested minimum.
 
 Note that the term \textit{'compute resource'} specifically avoids stating whether the
 notebook will be run in an \openstack{} virtual machine or a \kubernetes{} cluster.
-As far as the user is concerned, it should not matter, as long as the compute resource provides
+As far as the user is concerned, it should not matter. As long as the compute resource provides
 sufficient \cpu{} cores and memory for the notebook to execute, the technical details of how the
-platform implements are not relevant at this level of abstraction.
+platform implements should not be relevant at this level of abstraction.
+
+The user just wants their notebook to run. The technical details of what platform is used to
+run it should be someone else's problem.
 
 \subsubsection{Storage resources}
 \label{storage-resources}
@@ -736,6 +826,9 @@ The simplest of these are ephemeral storage resources managed by the execution p
 For example, if the \jupyternotebook{} in our example requires 1024G of space to perform its calculations,
 then this can be specified in the request by defining an ephemeral storage resource.
 
+% Type URLs
+% https://www.purl.org/ivoa.net/storage-types/ephemeral-storage
+% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/ephemeral-storage.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
   ....
@@ -744,7 +837,7 @@ resources:
   ....
   storage:
   - name: "scratch-space"
-    type: "https://.../ephemeral"
+    type: "https://www.purl.org/ivoa.net/storage-types/ephemeral-storage"
     spec:
       size: 1024
 \end{lstlisting}
@@ -774,7 +867,7 @@ resources:
       mode: "rw"
   storage:
   - name: "scratch-space"
-    type: "https://.../ephemeral"
+    type: "https://www.purl.org/ivoa.net/storage-types/ephemeral-storage"
     spec:
       size: 1024
 \end{lstlisting}
@@ -791,6 +884,9 @@ in an external S3 system, this can be done by defining an external storage resou
 that describes where the data is,
 and a corresponding volume mount inside the compute resource.
 
+% Type URLs
+% https://www.purl.org/ivoa.net/storage-types/amazon-s3
+% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/amazon-s3.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
   ....
@@ -807,7 +903,7 @@ resources:
       mode: "r"
   storage:
   - name: "source-data"
-    type: "https://.../amazon-S3"
+    type: "https://www.purl.org/ivoa.net/storage-types/amazon-s3"
     spec:
       endpoint: "https://.../echo"
       bucket: "example-data"
@@ -822,6 +918,9 @@ The same pattern can be used to describe a storage resource that can be used
 to save the analysis results, by defining a persistent storage resource
 allocated by the system, and a corresponding volume mount inside the compute resource.
 
+% Type URLs
+% https://www.purl.org/ivoa.net/storage-types/persistent-storage
+% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/persistent-storage.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
   ....
@@ -838,7 +937,7 @@ resources:
       mode: "rw"
   storage:
   - name: "results-storage"
-    type: "https://.../persistent"
+    type: "https://www.purl.org/ivoa.net/storage-types/persistent-storage"
     spec:
       lifecycle: "managed"
       minlifetime: "1D"
@@ -858,6 +957,9 @@ In which case the \execplanner{} service would respond with an offer that
 stores the results in the \rucio{} system and provides details of how the user
 can access it after the \job{} has completed.
 
+% Type URLs
+% https://www.purl.org/ivoa.net/storage-types/rucio-storage
+% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/rucio-storage.md
 \begin{lstlisting}[]
 # ExecutionPlanner service response.
   ....
@@ -882,6 +984,7 @@ resources:
       minsize:  100
       maxsize:  200
       endpoint: "http://...."
+      domain: "Project 51"
       objectid: "cdc78e7d-8032-497e-9a5b-01c720ea2223"
 \end{lstlisting}
 
@@ -907,6 +1010,9 @@ The same \datamodel{} can be used the other way around as well.
 If the client already knows where it wants the data to be stored, for example at a specific
 \vospace{} location, then it can specify this in the request.
 
+% Type URLs
+% https://www.purl.org/ivoa.net/storage-types/vospace-storage
+% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/vospace-storage.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
   ....
@@ -922,7 +1028,7 @@ resources:
       mode: "rw"
   storage:
   - name: "results"
-    type: "https://.../vospace"
+    type: "https://www.purl.org/ivoa.net/storage-types/vospace-storage"
     spec:
       endpoint: "http://...."
       path: "/experiment-21/results"
@@ -1329,31 +1435,38 @@ In which case, we want this \job{} to wait until the previous step has completed
 Hence the trigger that waits until the \codeword{status} of the \textbf{previous} step is
 \codeword{COMPLETED} before starting this step.
 
-Defining a \codeword{start} action in the \codeword{triggers} section will modify the effect of a
-start time defined in the \codeword{datetime} section.
-The \execplanner{} service will not automatically start the \job{} when the start time range is reached.
+Defining a \codeword{start} action in the \codeword{triggers} section will modify the effect of the
+start time declared in the \codeword{datetime} section.
+The \execplanner{} service will not automatically start the \job{} when the specified start time is reached.
 Instead the \execplanner{} service will wait until the start action has been triggered before it starts the \job{}.
 
 \begin{itemize}
-    \item If the trigger is called before the start time range is reached, the event is recorded,
+    \item If the trigger is called before the specified start time is reached, the event is recorded,
     but no action is taken.
-    The \execplanner{} service will wait until the start time range is reached before starting the \job{}.
-    \item If the start time range is reached before the trigger has been called,
-    no action is taken. The \execplanner{} service will wait until the trigger is called before starting the \job{}.
+    The \execplanner{} service will wait until the start time is reached before starting the \job{}.
+    \item If the start time is reached before the trigger has been called, the event is recorded,
+    but no action is taken. The \execplanner{} service will wait until the trigger is called before starting the \job{}.
     \item If the trigger is called within the start time range, the \execplanner{} service will start \job{}.
     \item If the start time range expires before the trigger has been called, the \execplanner{} service will cancel the \job{}.
     \item If the trigger is called after the start time range, it has no effect. The \job{} should already have been cancelled.
 \end{itemize}
 
+In effect, the start time range acts as a constraint on the action of the trigger. Preventing it from starting the \job{} too early
+or too late.
+As far as resource allocation is concerned, the \execplanner{} service allocates the required compute and storage resources
+from the beginning of the start time range. This means the \job{} is ready to start as soon as the trigger is called.
+If the start time range expires before the trigger has been called, the resources are released as normal
+when the \job{} is cancelled.
+
 \subsubsection{Remote callouts}
 \label{callouts}
 
-The \codeword{callouts} section of the \datamodel{} allows the client to set up one or more remote
-\webservice{} API calls that the \execplanner{} service will call at specific points in the lifecycle
-of a \job{}.
+The \codeword{callouts} part of the \datamodel{} forms the other half of a callout-trigger pair,
+enabling a client to set up \webservice{} API calls to remote services that the \execplanner{} service will
+call at specific points in the lifecycle of a \job{}.
 
-The following definition asks the \execplanner{} service to POST the name-value list defined in the
-\codeword{template} to a remote \webservice{} endpoint when the status of this \job{} changes to be one
+The following definition asks the \execplanner{} service to \codeword{POST} the name-value list defined in the
+\codeword{content} template to a remote \webservice{} endpoint when the status of this \job{} changes to be one
 of \codeword{RUNNING}, \codeword{COMPLETED}, \codeword{FAILED} or \codeword{CANCELLED}.
 
 \begin{lstlisting}[]
@@ -1362,32 +1475,44 @@ callouts:
 - name: "callout-001"
   type: "https://.../value-update"
   spec:
-    method: "POST"
-    endpoint: "http://...."
     triggers:
     - state: "RUNNING,COMPLETED,FAILED,CANCELLED"
-    template: |
-      name:  {{name}}
-      date:  {{date}}
-      ident: {{ident}}
-      state: {{state}}
+    method: "POST"
+    endpoint: "http://ws.example.org/update"
+    content-type: "yaml
+    content: |
+      name:  {{job.name}}
+      date:  {{system.date}}
+      ident: {{job.ident}}
+      status: {{job.status}}
 \end{lstlisting}
 
-The \codeword{callouts} part of the \datamodel{} forms the other half of a callout-trigger pair,
-enabling a client to set up a chain of workflow steps that will be executed one after the other.
+When the status of this \job{} changes to be one of the specified values, the
+\execplanner{} service will \codeword{POST} the document described in the
+\codeword{content} template to the HTTP \codeword{endpoint}, filling in the \codeword{{{...}}}
+markers in the template with values from the \datamodel{} representing the \job{}
+at that point in time.
+
+In this example, the \codeword{{{...}}} markers in the \codeword{content} template will be filled
+in with the current values of the \job{} \codeword{name}, \codeword{ident} and \codeword{status},
+along with the current local system time on the \execplanner{} service sending the callout.
+
+In a normal execution sequence, this callout would be called twice. Once when the \job{} \codeword{status}
+is set to \codeword{RUNNING}, and again when the \job{} \codeword{status} is set to \codeword{COMPLETED}.
 
 \subsubsection{Linked worflow}
 \label{linked-worflow}
 
-If a user wants to set up a 2 step workflow containing step-A and step-B,
-they can use callouts and triggers to link the steps together.
+The following example describes how the callout and trigger functions can be used to
+set up a 2 step workflow containing step-a and step-b, with step-b waiting until
+step-a has been completed.
 
-The user would start by setting up step-B with a trigger that would wait until it received
-a value-update \webservice{} API call with the value of \codeword{status} set to
-\codeword{COMPLETED} before starting the \job{}.
+The first part of setting up the workflow is to configure the second step, step-b, with a trigger that
+will wait until it receives a \codeword{value-update} \webservice{} call with the
+value of \codeword{status} set to \codeword{COMPLETED} before starting the \job{}.
 
 \begin{lstlisting}[]
-name: "step-B"
+name: "step-b"
 executable:
   ...
 resources:
@@ -1409,7 +1534,7 @@ triggers:
 
 Note that the client doesn't set the endpoint location for the trigger, that needs to
 come from the \execplanner{} service.
-The \webservice{} endpoint location for each trigger will be different for each of the
+The \webservice{} endpoint location for each trigger may be different for each of the
 offers in the \execplanner{} service response.
 
 \begin{lstlisting}[]
@@ -1427,39 +1552,38 @@ offers:
       ....
 \end{lstlisting}
 
-The user can then use this \webservice{} endpoint to set up step-A with a
-remote \webservice{} API callout to trigger step-B when step-A completes.
+The second part of setting up the workflow is to configure step-a with a
+\codeword{value-update} \webservice{} callout to the endpoint address from
+step-b when the status of step-a changes.
 
 \begin{lstlisting}[]
-name: "step-A"
+name: "step-a"
 executable:
   ...
 resources:
   ...
-datetime:
-  - start: "2023-08-14/P1D"
-....
 callouts:
 - name: "callout-001"
   type: "https://.../value-update"
   spec:
-    method: "POST"
-    content-type: "yaml"
-    endpoint: "https://..../offer-001/trigger-001"
     triggers:
-    - state: "RUNNING,COMPLETED,FAILED,CANCELLED"
-    template: |
-      name:  {{name}}
-      date:  {{date}}
-      ident: {{ident}}
-      state: {{state}}
+    - status: "RUNNING,COMPLETED,FAILED,CANCELLED"
+    method: "POST"
+    endpoint: "https://..../offer-001/trigger-001"
+    content-type: "yaml
+    content: |
+      name:  {{job.name}}
+      date:  {{system.date}}
+      ident: {{job.ident}}
+      status: {{job.status}}
 \end{lstlisting}
 
-The user can set a start time range on the steps that starts today and lasts for a day.
-This will ensure that even if the triggers don't get called the \job{}s will
+The start times on both step-a and step-b can be set to a range that starts today and lasts for a day.
+This will ensure that even if the triggers don't get called, and neither \job{} is executed, both \job{}s will
 be cancelled and the resources released when the start time range expires at the end of the day.
 
 \begin{lstlisting}[]
+name: "step-a"
 executable:
   ...
 resources:
@@ -1468,49 +1592,145 @@ datetime:
   - start: "2023-08-14/P1D"
 \end{lstlisting}
 
-The user can also set up a location in \vospace to transfer data between the steps.
-In step-A they can set up a \codeword{managed} storage resource that points a location
-in a \vospace service. Setting this up as \codeword{managed} with athe \codeword{maxlifetime}
-and \codeword{minlifetime} set to 1 day means that the \vospace location will be created
-automatically when step-A starts, and then be automatically deleted 1 day after step-A completes.
+The client can also set up a \codeword{managed} storage resource in \vospace{} to transfer data
+between the steps which is automatically created and deleted by the \execplanner{} service.
 
-This gives step-B enough time to collect the results but also ensures that the storage resource
+Adding a \codeword{managed} storage resource to step-a which points a location in a \vospace{} service
+with a \codeword{maxlifetime} and \codeword{minlifetime} set to 1 day means that the \vospace{} location
+will be automatically created when step-a starts, and automatically deleted 1 day after step-a completes.
+
+This gives step-b enough time to collect the results but also ensures that the storage resource
 is eventually released after a day.
 
 \begin{lstlisting}[]
-name: "step-A"
+name: "step-a"
 executable:
   ...
 resources:
   ....
   storage:
-  - name: "results"
+  - name: "result-storage"
     type: "https://.../vospace"
     spec:
       endpoint: "http://...."
-      path: "/step-A/results"
+      path: "/step-a/results"
       lifecycle: "managed"
       minlifetime: "1D"
       maxlifetime: "1D"
 \end{lstlisting}
 
-In step-B the user just needs to create an \codeword{unmanaged} \vospace resource
-that points to the same location in \vospace.
+The data in this location can be made available to step-b using an \codeword{unmanaged} resource
+that points to the same location in \vospace{}.
 
 \begin{lstlisting}[]
-name: "step-B"
+name: "step-b"
 executable:
   ...
 resources:
   ....
   storage:
-  - name: "inputs"
+  - name: "input-storage"
     type: "https://.../vospace"
     spec:
       endpoint: "http://...."
-      path: "/step-A/results"
+      path: "/step-a/results"
       lifecycle: "unmanaged"
 \end{lstlisting}
+
+If all goes to plan, when the start time for step-a is reached, the first \execplanner{}
+service will allocate the managed space in \vospace{}, and then start the execution of step-a.
+As soon as step-a starts, the \job{} status changes to \codeword{RUNNING},
+which triggers a callout from this \execplanner{} service to the second
+\execplanner{} service running step-b.
+This first callout will have no effect, as the trigger
+for step-b is configured to only perform an action on a \codeword{status}
+value of \codeword{COMPLETED}, \codeword{FAILED} or \codeword{CANCELLED}.
+
+The executable in step-a can access the storage location using an internal
+volume mount that refers to the external storage location.
+
+\begin{lstlisting}[]
+name: "step-a"
+executable:
+  ...
+resources:
+  ....
+  compute:
+  - name: "compute-001"
+    ....
+    volumes:
+    - name: "results-volume"
+      resource: "results-storage"
+      path: "/results"
+      mode: "rw"
+  ....
+  storage:
+  - name: "results-storage"
+    type: "https://.../vospace"
+    spec:
+      endpoint: "http://...."
+      path: "/step-a/results"
+      lifecycle: "managed"
+      minlifetime: "1D"
+      maxlifetime: "1D"
+\end{lstlisting}
+
+As far as the code inside the executable is concerned, it writes its results to a
+filesystem directory at \codeword{/results}.
+The code inside the executable does not need to know anything about the
+details of where the data is stored.
+The \execplanner{} service is responsible for ensuring that anything written to
+\codeword{/results} in the local filesystem is transferred to \codeword{/step-a/results}
+in the remote \vospace{} service.
+
+When step-a completes, its status is updated to \codeword{COMPLETED},
+which triggers another callout to the \execplanner{} service running step-b.
+This time, the \codeword{status} value of \codeword{COMPLETED} triggers
+an action to start step-b.
+
+Although step-a has completed, the managed space in \vospace{} is not deleted.
+The managed resource has a \codeword{minlifetime} of \codeword{1D},
+which means that the space will not be deleted until a day after step-a has completed.
+This allows sufficient time for step-b to execute, reading its input data
+from the results of step-a.
+The second \execplanner{} service runs step-b to completion as normal,
+freeing up any resources it was allocated at the end.
+
+As with step-a, step-b is configured to mount the same \vospace{} location
+as a filesystem directory.
+
+\begin{lstlisting}[]
+name: "step-b"
+executable:
+  ...
+resources:
+  ....
+  compute:
+  - name: "compute-001"
+    ....
+    volumes:
+    - name: "input-volume"
+      resource: "input-storage"
+      path: "/inputs"
+      mode: "r"
+  ....
+  storage:
+  - name: "input-storage"
+    type: "https://.../vospace"
+    spec:
+      endpoint: "http://...."
+      path: "/step-a/results"
+      lifecycle: "unmanaged"
+\end{lstlisting}
+
+As far as the code inside the executable is concerned, it reads
+its input data from a filesystem directory at \codeword{/inputs}.
+The code inside the executable does not need to know anything about the
+details of where the data is stored.
+
+Finally, the \codeword{managed} \vospace{} storage location is automatically
+deleted a day after the completion of step-a by the \execplanner{} service
+that was assigned to manage its lifecycle.
 
 \section{Separation of concerns}
 \label{separate-concerns}
@@ -1536,10 +1756,12 @@ Timeline of request, offer and accept.
 \label{execution-planner}
 
 Simple \codeword{POST} REST webservice.
-Single parameter, the task description.
+Single parameter, the \job{} description.
 
-Response contains 2 values, a simple \codeword{YES} or \codeword{NO}
-and a list of offers.
+Response contains a simple \codeword{YES} or \codeword{NO}
+and a list of offers for how the \job{} can be executed on this platform.
+
+
 
 \subsection{ExecutionWorker}
 \label{execution-worker}
@@ -1578,26 +1800,25 @@ The \execplanner{} and \execworker{} services are designed to be used at multipl
 At the low level, an \execplanner{} and \execworker{} pair may be implemented as a
 single web-application linked to a simple \docker{} execution service.
 The configuration may be hard coded to only accept a fixed white list of container images
-and a fixed allocation of compute resources for each job.
-
-e.g. accepts container images xxxx and yyyy, with 2 cpu cores, 2G of memory, max 1HR duration.
+and a fixed allocation of compute resources for each job{}.
+e.g. the platform will only run a fixed set of container images, and only provides 2 \cpu{} cores, 2G of memory and a maximum 1HR execution time.
 
 A project or organization may deploy several of these low level services,
 providing a range of different capabilities.
 
-Given a new task to execute a client can poll each of the services to see which one will
+Given a new \job{} to execute, a client can simply poll each of the services to see which one will
 make an offer to execute it.
 
 The client does not need to have any prior knowledge about the services apart from their
-endpoint address and perhaps the version of the API that they implement.
-This information could come from an \ivoa{} Registry instance, or it could simply
+endpoint address.
+This information could come from the \ivoa{} Registry, or it could simply
 be provided as a flat list in a configuration file for the client.
 
 A more flexible architecture could add another \execplanner{} service
 a level above the low level task specific services.
 This service would be configured with a list of the local task specific services
 and act as an aggregator service sitting between the client and the low level services.
-This aggregator service would forward a copy of each request it receives to each of the low level services and
+This aggregator service would forward a copy of each request it receives to each of the low level services in its list and
 then aggregate the offers from the individual responses into a single response that is sent back to the client.
 
 A simple aggregator service would just forward every request to all the low level services below it,
@@ -1607,39 +1828,41 @@ A more complex aggregator service may have some prior knowledge about what types
 each of the lower level services were able to offer, enabling it to make more informed decisions about
 which low level serviecs to send the requests to.
 
-The aggregator service may also have an understanding of the location of data sets within the organization and
-be able to route requests for tasks to different low level services depending on which data sets the tasks required.
+The aggregator service may also have an understanding of the location of \dataset{}s within the organization and
+be able to route requests to different low level services depending on which \dataset{}s were required.
 
 The aggregator service may expose the low level \execworker{} endpoints in its responses,
-or it may also implement proxy interface acting as an aggregator for the \execworker{}
-services.
+or it may implement a proxy interface acting as an aggregator for the \execworker{}
+services as well.
 
 This configuration could be used to provide \execplanner{} and \execworker{} service interfaces
 that bridged a firewall. Providing a public interface for external clients and forwarding the requests
 to the internal \execplanner{} and \execworker{} services that are not accessible from outside the
 firewall.
 
-A large organization with multiple sites may deploy a single high level \execplanner{} and \execworker{}
+A large organization with multiple sites couls also deploy a single high level \execplanner{} and \execworker{}
 interface that handles task execution for the whole organization, forwarding the requests to mid-level
 \execplanner{} and \execworker{} services at each site which in turn forwards the requests to
 individual low-level \execplanner{} and \execworker{} services within the local site networks.
 
 The implementation at each level may be different, providing different levels of routing
 and aggregation based on internal knowledge of the capabilities of the level below,
-but the \execplanner{} and \execworker{} interfaces are the same at every level
+but the \execplanner{} and \execworker{} interfaces would be the same at each level
 in the organization.
 
 This could be expanded to include another level of \execplanner{} and \execworker{} services that
 cross organization bondaries, providing a gateway that allows users from one project to access services
-from other projects and organizations. This gateway service may also apply a translation layer between
-external public user identifiers and the internal project specific identities.
+from other projects and organizations. This gateway service may also provide an authentication translation
+layer between external public accounts internal project specific identities and authentication methods.
+
+Federated cloud diagram ....
 
 \begin{itemize}
     \item Project - SKA
     \begin{itemize}
         \item Project gateway
-        \item Regional centers
-        \item Local data centers
+        \item Regional centres
+        \item Local data centres
         \item Low level services
         \begin{itemize}
             \item Slurm batch services
@@ -1653,8 +1876,8 @@ external public user identifiers and the internal project specific identities.
     \item Project - LSST
     \begin{itemize}
         \item Project gateway
-        \item Regional centers
-        \item Local data centers
+        \item Regional centres
+        \item Local data centres
         \item Low level services
         \begin{itemize}
             \item Slurm batch services
@@ -1668,8 +1891,8 @@ external public user identifiers and the internal project specific identities.
     \item Project - CTA
     \begin{itemize}
         \item Project gateway
-        \item Regional centers
-        \item Local data centers
+        \item Regional centres
+        \item Local data centres
         \item Low level services
         \begin{itemize}
             \item Slurm batch services
@@ -1683,8 +1906,8 @@ external public user identifiers and the internal project specific identities.
     \item Project - CERN
     \begin{itemize}
         \item Project gateway
-        \item Regional centers
-        \item Local data centers
+        \item Regional centres
+        \item Local data centres
         \item Low level services
         \begin{itemize}
             \item Slurm batch services
@@ -1700,7 +1923,7 @@ external public user identifiers and the internal project specific identities.
 This section contains a set of examples ranging from very simple to complex, with a complete
 listing of the \datamodel{} used to describe each case.
 
-Before we get into some of the more complex examples it is wirth re-iterating that all of the
+Before we get into some of the more complex examples it is worth re-iterating that all of the
 elements in the \datamodel{} are optional, so it is perfectly legitimate for a simple
 implementation to only accept one of the simplest examples with no extras, and answer
 \codeword{NO} to everything else.
