@@ -58,6 +58,7 @@
             latexmk \
             librsvg2-bin \
             librsvg2-bin \
+            pdftk \
             texlive-latex-extra \
             texlive-bibtex-extra \
             xsltproc \

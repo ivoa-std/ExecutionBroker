@@ -2,6 +2,7 @@ ivoatexmeta.tex
 gitmeta.tex
 role_diagram.svg
 ExecutionPlanner.pdf
+draft-background.pdf
 *.aux
 *.bbl
 *.blg

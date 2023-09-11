@@ -566,6 +566,10 @@ of \gpu{}.
 % Type URLs
 % https://www.purl.org/ivoa.net/resource-types/generic-compute
 % https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/generic-compute.md
+% Type URLs
+% https://tinyurl.com/nvidia-ad104
+% https://www.purl.org/ivoa.net/resource-types/nvidia-ad104
+% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/nvidia-ad104.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
 # Details of the executable.
@@ -585,7 +589,7 @@ resources:
       extras:
       - name: "nvidia-gpu"
         # A URI identifying the type of GPU.
-        type: ""
+        type: "https://tinyurl.com/nvidia-ad104"
 \end{lstlisting}
 
 With this detail added to the request, platforms that are not able to provide this kind of \gpu{}
@@ -623,7 +627,7 @@ e.g. the minimum amount of memory and number of shaders.
 resources:
   compute:
   - name: "compute-001"
-    type: "https://.../generic-compute"
+    type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
     spec:
       extras:
       - name: "nvidia-gpu"
@@ -650,7 +654,7 @@ and they can add their own type specific details to the \codeword{spec} section.
 resources:
   compute:
   - name: "compute-001"
-    type: "https://.../generic-compute"
+    type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
     spec:
       extras:
       - name: "Xilinx FPGA"
@@ -718,7 +722,7 @@ to be able to perform its calculations, then this can be specified in the comput
 resources:
   compute:
   - name: "compute-001"
-    type: "https://.../generic-compute"
+    type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
     spec:
       mincores:   8
       minmemory: 16
@@ -744,7 +748,7 @@ then it can indicate this by specifying higher maximum values in its response.
 resources:
   compute:
   - name: "compute-001"
-    type: "https://.../generic-compute"
+    type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
     spec:
       mincores:   8
       maxcores:  16
@@ -776,7 +780,7 @@ then the service can represent that by setting the minimum values in its offer t
 resources:
   compute:
   - name: "compute-001"
-    type: "https://.../generic-compute"
+    type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
     spec:
       mincores:  16
       maxcores:  16
@@ -823,7 +827,7 @@ There are two levels of persistent storage:
 \end{itemize}
 
 The simplest of these are ephemeral storage resources managed by the execution platform.
-For example, if the \jupyternotebook{} in our example requires 1024G of space to perform its calculations,
+For example, if the \jupyternotebook{} in our example requires 1024GiB of space to perform its calculations,
 then this can be specified in the request by defining an ephemeral storage resource.
 
 % Type URLs
@@ -846,7 +850,7 @@ To enable the \jupyternotebook{} to access this storage, we need to add a
 corresponding \codeword{volume} element to the compute resource that describes
 where to mount the storage resource.
 
-For example, the following request asks for 1024G of ephemeral storage
+For example, the following request asks for 1024GiB of ephemeral storage
 that is mounted at \codeword{/temp} in the filesystem of the compute resource.
 The compute volume is linked to the storage resource by the name of the
 storage resource.
@@ -976,7 +980,7 @@ resources:
       mode: "rw"
   storage:
   - name: "results-storage"
-    type: "https://.../rucio"
+    type: "https://www.purl.org/ivoa.net/storage-types/rucio-storage"
     spec:
       lifecycle: "managed"
       minlifetime: "1D"
@@ -1058,9 +1062,10 @@ resources:
   ....
   storage:
   - name: "results"
-    type: "https://.../vospace"
+    type: "https://www.purl.org/ivoa.net/storage-types/vospace-storage"
     spec:
       endpoint: "http://...."
+      type: "container"
       path: "/experiment-21/results"
       lifecycle: "managed"
       maxlifetime: "2D"
@@ -1407,7 +1412,7 @@ element in the \codeword{POST} data it receives.
 ....
 triggers:
 - name: "trigger-001"
-  type: "https://.../value-update"
+  type: "https://www.purl.org/ivoa.net/webservice-types/value-update"
   spec:
     method: "POST"
     content-type: "yaml"
@@ -1473,7 +1478,7 @@ of \codeword{RUNNING}, \codeword{COMPLETED}, \codeword{FAILED} or \codeword{CANC
 ....
 callouts:
 - name: "callout-001"
-  type: "https://.../value-update"
+  type: "https://www.purl.org/ivoa.net/webservice-types/value-update"
   spec:
     triggers:
     - state: "RUNNING,COMPLETED,FAILED,CANCELLED"
@@ -1519,7 +1524,7 @@ resources:
   ...
 triggers:
 - name: "trigger-001"
-  type: "https://.../value-update"
+  type: "https://www.purl.org/ivoa.net/webservice-types/value-update"
   spec:
     method: "POST"
     content-type: "yaml"
@@ -1544,7 +1549,7 @@ offers:
   ....
   triggers:
   - name: "trigger-001"
-    type: "https://.../value-update"
+    type: "https://www.purl.org/ivoa.net/webservice-types/value-update"
     spec:
       method: "POST"
       content-type: "yaml"
@@ -1564,7 +1569,7 @@ resources:
   ...
 callouts:
 - name: "callout-001"
-  type: "https://.../value-update"
+  type: "https://www.purl.org/ivoa.net/webservice-types/value-update"
   spec:
     triggers:
     - status: "RUNNING,COMPLETED,FAILED,CANCELLED"
@@ -1610,7 +1615,7 @@ resources:
   ....
   storage:
   - name: "result-storage"
-    type: "https://.../vospace"
+    type: "https://www.purl.org/ivoa.net/storage-types/vospace-storage"
     spec:
       endpoint: "http://...."
       path: "/step-a/results"
@@ -1630,7 +1635,7 @@ resources:
   ....
   storage:
   - name: "input-storage"
-    type: "https://.../vospace"
+    type: "https://www.purl.org/ivoa.net/storage-types/vospace-storage"
     spec:
       endpoint: "http://...."
       path: "/step-a/results"
@@ -1666,7 +1671,7 @@ resources:
   ....
   storage:
   - name: "results-storage"
-    type: "https://.../vospace"
+    type: "https://www.purl.org/ivoa.net/storage-types/vospace-storage"
     spec:
       endpoint: "http://...."
       path: "/step-a/results"
@@ -1716,7 +1721,7 @@ resources:
   ....
   storage:
   - name: "input-storage"
-    type: "https://.../vospace"
+    type: "https://www.purl.org/ivoa.net/storage-types/vospace-storage"
     spec:
       endpoint: "http://...."
       path: "/step-a/results"
@@ -1996,6 +2001,56 @@ A complex Spark cluster analysis launched as a single task.
 No previous versions yet.
 % these would be subsections "Changes from v. WD-..."
 % Use itemize environments.
+
+\pagebreak
+\appendix
+\section{Resource type URLs}
+
+https://www.purl.org/ivoa.net/executable-types/example
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/example-executable.md
+
+https://www.purl.org/ivoa.net/executable-types/jupyter-notebook
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/jupyter-notebook.md
+
+https://www.purl.org/ivoa.net/executable-types/oci-container
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/oci-container.md
+
+https://www.purl.org/ivoa.net/resource-types/generic-compute
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/generic-compute.md
+
+https://www.purl.org/ivoa.net/resource-types/nvidia-ad104
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/nvidia-ad104.md
+
+https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/xilinx-vu19p.md
+
+https://www.purl.org/ivoa.net/storage-types/ephemeral-storage
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/ephemeral-storage.md
+
+https://www.purl.org/ivoa.net/storage-types/amazon-s3
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/amazon-s3.md
+
+https://www.purl.org/ivoa.net/storage-types/persistent-storage
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/persistent-storage.md
+
+https://www.purl.org/ivoa.net/storage-types/rucio-storage
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/rucio-storage.md
+
+https://www.purl.org/ivoa.net/storage-types/vospace-storage
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/vospace-storage.md
+
+https://www.purl.org/ivoa.net/authentication-types/basic-auth
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/authentication-types/basic-auth.md
+
+https://www.purl.org/ivoa.net/authentication-types/oidc-auth
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/authentication-types/oidc-auth.md
+
+https://www.purl.org/ivoa.net/authentication-types/rfc7519-token
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/authentication-types/rfc7519-token.md
+
+https://www.purl.org/ivoa.net/webservice-types/value-update
+https://github.com/Zarquan/ExecutionPlanner/blob/main/types/webservice-types/value-update.md
+
 
 
 % NOTE: IVOA recommendations must be cited from docrepo rather than ivoabib
