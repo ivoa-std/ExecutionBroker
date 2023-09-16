@@ -1,0 +1,89 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (C) 2023 by Wizzard Solutions Ltd, wizzard@metagrid.co.uk
+#
+#     This information is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This information is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   </meta:licence>
+# </meta:header>
+#
+# AIMetrics: []
+#
+
+    Target:
+
+        Success
+
+    Result:
+
+        Work in progress ...
+
+# -----------------------------------------------------
+# Create a new git branch.
+#[user@desktop]
+
+    branchname=development
+
+    newbranch=$(date '+%Y%m%d')-zrq-${branchname:?}
+
+    git checkout main
+
+    git checkout -b "${newbranch:?}"
+
+    git push --set-upstream 'origin' "$(git branch --show-current)"
+
+
+# -----------------------------------------------------
+# Start a new build container.
+#[user@desktop]
+
+    podman run \
+        --rm \
+        --tty \
+        --interactive \
+        --name document-builder \
+        --volume "$(pwd):/document:rw,z" \
+        debian \
+            bash
+
+# -----------------------------------------------------
+# Install the build tools.
+#[root@document-builder]
+
+    apt-get update
+
+    apt-get -y install \
+        build-essential \
+        cm-super \
+        ghostscript \
+        latexmk \
+        librsvg2-bin \
+        librsvg2-bin \
+        pdftk \
+        texlive-latex-extra \
+        texlive-bibtex-extra \
+        xsltproc \
+        zip
+
+# -----------------------------------------------------
+# Create a clean build of the document.
+#[root@document-builder]
+
+    cd /document/
+
+    make clean
+
+    make
+
+
