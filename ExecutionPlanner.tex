@@ -391,6 +391,47 @@ While it is possible to use \ivoa{} registry URIs to identify the \codeword{type
 recomends using a simple HTTP/S URL. This lowers the barrier to entry and makes it simpler for the end user
 to resolve the URL into a description.
 
+\section{Service interaction}
+\label{service-interaction}
+
+The interaction between user, client and the services can be described in a series of stages.
+
+\subsection{Discovery}
+\label{discovery-stage}
+
+The first stage in the process is the discovery stage, where the user selects the software and
+\dataset{}s that they want to work with.
+This involves interaction between the client application and the software and data discovery services.
+
+The detailed specification for the discovery services is beyond the scope of this document.
+However we can outline some general requirements for these services.
+
+In both cases, the discovery process should not depend on the technical details
+of the software or \dataset{}s, but on their functionality and science domain properties.
+
+From a user's perspective they want to be able to look for software that implements
+a particular clustering algorithm, on a \dataset{} that is indexed according to a particular
+coordinate system.
+The programming language the software is written in and the binary format of the \dataset{}
+are at best secondary criteria.
+Ideally, if the \executionplanner{} services function as intended, the researcher should not
+need to know about programming languages or binary formats.
+The \executionplanner{} services should be able to handle all of the technical details
+internally.
+
+The interfaces for the discovery services should be designed to be domain agnostic.
+Meaning that it should be possible to swap out the astronomy based discovery services
+for the equivalent biochemistry discovery services and although the domain specific
+terms and vocabulary will be different, the techical details of the service interfaces
+should be the same.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.9\textwidth]{diagrams/data-discovery.pdf}
+\caption{Software and \dataset{} discovery}
+\label{fig:discovery-diag}
+\end{figure}
+
 \section{Client-server conversation}
 \label{conversation}
 
