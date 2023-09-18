@@ -394,17 +394,18 @@ to resolve the URL into a description.
 \section{Service interaction}
 \label{service-interaction}
 
-The interaction between user, client and the services can be described in a series of stages.
+The interaction between user, client and services can be described as a conversation between the client
+and one or more \execplanner{} services to discover where, how, and when, an \executablething{} can be
+executed.
 
-\subsection{Discovery}
-\label{discovery-stage}
+\subsection{Discovery services}
+\label{discovery-services}
 
-The first stage in the process is the discovery stage, where the user selects the software and
+The conversation starts at the discovery stage, where the user selects the software and
 \dataset{}s that they want to work with.
-This involves interaction between the client application and the software and data discovery services.
-
-The detailed specification for the discovery services is beyond the scope of this document.
-However we can outline some general requirements for these services.
+This involves interaction with the software and data discovery services.
+The detailed specification for these discovery services is beyond the scope of this document.
+However we can outline some general requirements for them.
 
 In both cases, the discovery process should not depend on the technical details
 of the software or \dataset{}s, but on their functionality and science domain properties.
@@ -432,16 +433,14 @@ should be the same.
 \label{fig:discovery-diag}
 \end{figure}
 
-\section{Client-server conversation}
-\label{conversation}
+\subsection{Initial request}
+\label{initial-request}
 
-The core idea behind the \ivoa{} \executionplanner{} is based on a conversation between a client
-and one or more \execplanner{} services to discover where, how, and when, an \executablething{} can be
-executed.
-
-The conversation starts with the client sending a description of the \executablething{} they want to
-run to the
-\execplanner{} services, which respond with a top level \codeword{YES|NO} answer, and if
+Once the client has built a description of the \executablething{} the user wants to
+execute, it send the description to a set of
+\execplanner{} services.
+Each \execplanner{} service evaluates the task description and responds with a top level
+\codeword{YES|NO} answer, and if
 the answer is \codeword{YES}, a list of offers describing how it
 can be executed on their platform.
 
@@ -449,6 +448,39 @@ can be executed on their platform.
 Request  - Can this platform execute <task> ?
 Response - YES, list of <offer>[]
 \end{lstlisting}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.9\textwidth]{diagrams/request-offers.pdf}
+\caption{Execution request}
+\label{fig:discovery-diag}
+\end{figure}
+
+Each offer contains some metadata about the offer itself,
+including an identifier and an expiry time,
+and an updated copy of the original request.
+
+\begin{lstlisting}[]
+# ExecutionPlanner service response.
+response:
+  offers:
+  - ident: "f185cd47-db9b-4765-a934-bf81ee9d2d34"
+    expiry: "20230918T070521"
+    request:
+      ....
+      ....
+  - ident: "2c89f536-3fff-48f7-943f-bcc5c3225be7"
+    expiry: "20230918T070521"
+    request:
+      ....
+      ....
+  - ident: "4381605c-868a-4a43-8563-1fbbe869341e"
+    expiry: "20230918T070521"
+    request:
+      ....
+      ....
+\end{lstlisting}
+
 
 The client can then choose which of the offers it wants to use and reply
 with a message accepting the offer.
@@ -493,14 +525,15 @@ To support this, the core \datamodel{} defines two fields:
 % https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/example-executable.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-# Details of the executable.
-executable:
+request:
+  # Details of the executable.
+  executable:
 
-  # A URI identifying the type of executable.
-  type: "https://www.purl.org/ivoa.net/executable-types/example"
+    # A URI identifying the type of executable.
+    type: "https://www.purl.org/ivoa.net/executable-types/example"
 
-  # The details, specific to the type of executable.
-  spec: {}
+    # The details, specific to the type of executable.
+    spec: {}
 \end{lstlisting}
 
 \subsubsection{\jupyternotebook{}}
@@ -515,29 +548,31 @@ to fetch the source code for the notebook from.
 % https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/jupyter-notebook.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-# Details of the executable.
-executable:
-  # A URI identifying the type of executable.
-  type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
+request:
+  # Details of the executable.
+  executable:
+    # A URI identifying the type of executable.
+    type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
 
-  # The details, specific to a Jupyter notebook.
-  spec:
-    notebook: "https://.../example.jpnb"
+    # The details, specific to a Jupyter notebook.
+    spec:
+      notebook: "https://.../example.jpnb"
 \end{lstlisting}
 
 It may also include a reference to a \codeword{requirements.txt} file that describes any additional \python{}
 libraries needed to run the notebook.
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-# Details of the executable.
-executable:
-  # A URI identifying the type of executable.
-  type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
+request:
+  # Details of the executable.
+  executable:
+    # A URI identifying the type of executable.
+    type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
 
-  # The details, specific to a Jupyter notebook.
-  spec:
-    notebook: "https://.../example.jpnb"
-    requirements: "https://.../requirements.txt"
+    # The details, specific to a Jupyter notebook.
+    spec:
+      notebook: "https://.../example.jpnb"
+      requirements: "https://.../requirements.txt"
 \end{lstlisting}
 
 \subsubsection{\ocicontainer{}}
@@ -550,18 +585,19 @@ the container is built for, and where to fetch the binary image from.
 % https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/oci-container.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-# Details of the executable.
-executable:
-  # A URI identifying the type of executable.
-  type: "https://www.purl.org/ivoa.net/executable-types/oci-container"
+request:
+  # Details of the executable.
+  executable:
+    # A URI identifying the type of executable.
+    type: "https://www.purl.org/ivoa.net/executable-types/oci-container"
 
-  # The details, specific to an OCI container.
-  spec:
-    os:    "linux"
-    arch:  "amd64"
-    repo:  "ghcr.io"
-    image: "ivoa/oligia-webtop"
-    version: "ubuntu-2022.01.13"
+    # The details, specific to an OCI container.
+    spec:
+      os:    "linux"
+      arch:  "amd64"
+      repo:  "ghcr.io"
+      image: "ivoa/oligia-webtop"
+      version: "ubuntu-2022.01.13"
 \end{lstlisting}
 
 This pattern of using a \codeword{type} URI to identify the type of thing, and then a
@@ -606,14 +642,15 @@ does not need to include any resource details.
 
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-# Details of the executable.
-executable:
-  # A URI identifying the type of executable.
-  type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
+request:
+  # Details of the executable.
+  executable:
+    # A URI identifying the type of executable.
+    type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
 
-  # The details, specific to a Jupyter notebook.
-  spec:
-    notebook: "https://.../example.jpnb"
+    # The details, specific to a Jupyter notebook.
+    spec:
+      notebook: "https://.../example.jpnb"
 \end{lstlisting}
 
 As long as this \jupyternotebook{} only needs a minimal set of resources to run, e.g.
@@ -633,31 +670,32 @@ of \gpu{}.
 % https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/nvidia-ad104.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-# Details of the executable.
-executable:
-  # A URI identifying the type of executable.
-  type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
-  # The details, specific to a Jupyter notebook.
-  spec:
-    notebook: "https://.../example.jpnb"
-
-# Details of the resources needed.
-resources:
-  compute:
-  - name: "compute-001"
-    type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
+request:
+  # Details of the executable.
+  executable:
+    # A URI identifying the type of executable.
+    type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
+    # The details, specific to a Jupyter notebook.
     spec:
-      extras:
-      - name: "nvidia-gpu"
-        # A URI identifying the type of GPU.
-        type: "https://tinyurl.com/nvidia-ad104"
+      notebook: "https://.../example.jpnb"
+
+  # Details of the resources needed.
+  resources:
+    compute:
+    - name: "compute-001"
+      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
+      spec:
+        extras:
+        - name: "nvidia-gpu"
+          # A URI identifying the type of GPU.
+          type: "https://tinyurl.com/nvidia-ad104"
 \end{lstlisting}
 
 With this detail added to the request, platforms that are not able to provide this kind of \gpu{}
 would simply reply \codeword{NO}.
 
 \begin{lstlisting}[]
-Request  - Can this platform provide a 'NVIDIA AD104 GPU' ?
+Request  - Can this platform provide 'NVIDIA AD104 GPU' ?
 Response - NO
 \end{lstlisting}
 
@@ -683,21 +721,24 @@ e.g. the minimum amount of memory and number of shaders.
 % https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/nvidia-ad104.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-  ....
-# Details of the resources needed.
-resources:
-  compute:
-  - name: "compute-001"
-    type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
-    spec:
-      extras:
-      - name: "nvidia-gpu"
-        # A URI identifying the type.
-        type: "https://tinyurl.com/nvidia-ad104"
-        # The details, specific to a 'NVIDIA AD104 GPU'.
-        spec:
-          minmemory: 20
-          minshaders: 6144
+request:
+  # Details of the executable.
+  executable:
+    ....
+  # Details of the resources needed.
+  resources:
+    compute:
+    - name: "compute-001"
+      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
+      spec:
+        extras:
+        - name: "nvidia-gpu"
+          # A URI identifying the type.
+          type: "https://tinyurl.com/nvidia-ad104"
+          # The details, specific to a 'NVIDIA AD104 GPU'.
+          spec:
+            minmemory: 20
+            minshaders: 6144
 \end{lstlisting}
 
 This pattern make it easy for projects to add new types of compute resources to their
@@ -710,21 +751,24 @@ and they can add their own type specific details to the \codeword{spec} section.
 % https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/xilinx-vu19p.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-  ....
-# Details of the resources needed.
-resources:
-  compute:
-  - name: "compute-001"
-    type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
-    spec:
-      extras:
-      - name: "Xilinx FPGA"
-        # A URI identifying the type.
-        type: "https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p"
-        # The details, specific to a 'Xilinx FPGA'.
-        spec:
-          logicCells: 8938
-          DSPslices:  3840
+request:
+  # Details of the executable.
+  executable:
+    ....
+  # Details of the resources needed.
+  resources:
+    compute:
+    - name: "compute-001"
+      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
+      spec:
+        extras:
+        - name: "Xilinx FPGA"
+          # A URI identifying the type.
+          type: "https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p"
+          # The details, specific to a 'Xilinx FPGA'.
+          spec:
+            logicCells: 8938
+            DSPslices:  3840
 \end{lstlisting}
 
 Note that in both these examples, the URL used to identify the \codeword{type}
@@ -778,15 +822,18 @@ to be able to perform its calculations, then this can be specified in the comput
 
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-  ....
-# Details of the resources needed.
-resources:
-  compute:
-  - name: "compute-001"
-    type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
-    spec:
-      mincores:   8
-      minmemory: 16
+request:
+  # Details of the executable.
+  executable:
+    ....
+  # Details of the resources needed.
+  resources:
+    compute:
+    - name: "compute-001"
+      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
+      spec:
+        mincores:   8
+        minmemory: 16
 \end{lstlisting}
 
 All of the \datamodel{} elements for specifying the size or number of resources are defined
@@ -804,17 +851,20 @@ then it can indicate this by specifying higher maximum values in its response.
 
 \begin{lstlisting}[]
 # ExecutionPlanner service response.
-  ....
-# Details of the resources offered.
-resources:
-  compute:
-  - name: "compute-001"
-    type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
-    spec:
-      mincores:   8
-      maxcores:  16
-      minmemory: 16
-      maxmemory: 32
+response:
+  # Details of the executable.
+  executable:
+    ....
+  # Details of the resources offered.
+  resources:
+    compute:
+    - name: "compute-001"
+      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
+      spec:
+        mincores:   8
+        maxcores:  16
+        minmemory: 16
+        maxmemory: 32
 \end{lstlisting}
 
 This response represents an offer to start with a minimum of 8 \cpu{} cores and 16G of memory
@@ -836,17 +886,20 @@ then the service can represent that by setting the minimum values in its offer t
 
 \begin{lstlisting}[]
 # ExecutionPlanner service response.
-  ....
-# Details of the resources offered.
-resources:
-  compute:
-  - name: "compute-001"
-    type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
-    spec:
-      mincores:  16
-      maxcores:  16
-      minmemory: 24
-      maxmemory: 24
+response:
+  # Details of the executable.
+  executable:
+    ....
+  # Details of the resources offered.
+  resources:
+    compute:
+    - name: "compute-001"
+      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
+      spec:
+        mincores:  16
+        maxcores:  16
+        minmemory: 24
+        maxmemory: 24
 \end{lstlisting}
 
 This response represents an offer to start with a fixed allocation of 16 \cpu{} cores and 24G of memory.
@@ -896,15 +949,18 @@ then this can be specified in the request by defining an ephemeral storage resou
 % https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/ephemeral-storage.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-  ....
-# Details of the resources needed.
-resources:
-  ....
-  storage:
-  - name: "scratch-space"
-    type: "https://www.purl.org/ivoa.net/storage-types/ephemeral-storage"
-    spec:
-      size: 1024
+request:
+  # Details of the executable.
+  executable:
+    ....
+  # Details of the resources needed.
+  resources:
+    ....
+    storage:
+    - name: "scratch-space"
+      type: "https://www.purl.org/ivoa.net/storage-types/ephemeral-storage"
+      spec:
+        size: 1024
 \end{lstlisting}
 
 To enable the \jupyternotebook{} to access this storage, we need to add a
@@ -918,23 +974,26 @@ storage resource.
 
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-  ....
-# Details of the resources needed.
-resources:
-  ....
-  compute:
-  - name: "compute-001"
+request:
+  # Details of the executable.
+  executable:
     ....
-    volumes:
-    - name: "temp-volume"
-      resource: "scratch-space"
-      path: "/temp"
-      mode: "rw"
-  storage:
-  - name: "scratch-space"
-    type: "https://www.purl.org/ivoa.net/storage-types/ephemeral-storage"
-    spec:
-      size: 1024
+  # Details of the resources needed.
+  resources:
+    ....
+    compute:
+    - name: "compute-001"
+      ....
+      volumes:
+      - name: "temp-volume"
+        resource: "scratch-space"
+        path: "/temp"
+        mode: "rw"
+    storage:
+    - name: "scratch-space"
+      type: "https://www.purl.org/ivoa.net/storage-types/ephemeral-storage"
+      spec:
+        size: 1024
 \end{lstlisting}
 
 This pattern of separating the details of how a storage resource is implemented
@@ -954,24 +1013,27 @@ and a corresponding volume mount inside the compute resource.
 % https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/amazon-s3.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-  ....
-# Details of the resources needed.
-resources:
-  ....
-  compute:
-  - name: "compute-001"
+request:
+  # Details of the executable.
+  executable:
     ....
-    volumes:
-    - name: "data-volume"
-      resource: "source-data"
-      path: "/data"
-      mode: "r"
-  storage:
-  - name: "source-data"
-    type: "https://www.purl.org/ivoa.net/storage-types/amazon-s3"
-    spec:
-      endpoint: "https://.../echo"
-      bucket: "example-data"
+  # Details of the resources needed.
+  resources:
+    ....
+    compute:
+    - name: "compute-001"
+      ....
+      volumes:
+      - name: "data-volume"
+        resource: "source-data"
+        path: "/data"
+        mode: "r"
+    storage:
+    - name: "source-data"
+      type: "https://www.purl.org/ivoa.net/storage-types/amazon-s3"
+      spec:
+        endpoint: "https://.../echo"
+        bucket: "example-data"
 \end{lstlisting}
 
 Again, this pattern of separating how the data is stored outside the system
@@ -988,25 +1050,28 @@ allocated by the system, and a corresponding volume mount inside the compute res
 % https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/persistent-storage.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-  ....
-# Details of the resources needed.
-resources:
-  ....
-  compute:
-  - name: "compute-001"
+request:
+  # Details of the executable.
+  executable:
     ....
-    volumes:
-    - name: "results-volume"
-      resource: "results-storage"
-      path: "/results"
-      mode: "rw"
-  storage:
-  - name: "results-storage"
-    type: "https://www.purl.org/ivoa.net/storage-types/persistent-storage"
-    spec:
-      lifecycle: "managed"
-      minlifetime: "1D"
-      minsize: 100
+  # Details of the resources needed.
+  resources:
+    ....
+    compute:
+    - name: "compute-001"
+      ....
+      volumes:
+      - name: "results-volume"
+        resource: "results-storage"
+        path: "/results"
+        mode: "rw"
+    storage:
+    - name: "results-storage"
+      type: "https://www.purl.org/ivoa.net/storage-types/persistent-storage"
+      spec:
+        lifecycle: "managed"
+        minlifetime: "1D"
+        minsize: 100
 \end{lstlisting}
 
 By setting the storage resource type to \codeword{https://.../persistent},
@@ -1027,30 +1092,33 @@ can access it after the \job{} has completed.
 % https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/rucio-storage.md
 \begin{lstlisting}[]
 # ExecutionPlanner service response.
-  ....
-# Details of the resources offered.
-resources:
-  ....
-  compute:
-  - name: "compute-001"
+response:
+  # Details of the executable.
+  executable:
     ....
-    volumes:
-    - name: "results-volume"
-      resource: "results-storage"
-      path: "/results"
-      mode: "rw"
-  storage:
-  - name: "results-storage"
-    type: "https://www.purl.org/ivoa.net/storage-types/rucio-storage"
-    spec:
-      lifecycle: "managed"
-      minlifetime: "1D"
-      maxlifetime: "5D"
-      minsize:  100
-      maxsize:  200
-      endpoint: "http://...."
-      domain: "Project 51"
-      objectid: "cdc78e7d-8032-497e-9a5b-01c720ea2223"
+  # Details of the resources offered.
+  resources:
+    ....
+    compute:
+    - name: "compute-001"
+      ....
+      volumes:
+      - name: "results-volume"
+        resource: "results-storage"
+        path: "/results"
+        mode: "rw"
+    storage:
+    - name: "results-storage"
+      type: "https://www.purl.org/ivoa.net/storage-types/rucio-storage"
+      spec:
+        lifecycle: "managed"
+        minlifetime: "1D"
+        maxlifetime: "5D"
+        minsize:  100
+        maxsize:  200
+        endpoint: "http://...."
+        domain: "Project 51"
+        objectid: "cdc78e7d-8032-497e-9a5b-01c720ea2223"
 \end{lstlisting}
 
 In this example, the client requested at least 100G of storage available for 1 day
@@ -1080,24 +1148,27 @@ If the client already knows where it wants the data to be stored, for example at
 % https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/vospace-storage.md
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-  ....
-# Details of the resources needed.
-resources:
-  ....
-  compute:
-  - name: "compute-001"
+request:
+  # Details of the executable.
+  executable:
     ....
-    volumes:
+  # Details of the resources needed.
+  resources:
+    ....
+    compute:
+    - name: "compute-001"
+      ....
+      volumes:
+      - name: "results"
+        path: "/results"
+        mode: "rw"
+    storage:
     - name: "results"
-      path: "/results"
-      mode: "rw"
-  storage:
-  - name: "results"
-    type: "https://www.purl.org/ivoa.net/storage-types/vospace-storage"
-    spec:
-      endpoint: "http://...."
-      path: "/experiment-21/results"
-      lifecycle: "unmanaged"
+      type: "https://www.purl.org/ivoa.net/storage-types/vospace-storage"
+      spec:
+        endpoint: "http://...."
+        path: "/experiment-21/results"
+        lifecycle: "unmanaged"
 \end{lstlisting}
 
 It is up to the \execplanner{} service to work out if it is able to access the
@@ -1117,19 +1188,22 @@ data in an external resource.
 
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-  ....
-# Details of the resources needed.
-resources:
-  ....
-  storage:
-  - name: "results"
-    type: "https://www.purl.org/ivoa.net/storage-types/vospace-storage"
-    spec:
-      endpoint: "http://...."
-      type: "container"
-      path: "/experiment-21/results"
-      lifecycle: "managed"
-      maxlifetime: "2D"
+request:
+  # Details of the executable.
+  executable:
+    ....
+  # Details of the resources needed.
+  resources:
+    ....
+    storage:
+    - name: "results"
+      type: "https://www.purl.org/ivoa.net/storage-types/vospace-storage"
+      spec:
+        endpoint: "http://...."
+        type: "container"
+        path: "/experiment-21/results"
+        lifecycle: "managed"
+        maxlifetime: "2D"
 \end{lstlisting}
 
 In this example, the client is specifying an external \vospace{} location to store the data,
@@ -1167,13 +1241,15 @@ information to identify the authenticated identity.
 
 \begin{lstlisting}[]
 # ExecutionPlanner server response.
-....
-authentication:
-- name: "http-request"
-  type: "https://.../oidc"
-  mode: "implicit"
-  spec:
-    subject: "user@domain"
+response:
+  ....
+  # Details of the authentication offered.
+  authentication:
+  - name: "http-request"
+    type: "https://.../oidc"
+    mode: "implicit"
+    spec:
+      subject: "user@domain"
 \end{lstlisting}
 
 If the client uses an unknown authentication method in the \webservice{} call and
@@ -1191,13 +1267,17 @@ For example, to explicitly include a basic authentication with username and pass
 in the request:
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-....
-authentication:
-- name: "basic-auth"
-  type: "https://.../basic"
-  spec:
-    username: "..."
-    password: "..."
+request:
+  # Details of the executable.
+  executable:
+    ....
+  # Additional authentication methods
+  authentication:
+  - name: "basic-auth"
+    type: "https://.../basic"
+    spec:
+      username: "..."
+      password: "..."
 \end{lstlisting}
 
 This pattern allows the client to supply multiple authentication methods
@@ -1210,20 +1290,24 @@ For example, if the client supplies both basic and token authentication
 in the request:
 \begin{lstlisting}[]
 # ExecutionPlanner client request.
-....
-authentication:
-- name: "basic-auth"
-  type: "https://.../basic"
-  mode: "explicit"
-  spec:
-    username: "..."
-    password: "..."
-- name: "token-auth"
-  type: "https://.../token"
-  mode: "explicit"
-  spec:
-    subject: "user@domain"
-    token: "..."
+request:
+  # Details of the executable.
+  executable:
+    ....
+  # Additional authentication methods
+  authentication:
+  - name: "basic-auth"
+    type: "https://.../basic"
+    mode: "explicit"
+    spec:
+      username: "..."
+      password: "..."
+  - name: "token-auth"
+    type: "https://.../token"
+    mode: "explicit"
+    spec:
+      subject: "user@domain"
+      token: "..."
 \end{lstlisting}
 
 If the \execplanner{} service only accepts the token authentication, it MUST
@@ -1232,13 +1316,15 @@ based authentication in its reply.
 
 \begin{lstlisting}[]
 # ExecutionPlanner server response.
-....
-authentication:
-- name: "token-auth"
-  type: "https://.../rfc7519"
-  mode: "explicit"
-  spec:
-    subject: "user@domain"
+response:
+  ....
+  # Details of the authentication offered.
+  authentication:
+  - name: "token-auth"
+    type: "https://.../rfc7519"
+    mode: "explicit"
+    spec:
+      subject: "user@domain"
 \end{lstlisting}
 
 If the \execplanner{} service does not recognise or support any of the authentication methods
