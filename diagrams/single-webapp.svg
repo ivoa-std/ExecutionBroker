@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.2" width="72.42mm" height="48.03mm" viewBox="1959 8999 7242 4803" preserveAspectRatio="xMidYMid" fill-rule="evenodd" stroke-width="28.222" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" xmlns:ooo="http://xml.openoffice.org/svg/export" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:presentation="http://sun.com/xmlns/staroffice/presentation" xmlns:smil="http://www.w3.org/2001/SMIL20/" xmlns:anim="urn:oasis:names:tc:opendocument:xmlns:animation:1.0" xml:space="preserve">
+<svg version="1.2" width="71.89mm" height="46.02mm" viewBox="1959 9000 7189 4602" preserveAspectRatio="xMidYMid" fill-rule="evenodd" stroke-width="28.222" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" xmlns:ooo="http://xml.openoffice.org/svg/export" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:presentation="http://sun.com/xmlns/staroffice/presentation" xmlns:smil="http://www.w3.org/2001/SMIL20/" xmlns:anim="urn:oasis:names:tc:opendocument:xmlns:animation:1.0" xml:space="preserve">
  <defs>
   <font id="EmbeddedFont_1" horiz-adv-x="2048">
    <font-face font-family="Liberation Sans embedded" units-per-em="2048" font-weight="normal" font-style="normal" ascent="1852" descent="423"/>
@@ -158,33 +158,27 @@
      <path fill="none" stroke="rgb(128,128,128)" d="M 5061,12750 L 5062,12750 C 5053,12750 5045,12752 5037,12757 5030,12761 5024,12767 5020,12774 5015,12782 5013,12790 5013,12799 L 5013,13551 5013,13551 C 5013,13560 5015,13568 5020,13576 5024,13583 5030,13589 5037,13593 5045,13598 5053,13600 5062,13600 L 5256,13600 5256,13600 C 5265,13600 5273,13598 5281,13593 5288,13589 5294,13583 5298,13576 5303,13568 5305,13560 5305,13551 L 5305,12798 5305,12799 5305,12799 C 5305,12790 5303,12782 5298,12774 5294,12767 5288,12761 5281,12757 5273,12752 5265,12750 5256,12750 L 5061,12750 Z"/>
     </g>
    </g>
-   <g class="com.sun.star.drawing.CustomShape">
-    <g id="id15">
-     <rect class="BoundingBox" stroke="none" fill="none" x="2001" y="8999" width="7200" height="4803"/>
-     <path fill="none" stroke="rgb(128,128,128)" d="M 5601,13800 L 2002,13800 2002,9000 9199,9000 9199,13800 5601,13800 Z"/>
-    </g>
-   </g>
    <g class="TextShape">
-    <g id="id16">
+    <g id="id15">
      <rect class="BoundingBox" stroke="none" fill="none" x="2003" y="9000" width="5598" height="807"/>
      <text class="SVGTextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="494px" font-weight="400"><tspan class="TextPosition" x="2253" y="9574"><tspan fill="rgb(0,0,0)" stroke="none">Single web application</tspan></tspan></tspan></text>
     </g>
    </g>
    <g class="TextShape">
-    <g id="id17">
+    <g id="id16">
      <rect class="BoundingBox" stroke="none" fill="none" x="5205" y="12600" width="1021" height="608"/>
      <text class="SVGTextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="318px" font-weight="400"><tspan class="TextPosition" x="5455" y="13013"><tspan fill="rgb(0,0,0)" stroke="none">API</tspan></tspan></tspan></text>
     </g>
    </g>
    <g class="TextShape">
-    <g id="id18">
+    <g id="id17">
      <rect class="BoundingBox" stroke="none" fill="none" x="6600" y="11085" width="2548" height="570"/>
      <text class="SVGTextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="282px" font-weight="400"><tspan class="TextPosition" x="6850" y="11468"><tspan fill="rgb(0,0,0)" stroke="none">implementation</tspan></tspan></tspan></text>
     </g>
    </g>
    <g class="Group">
     <g class="com.sun.star.drawing.CustomShape">
-     <g id="id19">
+     <g id="id18">
       <rect class="BoundingBox" stroke="none" fill="none" x="8223" y="11573" width="769" height="730"/>
       <path fill="rgb(207,231,229)" stroke="none" d="M 8607,11574 C 8398,11574 8224,11615 8224,11664 L 8224,12210 C 8224,12259 8398,12301 8607,12301 8815,12301 8990,12259 8990,12210 L 8990,11664 C 8990,11615 8815,11574 8607,11574 L 8607,11574 Z"/>
       <path fill="none" stroke="rgb(128,128,128)" d="M 8607,11574 C 8398,11574 8224,11615 8224,11664 L 8224,12210 C 8224,12259 8398,12301 8607,12301 8815,12301 8990,12259 8990,12210 L 8990,11664 C 8990,11615 8815,11574 8607,11574 Z"/>
@@ -194,14 +188,14 @@
     </g>
     <g class="Group">
      <g class="com.sun.star.drawing.CustomShape">
-      <g id="id20">
+      <g id="id19">
        <rect class="BoundingBox" stroke="none" fill="none" x="7507" y="11845" width="578" height="456"/>
        <path fill="rgb(207,231,229)" stroke="none" d="M 7796,12299 L 7508,12299 7508,11846 8083,11846 8083,12299 7796,12299 Z"/>
        <path fill="none" stroke="rgb(128,128,128)" d="M 7796,12299 L 7508,12299 7508,11846 8083,11846 8083,12299 7796,12299 Z"/>
       </g>
      </g>
      <g class="com.sun.star.drawing.CustomShape">
-      <g id="id21">
+      <g id="id20">
        <rect class="BoundingBox" stroke="none" fill="none" x="7507" y="11563" width="578" height="169"/>
        <path fill="rgb(207,231,229)" stroke="none" d="M 7796,11730 L 7508,11730 7508,11564 8083,11564 8083,11730 7796,11730 Z"/>
        <path fill="none" stroke="rgb(128,128,128)" d="M 7796,11730 L 7508,11730 7508,11564 8083,11564 8083,11730 7796,11730 Z"/>
@@ -210,14 +204,14 @@
     </g>
     <g class="Group">
      <g class="com.sun.star.drawing.CustomShape">
-      <g id="id22">
+      <g id="id21">
        <rect class="BoundingBox" stroke="none" fill="none" x="6833" y="11845" width="575" height="456"/>
        <path fill="rgb(207,231,229)" stroke="none" d="M 7120,12299 L 6834,12299 6834,11846 7406,11846 7406,12299 7120,12299 Z"/>
        <path fill="none" stroke="rgb(128,128,128)" d="M 7120,12299 L 6834,12299 6834,11846 7406,11846 7406,12299 7120,12299 Z"/>
       </g>
      </g>
      <g class="com.sun.star.drawing.CustomShape">
-      <g id="id23">
+      <g id="id22">
        <rect class="BoundingBox" stroke="none" fill="none" x="6833" y="11563" width="575" height="169"/>
        <path fill="rgb(207,231,229)" stroke="none" d="M 7120,11730 L 6834,11730 6834,11564 7406,11564 7406,11730 7120,11730 Z"/>
        <path fill="none" stroke="rgb(128,128,128)" d="M 7120,11730 L 6834,11730 6834,11564 7406,11564 7406,11730 7120,11730 Z"/>
@@ -226,30 +220,29 @@
     </g>
    </g>
    <g class="TextShape">
-    <g id="id24">
+    <g id="id23">
      <rect class="BoundingBox" stroke="none" fill="none" x="5205" y="10701" width="1021" height="608"/>
      <text class="SVGTextShape"><tspan class="TextParagraph" font-family="Liberation Sans, sans-serif" font-size="318px" font-weight="400"><tspan class="TextPosition" x="5455" y="11114"><tspan fill="rgb(0,0,0)" stroke="none">API</tspan></tspan></tspan></text>
     </g>
    </g>
    <g class="com.sun.star.drawing.LineShape">
-    <g id="id25">
+    <g id="id24">
      <rect class="BoundingBox" stroke="none" fill="none" x="5205" y="11282" width="1897" height="720"/>
      <path fill="none" stroke="rgb(0,0,0)" d="M 7100,12000 L 5380,11372"/>
      <path fill="rgb(0,0,0)" stroke="none" d="M 5359,11471 L 5205,11308 5427,11283 5359,11471 Z"/>
     </g>
    </g>
    <g class="com.sun.star.drawing.LineShape">
-    <g id="id26">
+    <g id="id25">
      <rect class="BoundingBox" stroke="none" fill="none" x="5205" y="12099" width="1897" height="1109"/>
      <path fill="none" stroke="rgb(0,0,0)" d="M 7100,12100 L 5366,13113"/>
      <path fill="rgb(0,0,0)" stroke="none" d="M 5428,13192 L 5205,13207 5327,13020 5428,13192 Z"/>
     </g>
    </g>
    <g class="com.sun.star.drawing.CustomShape">
-    <g id="id27">
-     <rect class="BoundingBox" stroke="none" fill="none" x="2099" y="9799" width="2703" height="2603"/>
+    <g id="id26">
+     <rect class="BoundingBox" stroke="none" fill="none" x="2100" y="9800" width="2701" height="2601"/>
      <path fill="rgb(255,255,255)" fill-opacity="0.502" stroke="rgb(255,255,255)" stroke-opacity="0.502" d="M 3450,12400 L 2100,12400 2100,9800 4800,9800 4800,12400 3450,12400 Z"/>
-     <path fill="none" stroke="rgb(128,128,128)" d="M 3450,12400 L 2100,12400 2100,9800 4800,9800 4800,12400 3450,12400 Z"/>
     </g>
    </g>
   </g>
