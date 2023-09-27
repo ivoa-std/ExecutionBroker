@@ -359,65 +359,6 @@ This can include things like number of \cpu{} cores and amount of memory it need
 whether it needs a \gpu{}, the location of the input data, the storage space needed to perform
 the calculation and the storage space needed to save the results.
 
-%TODO Move this to data model
-\subsection{Type URIs and specifications}
-\label{type-and-spec}
-
-Several parts of the \ivoa{} \executionplanner{} \datamodel{} follow a common pattern, using a URI
-to identify a \codeword{type} followed a \codeword{spec} section to fill in the details.
-This pattern is adopted from a similar pattern used by \kubernetes{} to describe components
-deployed in the system.
-
-\begin{lstlisting}[]
-# A URI to identify the type of thing.
-type: "uri:type-A"
-
-# Type specific details about the thing.
-spec:
-  property-one: "...."
-  property-two: "...."
-  ....
-\end{lstlisting}
-
-However, the \executionplanner{} \datamodel{} specifically recomends using a long lasting resolvable
-HTTP URL as the type identifier.
-
-\begin{lstlisting}[]
-# A URL to identify the type of thing.
-type: "http://www.example.com/type-A"
-
-# Type specific details about the thing.
-spec:
-  property-one: "...."
-  property-two: "...."
-  ....
-\end{lstlisting}
-
-The reasoning behind this is that if a service provider notices several clients are requesting
-\textit{'encabulation'} on their compute nodes, the service provider may not know what this means.
-However, if we use a resolvable URL to identify the type, a service provider can use it to find a
-human readable description\footurl{https://tinyurl.com/encabulation} and decide whether they want
-to provide it on their platform.
-
-To the \webservice{} implementation, both of these requests are just a simple string comparison against a
-dictionary of known terms:
-
-\begin{lstlisting}[]
-Request  - Can you provide 'encabulation' ?
-Response - YES|NO
-\end{lstlisting}
-
-\begin{lstlisting}[]
-Request  - Can you provide 'https://tinyurl.com/encabulation' ?
-Response - YES|NO
-\end{lstlisting}
-
-The second form provides a simple mechanism for linking the type identifier to a human readable description.
-
-While it is possible to use \ivoa{} registry URIs to identify types, this specification
-recomends using a simple HTTP URLs. This lowers the barrier to entry and makes it simpler for the end user
-to resolve the URL into a description.
-
 \section{Service interaction}
 \label{service-interaction}
 
@@ -469,7 +410,7 @@ The players:
 \end{itemize}
 
 \subsection{Execution planner}
-\label{execution-planner}
+\label{execution-planner-desc}
 
 Once the client has built a description of the \executablething{} the user wants to
 execute, it send the description to one or more
@@ -542,7 +483,7 @@ service providing the front-end for multiple \execworker{} services.
 \includegraphics[width=0.9\textwidth]{diagrams/micro-services.pdf}
 
 \subsection{Execution worker}
-\label{execution-worker}
+\label{execution-worker-desc}
 
 The client can use the \workerjob{} details in the \execplanner{} response to contact
 the \execworker{} service and track its status.
@@ -2210,7 +2151,7 @@ Timeline of request, offer and accept.
 \end{itemize}
 
 \subsection{ExecutionPlanner}
-\label{execution-planner}
+\label{execution-planner-spec}
 
 Simple \codeword{POST} REST webservice.
 Single parameter, the \job{} description.
@@ -2219,7 +2160,7 @@ Response contains a simple \codeword{YES} or \codeword{NO}
 and a list of offers for how the \job{} can be executed on this platform.
 
 \subsection{ExecutionWorker}
-\label{execution-worker}
+\label{execution-worker-spec}
 
 Derived from IVOA UWS, using a similar \datamodel{}.
 
@@ -2237,35 +2178,161 @@ The offer from the \execplanner{} will contain the URL \job{} in the \execworker
 
 \pagebreak
 
-\subsection{The data model}
+\section{The data model}
 \label{datamodel}
 
-    ....
-    ....
+The following section describes the core \datamodel{} using a YAML syntax
+to outline the structure and comments to describe the elements.
 
-\subsubsection{Executable}
+The intention is to define a portable \datamodel{} that can be serialised
+into a number of different formats, including YAML, JSON and XML.
+
+\subsection{Type URIs and specifications}
+\label{type-and-spec}
+
+Several parts of the \ivoa{} \executionplanner{} \datamodel{} follow a common pattern, using a URI
+to identify a \codeword{type} followed a \codeword{spec} section to fill in the details.
+This pattern is adopted from a similar pattern used by \kubernetes{}.
+
+\begin{lstlisting}[]
+# A URI to identify the type of thing.
+type: "uri:type-a"
+
+# Type specific details about the thing.
+spec:
+  name: "...."
+  size: "...."
+  ....
+\end{lstlisting}
+
+However, the \executionplanner{} \datamodel{} specifically recomends using a long lasting resolvable
+HTTP URL as the type identifier.
+
+\begin{lstlisting}[]
+# A URL to identify the type of thing.
+type: "http://www.example.com/type-a"
+
+# Type specific details about the thing.
+spec:
+  name: "...."
+  size: "...."
+  ....
+\end{lstlisting}
+
+The reasoning behind this is that if a service provider notices several clients are requesting
+\textit{'encabulation'} on their compute nodes, the service provider may not know what this means.
+However, if we use a resolvable URL to identify the type, a service provider can use it to find a
+human readable description\footurl{https://tinyurl.com/encabulation} and decide whether they want
+to provide it on their platform.
+
+To the \webservice{} implementation, both of these requests are just a simple string comparison against a
+dictionary of known terms:
+
+\begin{lstlisting}[]
+Request  - Can you provide 'encabulation' ?
+Response - YES|NO
+\end{lstlisting}
+
+\begin{lstlisting}[]
+Request  - Can you provide 'https://tinyurl.com/encabulation' ?
+Response - YES|NO
+\end{lstlisting}
+
+The second form provides a simple mechanism for linking the type identifier to a human readable description.
+
+While it is possible to use \ivoa{} registry URIs to identify types, this specification
+recomends using a simple HTTP URLs. This lowers the barrier to entry and makes it simpler for the end user
+to resolve the URL into a description.
+
+\subsection{Executable}
 \label{datamodel-executable}
 
-\subsubsection{Resources}
+....
+....
+
+\subsection{Resources}
 \label{datamodel-resources}
 
-\subsubsection{Compute resources}
+....
+....
+
+\subsection{Compute resources}
 \label{datamodel-compute-resources}
 
-\subsubsection{Storage resources}
+....
+....
+
+\subsection{Storage resources}
 \label{datamodel-storage-resources}
 
-\subsubsection{Authentication}
+....
+....
+
+\subsection{Authentication}
 \label{datamodel-authentication}
 
-\subsubsection{DateTime}
+....
+....
+
+\subsection{DateTime}
 \label{datamodel-datetime}
 
-\subsubsection{Triggers}
+....
+....
+
+\subsection{Triggers}
 \label{datamodel-triggers}
 
-\subsubsection{Callouts}
+....
+....
+
+\subsection{Callouts}
 \label{datamodel-callouts}
+
+....
+....
+
+\subsection{Extensions}
+\label{datamodel-extensions}
+
+....
+....
+
+\subsubsection{Jupyter notebook}
+\label{datamodel-jupyter-notebook}
+
+....
+....
+
+\subsubsection{Zeppelin notebook}
+\label{datamodel-zeppelin-notebook}
+
+....
+....
+
+\subsubsection{OCI container}
+\label{datamodel-oci-container}
+
+....
+....
+
+\subsubsection{Singularity container}
+\label{datamodel-singularity-container}
+
+....
+....
+
+\subsubsection{nvidia gpu}
+\label{datamodel-nvidia-gpu}
+
+....
+....
+
+\subsubsection{nvidia gpu}
+\label{datamodel-nvidia-gpu}
+
+....
+....
 
 
 \pagebreak
