@@ -1391,9 +1391,9 @@ request:
 \end{lstlisting}
 
 This pattern allows the client to supply multiple authentication methods
-in the request. The \execplanner{} service SHOULD select the authentication
+in the request. The \execplanner{} service can select the authentication
 methods it accepts from those in the request and include the name and
-type of the methods in its reply along with enough non-secret
+type of the methods in its offer along with enough non-secret
 information to identify the authenticated identity.
 
 For example, if the client supplies both basic and token authentication
@@ -1416,13 +1416,12 @@ request:
     type: "https://.../token"
     mode: "explicit"
     spec:
-      subject: "user@domain"
       token: "..."
 \end{lstlisting}
 
-If the \execplanner{} service only accepts the token authentication, it MUST
-skip the basic authentication and only include the name and type of the token
-based authentication in its reply.
+If the \execplanner{} service only accepts the token authentication, it should
+skip the basic authentication and only include a reference to the token
+based authentication in its offer.
 
 \begin{lstlisting}[]
 # ExecutionPlanner server response.
@@ -1434,7 +1433,7 @@ response:
     type: "https://.../rfc7519"
     mode: "explicit"
     spec:
-      subject: "user@domain"
+      ....
 \end{lstlisting}
 
 If the \execplanner{} service does not recognise or support any of the authentication methods
@@ -1445,8 +1444,8 @@ Request  - Can I authenticate with <unknown method, unknown method, or unknown m
 Response - NO
 \end{lstlisting}
 
-The result is that an offer made by an \execplanner{} service SHOULD include details
-of all the authenticated identities that are allowed to use the offer.
+The result is that an offer made by an \execplanner{} service should only include details
+of the authenticated identities that are allowed to use the offer.
 
 If the original question is equivalent to:
 \textit{"Do \textbf{these identities} have sufficient access rights and quota to run this \jupyternotebook{}?"}
