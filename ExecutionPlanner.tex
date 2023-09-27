@@ -359,6 +359,7 @@ This can include things like number of \cpu{} cores and amount of memory it need
 whether it needs a \gpu{}, the location of the input data, the storage space needed to perform
 the calculation and the storage space needed to save the results.
 
+%TODO Move this to data model
 \subsection{Type URIs and specifications}
 \label{type-and-spec}
 
@@ -597,7 +598,7 @@ This is because any workflow steps that follow after this step, will depend not 
 completed, but they also need the \teardown{} data transfers to complete so that the results from this step
 are in the right place for the next step to be able to access them.
 
-\subsection{The \executable{}}
+\section{The \executable{}}
 \label{executable}
 
 At the simplest level the client just needs to check whether a platform is able to execute a particular
@@ -633,7 +634,7 @@ request:
     spec: {}
 \end{lstlisting}
 
-\subsubsection{\jupyternotebook{}}
+\subsection{\jupyternotebook{}}
 \label{jupyternotebook}
 The \datamodel{} for each type of \executable{} defines the metadata needed to
 describe that particular type.
@@ -672,7 +673,7 @@ request:
       requirements: "https://.../requirements.txt"
 \end{lstlisting}
 
-\subsubsection{\ocicontainer{}}
+\subsection{\ocicontainer{}}
 \label{ocicontainer}
 The \datamodel{} for an \ocicontainer{} needs to describe what operating system and system architecture
 the container is built for, and where to fetch the binary image from.
@@ -716,7 +717,7 @@ Request  - Can this platform execute <unkown-type> ?
 Response - NO
 \end{lstlisting}
 
-\subsection{Resources}
+\section{Resources}
 \label{resources}
 
 At the next level the client may need to check whether a platform has sufficient compute resources
@@ -727,7 +728,7 @@ In order to do this the request would not only need to describe the \executable{
 but also the minimum level of compute resources needed in terms of \cpu{} cores, memory, \gpu{}s
 and disc space needed to execute it.
 
-\subsubsection{Compute resources}
+\subsection{Compute resources}
 \label{compute-resources}
 
 The \datamodel{} for describing compute resources is, in most cases, common to all types of \executable{},
@@ -908,7 +909,7 @@ FPGA and the tools needed to use it.
       \codeword{[https://github.com/..../resource-types/xilinx-vu19p.md]}
 \end{itemize}
 
-\subsubsection{Minimum and maximum}
+\subsection{Minimum and maximum}
 \label{minandmax}
 
 The \datamodel{} for describing compute resources includes elements for specifying the numeric size
@@ -1014,7 +1015,7 @@ platform implements should not be relevant at this level of abstraction.
 The user just wants their notebook to run. The technical details of what platform is used to
 run it should be someone else's problem.
 
-\subsubsection{Storage resources}
+\subsection{Storage resources}
 \label{storage-resources}
 
 The resources section of the request can also be used to specify storage resources.
@@ -1313,7 +1314,7 @@ enables a client to put together a workflow of interconnected steps, with the
 managing the lifecycle of the resources and releasing them automatically after they
 are no longer needed.
 
-\subsection{Authentication}
+\section{Authentication}
 \label{authentication}
 
 The client may also want to check whether the user account making the request
@@ -1464,7 +1465,7 @@ handles the authentication infomation it receives.
 This means that the \executionplanner{} services can be deployed in other domains outside the \ivoa{},
 without requiring them to adopt the full \ivoa{} SSO standard.
 
-\subsection{Date and time}
+\section{Date and time}
 \label{date-time}
 
 The \codeword{datetime} part of the \datamodel{} enables the client and server to have a
@@ -1622,14 +1623,14 @@ Even if all of the other parameters are the same, e.g. compute and storage resou
 Technically the \datamodel allows an array of values for the \codeword{datetime} section,
 but this would impose unnecessary complexity on the client for no real gain in user experience.
 
-\subsection{Triggers and callouts}
+\section{Triggers and callouts}
 \label{triggers-callouts}
 
 The final part of the \datamodel{} enables the client to set up
 \webservice{} API calls both to and from the \execplanner{} service
 that can be used to control the state of a \job{}.
 
-\subsubsection{Actions and triggers}
+\subsection{Actions and triggers}
 \label{triggers}
 
 The \codeword{triggers} section of the \datamodel{} allows the client to
@@ -1707,7 +1708,7 @@ from the beginning of the start time range. This means the \job{} is ready to st
 If the start time range expires before the trigger has been called, the resources are released as normal
 when the \job{} is cancelled.
 
-\subsubsection{Remote callouts}
+\subsection{Remote callouts}
 \label{callouts}
 
 The \codeword{callouts} part of the \datamodel{} forms the other half of a callout-trigger pair,
@@ -1749,7 +1750,7 @@ along with the current local system time on the \execplanner{} service sending t
 In a normal execution sequence, this callout would be called twice. Once when the \job{} \codeword{status}
 is set to \codeword{RUNNING}, and again when the \job{} \codeword{status} is set to \codeword{COMPLETED}.
 
-\subsubsection{Linked worflow}
+\subsection{Linked worflow}
 \label{linked-worflow}
 
 The following example describes how the callout and trigger functions can be used to
