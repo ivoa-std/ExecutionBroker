@@ -969,8 +969,8 @@ This response represents an offer to start with a minimum of 8 \cpu{} cores and 
 as requested, with the option to use a maximum of 16 \cpu{} cores and 32G of memory if needed.
 
 The client may receive different offers from different platforms and can pass this information
-on the the user to allow them to choose the offer that best fits their use case.
-The our example notebook may specify a minimum of 8 \cpu{} cores and 16G of memory,
+on the user to allow them to choose the offer that best fits their use case.
+The notebook they have chose may specify a minimum of 8 \cpu{} cores and 16G of memory,
 but an offer of twice the resources allows the user more scope for experimenting with
 more data or more complex algorithms.
 
@@ -1010,10 +1010,10 @@ Note that the term \textit{'compute resource'} specifically avoids stating wheth
 notebook will be run in an \openstack{} virtual machine or a \kubernetes{} cluster.
 As far as the user is concerned, it should not matter. As long as the compute resource provides
 sufficient \cpu{} cores and memory for the notebook to execute, the technical details of how the
-platform implements should not be relevant at this level of abstraction.
+platform implements this should not be relevant at this level of abstraction.
 
-The user just wants their notebook to run. The technical details of what platform is used to
-run it should be someone else's problem.
+The user just wants their notebook to run. The technical details of what technologies are used
+under the hood to make it happen should be someone else's problem.
 
 \subsection{Storage resources}
 \label{storage-resources}
@@ -1637,8 +1637,8 @@ The \codeword{triggers} section of the \datamodel{} allows the client to
 set up \webservice{} endpoints that will trigger actions that control the
 state of a \job{} in an \execworker service.
 
-The simplest of these \webservice{} calls is a \codeword{value-update} endpoint.
-This sets up a \codeword{POST} \webservice{} endpoint that a remote system can
+The simplest of these \webservice{} calls is a \codeword{value-update} service.
+This is a \codeword{POST} \webservice{} endpoint that a remote system can
 call with a set of name-value pairs.
 
 \begin{lstlisting}[]
