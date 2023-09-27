@@ -456,6 +456,18 @@ for the equivalent biochemistry discovery services and although the domain speci
 terms and vocabulary will be different, the techical details of the service interfaces
 should be the same.
 
+\subsubsection{Separation of concerns}
+\label{separate-concerns}
+
+Separate who knows what ..
+The players:
+\begin{itemize}
+    \item The researcher who creates the notebook
+    \item The developer who creates the container
+    \item The publisher who publishes the data
+    \item The user who is running the analysis
+\end{itemize}
+
 \subsection{Execution planner}
 \label{execution-planner}
 
@@ -1982,65 +1994,7 @@ Finally, the \codeword{managed} \vospace{} storage location is automatically
 deleted a day after the completion of step-a by the \execplanner{} service
 that was assigned to manage its lifecycle.
 
-\section{Separation of concerns}
-\label{separate-concerns}
-
-Separate who knows what ..
-The players:
-\begin{itemize}
-    \item The researcher who creates the notebook
-    \item The developer who creates the container
-    \item The publisher who publishes the data
-    \item The user who is running the analysis
-\end{itemize}
-
 \pagebreak
-
-\section{Request and response}
-\label{request-response}
-
-Details of the request and response messages.
-Timeline of request, offer and accept.
-
-\subsection{ExecutionPlanner}
-\label{execution-planner}
-
-Simple \codeword{POST} REST webservice.
-Single parameter, the \job{} description.
-
-Response contains a simple \codeword{YES} or \codeword{NO}
-and a list of offers for how the \job{} can be executed on this platform.
-
-
-
-\subsection{ExecutionWorker}
-\label{execution-worker}
-
-Derived from IVOA UWS, using a similar \datamodel{}.
-
-Accepting an offer on an \execplanner{} creates a job on the associated \execworker{},
-with status PENDING until the \job{} is started automatically at the designated time.
-
-The offer from the \execplanner{} will contain the URL \job{} in the \execworker{}.
-
-\begin{itemize}
-    \item \execplanner{} is responsible for creating and starting the \job{}.
-    \item Client can use a HEAD request to check network access at anytime.
-    \item Client can use a GET request to check the status of the \job{} at anytime.
-    \item Client can cancel the \job{} at anytime.
-\end{itemize}
-
-\pagebreak
-
-\section{General requirements}
-\label{general-requirements}
-
-\begin{itemize}
-    \item ....
-    \item ....
-    \item ....
-\end{itemize}
-
 
 \section{Federated architecture}
 \label{federation}
@@ -2238,6 +2192,82 @@ A complex Helm chart with multiple elements launched as a single task.
 
 A complex Spark cluster analysis launched as a single task.
 ...
+
+\pagebreak
+
+\section{Service specification}
+\label{service-specification}
+
+Details of the request and response messages.
+Timeline of request, offer and accept.
+
+\subsection{General requirements}
+\label{general-requirements}
+
+\begin{itemize}
+    \item ....
+    \item ....
+    \item ....
+\end{itemize}
+
+\subsection{ExecutionPlanner}
+\label{execution-planner}
+
+Simple \codeword{POST} REST webservice.
+Single parameter, the \job{} description.
+
+Response contains a simple \codeword{YES} or \codeword{NO}
+and a list of offers for how the \job{} can be executed on this platform.
+
+\subsection{ExecutionWorker}
+\label{execution-worker}
+
+Derived from IVOA UWS, using a similar \datamodel{}.
+
+Accepting an offer on an \execplanner{} creates a job on the associated \execworker{},
+with status PENDING until the \job{} is started automatically at the designated time.
+
+The offer from the \execplanner{} will contain the URL \job{} in the \execworker{}.
+
+\begin{itemize}
+    \item \execplanner{} is responsible for creating and starting the \job{}.
+    \item Client can use a HEAD request to check network access at anytime.
+    \item Client can use a GET request to check the status of the \job{} at anytime.
+    \item Client can cancel the \job{} at anytime.
+\end{itemize}
+
+\pagebreak
+
+\subsection{The data model}
+\label{datamodel}
+
+    ....
+    ....
+
+\subsubsection{Executable}
+\label{datamodel-executable}
+
+\subsubsection{Resources}
+\label{datamodel-resources}
+
+\subsubsection{Compute resources}
+\label{datamodel-compute-resources}
+
+\subsubsection{Storage resources}
+\label{datamodel-storage-resources}
+
+\subsubsection{Authentication}
+\label{datamodel-authentication}
+
+\subsubsection{DateTime}
+\label{datamodel-datetime}
+
+\subsubsection{Triggers}
+\label{datamodel-triggers}
+
+\subsubsection{Callouts}
+\label{datamodel-callouts}
+
 
 \pagebreak
 \appendix
