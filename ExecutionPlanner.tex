@@ -42,11 +42,16 @@
 \newcommand{\spark} {Spark}
 \newcommand{\pyspark} {PySpark}
 \newcommand{\zeppelin} {Zeppelin}
+\newcommand{\zeppelinnotebook} {Zeppelin notebook}
 
+\newcommand{\oci} {OCI}
 \newcommand{\ocicontainer} {OCI~container}
 \newcommand{\docker} {Docker}
 \newcommand{\dockercompose} {Docker compose}
-\newcommand{\dockercontainer} {Docker container}
+%\newcommand{\dockercontainer} {Docker container}
+
+\newcommand{\singularity} {Singularity}
+%\newcommand{\singularitycontainer} {Singularity container}
 
 \newcommand{\openstack} {Openstack}
 \newcommand{\kubernetes} {Kubernetes}
@@ -300,7 +305,7 @@ making it findable within the wider context of the VO.
 To understand the problem that the \ivoa{} \executionplanner{} is trying to solve
 it is useful to describe what an \executablething{} is in this context.
 In general terms, this document refers to something that can be executed, or run,
-as an \executable.
+as an \executable{}.
 
 To explain what this means we can start with a science domain function that we want to perform.
 For example, the mathematical concept of the square root of a number.
@@ -308,7 +313,7 @@ We can calculate the square root of a positive number using the Newton–Raphson
 algorithm\footurl{https://en.wikipedia.org/wiki/Newton\%27s_method}
 which produces successively closer approximations to the result.
 However, in general case, this mathematical description of the algorithm would not be
-considered to be an \executablething.
+considered to be an \executablething{}.
 
 We can write a \pythonprogram{} to use this algorithm to calculate the square root of a number.
 This is the first identifiable \executablething{} in our example.
@@ -429,28 +434,32 @@ could be executed on that platform.
 
 Each offer contains some metadata about the offer itself,
 including an identifier and an expiry time,
-followed by details of when and how the task would be executed.
+followed by an updated copy of the request \codeword{body}
+describing when and how the task would be executed.
 
 \begin{lstlisting}[]
 # ExecutionPlanner service response.
 response:
+  result: "YES"
   offers:
   - ident: "f185cd47-db9b-4765-a934-bf81ee9d2d34"
     expiry: "20230918T070521"
-    datetime:
-      ....
-    executable:
-      ....
-    resources:
-      ....
+    body:
+      executable:
+        ....
+      resources:
+        ....
+      datetime:
+        ....
   - ident: "2c89f536-3fff-48f7-943f-bcc5c3225be7"
     expiry: "20230918T070521"
-    datetime:
-      ....
-    executable:
-      ....
-    resources:
-      ....
+    body:
+      executable:
+        ....
+      resources:
+        ....
+      datetime:
+        ....
 \end{lstlisting}
 
 The client can then ask its user to choose which of the offers best fits their requirements
@@ -628,8 +637,8 @@ request:
 
 \subsection{\ocicontainer{}}
 \label{ocicontainer}
-The \datamodel{} for an \ocicontainer{} needs to describe what operating system and system architecture
-the container is built for, and where to fetch the binary image from.
+The \datamodel{} for an \ocicontainer{} describes the image name and version
+along with the hostname of the repository to fetch it from.
 
 % Type URLs
 % https://www.purl.org/ivoa.net/executable-types/oci-container
@@ -644,8 +653,6 @@ request:
 
     # The details, specific to an OCI container.
     spec:
-      os:    "linux"
-      arch:  "amd64"
       repo:  "ghcr.io"
       image: "ivoa/oligia-webtop"
       version: "ubuntu-2022.01.13"
@@ -2244,95 +2251,422 @@ While it is possible to use \ivoa{} registry URIs to identify types, this specif
 recomends using a simple HTTP URLs. This lowers the barrier to entry and makes it simpler for the end user
 to resolve the URL into a description.
 
-\subsection{Executable}
+\subsection{Request}
+\label{datamodel-request}
+
+The main part of the \execplanner{} \datamodel{} is the \codeword{request},
+which describes an \executablething{} and the resources needed to execute it.
+
+The request element is used in several places in the \datamodel{}:
+\begin{itemize}[]
+    \item It is main body of the initial \execplanner{} request call.
+    \item The the \codeword{request} is repeated in each \codeword{offer} in an \execplanner{} response.
+    \item The the \codeword{request} also occurs in an \execworker{} \job{} record.
+\end{itemize}
+
+\subsubsection{Executable}
 \label{datamodel-executable}
 
-....
-....
+The \codeword{executable} section of the \codeword{request} describes the \executablething{}.
 
-\subsection{Resources}
-\label{datamodel-resources}
+The core \datamodel{} defines this as a URI identifying the \codeword{type} of executable,
+and a \codeword{spec} placeholder for the type specific details.
 
-....
-....
+\begin{lstlisting}[]
+request:
+  executable:
+    # A URI identifying the executable type.
+    type: <string>
+    # Type specific details of the executable type.
+    spec:
+      ....
+\end{lstlisting}
 
-\subsection{Compute resources}
-\label{datamodel-compute-resources}
-
-....
-....
-
-\subsection{Storage resources}
-\label{datamodel-storage-resources}
-
-....
-....
-
-\subsection{Authentication}
-\label{datamodel-authentication}
-
-....
-....
-
-\subsection{DateTime}
-\label{datamodel-datetime}
-
-....
-....
-
-\subsection{Triggers}
-\label{datamodel-triggers}
-
-....
-....
-
-\subsection{Callouts}
-\label{datamodel-callouts}
-
-....
-....
-
-\subsection{Extensions}
-\label{datamodel-extensions}
-
-....
-....
+Out of the box, the core \datamodel{} defines 4 types of \executable{};
+\jupyter{} and \zeppelin{} notebooks, and OCI (Docker) and \singularity{} containers.
+However, the structure is designed to make it easy for 3rd parties to define their own
+types of \executable{}.
 
 \subsubsection{Jupyter notebook}
 \label{datamodel-jupyter-notebook}
 
-....
-....
+The \datamodel{} extension for a \jupyternotebook{} defines the URL
+to identify the \codeword{type}.
+
+\begin{lstlisting}[]
+https://www.purl.org/ivoa.net/executable-types/jupyter-notebook
+\end{lstlisting}
+
+The \datamodel{} extension for a \jupyternotebook{} contains
+a URL to download the \codeword{notebook} from, and an optional URL to download a
+\codeword{requirements} file that lists any additional \python{} modules
+needed by the notebook.
+
+The syntaxt of the \codeword{requirements} file is defined by the \codeword{pip}
+Requirements File Format\footurl{https://pip.pypa.io/en/stable/reference/requirements-file-format/}.
+
+The URL for the \codeword{requirements} file may be a relative URL based on the notebook URL.
+
+\begin{lstlisting}[]
+request:
+  executable:
+    # A URL identifying the executable type.
+    type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
+    # Type specific details of the executable type.
+    spec:
+      # A URL pointing to the notebook source code.
+      notebook: <string>
+      # A URL pointing to an optional requirements file.
+      requirements: <string>
+\end{lstlisting}
 
 \subsubsection{Zeppelin notebook}
 \label{datamodel-zeppelin-notebook}
 
-....
-....
+The \datamodel{} extension for a \zeppelin{} notebook defines the URL
+to identify the \codeword{type}.
+
+\begin{lstlisting}[]
+https://www.purl.org/ivoa.net/executable-types/zeppelin-notebook
+\end{lstlisting}
+
+The \datamodel{} extension for a \zeppelin{} notebook contains
+a URL to download the \codeword{notebook} from, and an optional URL to download a
+\codeword{requirements} file that lists any additional \python{} modules
+needed by the notebook.
+
+The syntaxt of the \codeword{requirements} file is defined by the \codeword{pip}
+Requirements File Format\footurl{https://pip.pypa.io/en/stable/reference/requirements-file-format/}.
+
+The URL for the \codeword{requirements} file may be a relative URL based on the notebook URL.
+
+\begin{lstlisting}[]
+request:
+  executable:
+    # A URL identifying the executable type.
+    type: "https://www.purl.org/ivoa.net/executable-types/zeppelin-notebook"
+    # Type specific details of the executable type.
+    spec:
+      # A URL pointing to the notebook source code.
+      notebook: <string>
+      # A URL pointing to an optional requirements file
+      requirements: <string>
+\end{lstlisting}
 
 \subsubsection{OCI container}
 \label{datamodel-oci-container}
 
-....
-....
+The \datamodel{} extension for an \oci{} (Docker) container defines the URL
+to identify the \codeword{type}.
+
+\begin{lstlisting}[]
+https://www.purl.org/ivoa.net/executable-types/oci-container
+\end{lstlisting}
+
+The \datamodel{} extension for an \ocicontainer{} contains
+the endpoint address of the repository, \codeword{repo}, to dowload the
+container image from, the \codeword{name} of the image and the \codeword{tag}
+or \codeword{digest} identifier for the image.
+
+The \datamodel{} extension for an \ocicontainer{} also includes
+optional an \codeword{platform} element which describes the operating system
+and system architecture that the container is built for.
+
+\begin{lstlisting}[]
+request:
+  executable:
+    # A URL identifying the executable type.
+    type: "https://www.purl.org/ivoa.net/executable-types/oci-container"
+    # Type specific details of the executable type.
+    spec:
+      # The repository to download the image from.
+      repo: <string>
+      # The name of the container image.
+      image: <string>
+      # The image tag to specify the version to download.
+      tag: <string>
+      # The image digest to specify the version to download.
+      digest: <string>
+      # Details of the platforms that the container is built for.
+      platforms:
+      - # The host system architecture the container is built for (default "amd64").
+        architecture: <string>
+        # The host operating system the container is built for (default "linux").
+        os: <string>
+\end{lstlisting}
 
 \subsubsection{Singularity container}
 \label{datamodel-singularity-container}
 
+The \datamodel{} extension for a \singularity{} container defines the URL
+to identify the \codeword{type}.
+
+\begin{lstlisting}[]
+https://www.purl.org/ivoa.net/executable-types/singulatiry-container
+\end{lstlisting}
+
+The \datamodel{} extension for a \singularity{} container contains .... tbd.
+
+\begin{lstlisting}[]
+request:
+  executable:
+    # A URL identifying the executable type.
+    type: "https://www.purl.org/ivoa.net/executable-types/oci-container"
+    # Type specific details of the executable type.
+    spec:
+      ....
+      ....
+\end{lstlisting}
+
+\subsubsection{Resources}
+\label{datamodel-resources}
+
+The second section of the request \codeword{body} describes the resources needed
+to execute the task.
+The \codeword{resources} section contains two lists of resources, one for
+\codeword{compute} resources and one for \codeword{storage} resources.
+This structure enables many-to-many relationships between the \codeword{compute}
+and \codeword{storage} resources.
+
+\begin{lstlisting}[]
+request:
+  # Details of the executable
+  executable:
+    ....
+    ....
+  # Details of the resources
+  resources:
+    # List of compute resources
+    compute:
+      ....
+      ....
+    # List of storage resources
+    storage:
+      ....
+      ....
+\end{lstlisting}
+
+\subsubsection{Compute resources}
+\label{datamodel-compute-resources}
+
+The \codeword{compute} \codeword{resources} section lists
+the computing resources needed.
+
+The core \datamodel{} part of a \codeword{compute} resource contains
+a name for the resource that is unique within this request,
+a count of how many replicas of this resource are needed,
+a URL identifying the \codeword{type} of resource,
+and a \codeword{spec} placeholder for the type specific details.
+
+\begin{lstlisting}[]
+request:
+  resources:
+    compute:
+    - # A unique name for this compute resource.
+      name: <string>
+      # A count of how many replicas are needed (defaults to 1).
+      replicas: <integer> <optional>
+      # A URI identifying the compute resource type.
+      type: <string>
+      # Type specific details of the compute resource.
+      spec:
+        ....
+        ....
+\end{lstlisting}
+
+The core \datamodel{} defines a generic computing resource
+that has cpu cores, memory and a hierarchical filesystem.
+
+The core \datamodel{} defines the URL to identify a generic computing resource:
+\begin{lstlisting}[]
+https://www.purl.org/ivoa.net/resource-types/generic-compute
+\end{lstlisting}
+
+The \codeword{spec} for a generic computing resource contains
+minimum and maximum values for the number of cpu cores and memory.
+
+The \codeword{spec} for a generic computing resource contains
+a list of \codeword{volumes} that describe how a storage resource
+should be mounted in the compute resource's filesystem.
+
+Each \codeword{volume} element contains a unique name for the volume,
+a reference (by name) to the corresponding \codeword{storage} resource,
+the \codeword{path} that the volume should be mounted at in the
+compute resource's filesystem, and the read write access mode
+('\codeword{rw}' for read and write, or '\codeword{ro}' for read only).
+
+\begin{lstlisting}[]
+request:
+  resources:
+    compute:
+    - # A unique name for this compute resource.
+      name: <string>
+      # A count of how many replicas are needed (defaults to 1).
+      replicas: <integer> <optional>
+      # A URL identifying the compute resource type.
+      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
+      spec:
+        # The minimum number of cpu cores needed.
+        mincores: <float>
+        # The maximum number of cpu cores alloed.
+        maxcores: <float>
+        # The minimum amount of memory needed, in GiB.
+        minmemory: <float>
+        # The maximum amount of memory allowed, in GiB.
+        maxmemory: <float>
+        # A list of volume mounts.
+        volumes:
+        - # A unique name for this volume.
+          name: <string>
+          # A reference to the storage resource this volume is linked to.
+          resource: <string>
+          # The path in the compute resource's filesystem.
+          path: <string>
+          # The access mode, 'rw' or 'ro'.
+          mode: <string>
+\end{lstlisting}
+
+\subsubsection{Storage resources}
+\label{datamodel-storage-resources}
+
+\begin{lstlisting}[]
 ....
 ....
+\end{lstlisting}
+
+\subsubsection{Authentication}
+\label{datamodel-authentication}
+
+\begin{lstlisting}[]
+....
+....
+\end{lstlisting}
+
+\subsubsection{DateTime}
+\label{datamodel-datetime}
+
+\begin{lstlisting}[]
+....
+....
+\end{lstlisting}
+
+\subsubsection{Triggers}
+\label{datamodel-triggers}
+
+\begin{lstlisting}[]
+....
+....
+\end{lstlisting}
+
+\subsubsection{Callouts}
+\label{datamodel-callouts}
+
+\begin{lstlisting}[]
+....
+....
+\end{lstlisting}
+
+
+
+
+\subsection{Response}
+\label{datamodel-response}
+
+A positive \execplanner{} service response contains \codeword{result}
+set to \codeword{YES}, and at least one offer.
+
+Each offer contains a unique identifier and an expiry time for the offer
+followed by an updated copy of the request \codeword{body} with details
+filled in by the \execplanner{} service.
+
+\begin{lstlisting}[]
+response:
+  # The top level result.
+  result: "YES"
+  # A list of offers to match the request.
+  offers:
+  - # Unique identifier for this offer.
+    ident:  <string>
+    # Expiry date for this offer.
+    expires: <string> <ISO 8601 date+time>
+    # An updated copy of the request body.
+    request:
+      executable:
+        ....
+      resources:
+        ....
+      datetime:
+        ....
+\end{lstlisting}
+
+A negative \execplanner{} service response contains \codeword{result}
+set to \codeword{NO}, followed by an optional list of messages
+explaining why the request was rejected.
+
+Each \codeword{message} consists of a path to an element in the original
+request and a text message explaining why the element was rejected.
+
+\begin{lstlisting}[]
+response:
+  # The top level result.
+  result: "NO"
+  # A list of messages explaining why the request was rejected.
+  messages:
+  - # The path to an element in the request body
+    path: <string>
+    # A text message why the element was rejected.
+    text: <string>
+\end{lstlisting}
+
+\subsection{Job}
+\label{datamodel-job}
+
+An \execworker{} \workerjob{} record consists of a unique identifier for the job,
+and a \codeword{phase} indicating what execution stage the \workerjob{} has reached.
+followed by an updated copy of the request \codeword{body} from the \execplanner{}
+offer with details filled in by the \execworker{} as the \workerjob{} is executed.
+
+\begin{lstlisting}[]
+job:
+  # A unique identifier for this job
+  ident: <string>
+  # The current execution phase.
+  phase: <string>
+  # An updated copy of the request body
+  request:
+    executable:
+      ....
+    resources:
+      ....
+    datetime:
+      ....
+\end{lstlisting}
+
+\subsection{Extensions}
+\label{datamodel-extensions}
+
+\begin{lstlisting}[]
+....
+....
+\end{lstlisting}
 
 \subsubsection{nvidia gpu}
 \label{datamodel-nvidia-gpu}
 
+\begin{lstlisting}[]
 ....
 ....
+\end{lstlisting}
 
-\subsubsection{nvidia gpu}
-\label{datamodel-nvidia-gpu}
+\subsubsection{Xilinx FPGA}
+\label{datamodel-xilinx-fpga}
 
+\begin{lstlisting}[]
+type: "https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p"
+# The details, specific to a 'Xilinx FPGA'.
 ....
 ....
+\end{lstlisting}
 
 
 \pagebreak
