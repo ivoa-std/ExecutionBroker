@@ -2188,8 +2188,8 @@ The offer from the \execplanner{} will contain the URL \job{} in the \execworker
 \section{The data model}
 \label{datamodel}
 
-The following section describes the core \datamodel{} using a YAML syntax
-to outline the structure and comments to describe the elements.
+The following section describes the core \datamodel{} using a YAML-like syntax
+to outline the structure with comments to describe the elements.
 
 The intention is to define a portable \datamodel{} that can be serialised
 into a number of different formats, including YAML, JSON and XML.
@@ -2254,22 +2254,22 @@ to resolve the URL into a description.
 \subsection{Request}
 \label{datamodel-request}
 
-The main part of the \execplanner{} \datamodel{} is the \codeword{request},
+The main section of the \execplanner{} \datamodel{} describes the \codeword{request} block,
 which describes an \executablething{} and the resources needed to execute it.
-
-The request element is used in several places in the \datamodel{}:
+\\
+\\
+The \codeword{request} block is used in several places in the \datamodel{}:
 \begin{itemize}[]
-    \item It is main body of the initial \execplanner{} request call.
-    \item The the \codeword{request} is repeated in each \codeword{offer} in an \execplanner{} response.
-    \item The the \codeword{request} also occurs in an \execworker{} \job{} record.
+    \item It is the main body of the initial \execplanner{} request call.
+    \item It is the main body of each \codeword{offer} in an \execplanner{} response.
+    \item It is the main body of an \execworker{} \job{} record.
 \end{itemize}
 
 \subsubsection{Executable}
 \label{datamodel-executable}
 
-The \codeword{executable} section of the \codeword{request} describes the \executablething{}.
-
-The core \datamodel{} defines this as a URI identifying the \codeword{type} of executable,
+The \codeword{executable} section of the \codeword{request} block describes the \executablething{}.
+The core \datamodel{} simply defines this section as containing a URI identifying the \codeword{type} of executable,
 and a \codeword{spec} placeholder for the type specific details.
 
 \begin{lstlisting}[]
@@ -2282,10 +2282,12 @@ request:
       ....
 \end{lstlisting}
 
-Out of the box, the core \datamodel{} defines 4 types of \executable{};
+The content of the \codeword{spec} section depends on the \codeword{type} of executable.
+
+The core \datamodel{} defines 4 types of \executable{};
 \jupyter{} and \zeppelin{} notebooks, and OCI (Docker) and \singularity{} containers.
-However, the structure is designed to make it easy for 3rd parties to define their own
-types of \executable{}.
+The structure is designed to make it easy for 3rd parties to extend the \datamodel{}
+by defining their own types of \executable{}.
 
 \subsubsection{Jupyter notebook}
 \label{datamodel-jupyter-notebook}
@@ -2364,12 +2366,12 @@ https://www.purl.org/ivoa.net/executable-types/oci-container
 \end{lstlisting}
 
 The \datamodel{} extension for an \ocicontainer{} contains
-the endpoint address of the repository, \codeword{repo}, to dowload the
+the \codeword{repo} endpoint address of the repository to dowload the
 container image from, the \codeword{name} of the image and the \codeword{tag}
-or \codeword{digest} identifier for the image.
+or \codeword{digest} identifier to specify which version to doenload.
 
 The \datamodel{} extension for an \ocicontainer{} also includes
-optional an \codeword{platform} element which describes the operating system
+an optional \codeword{platform} element which describes the operating system
 and system architecture that the container is built for.
 
 \begin{lstlisting}[]
@@ -2383,16 +2385,16 @@ request:
       repo: <string>
       # The name of the container image.
       image: <string>
-      # The image tag to specify the version to download.
+      # The image tag to specify the version.
       tag: <string>
-      # The image digest to specify the version to download.
+      # The image digest to specify the version.
       digest: <string>
-      # Details of the platforms that the container is built for.
+      # Details of the platform(s) that the container is built for.
       platforms:
-      - # The host system architecture the container is built for (default "amd64").
-        architecture: <string>
-        # The host operating system the container is built for (default "linux").
-        os: <string>
+      - # The system architecture the container is built for.
+        architecture: <string> # default: "amd64".
+        # The operating system the container is built for.
+        os: <string> # default: "linux".
 \end{lstlisting}
 
 \subsubsection{Singularity container}
@@ -2402,7 +2404,7 @@ The \datamodel{} extension for a \singularity{} container defines the URL
 to identify the \codeword{type}.
 
 \begin{lstlisting}[]
-https://www.purl.org/ivoa.net/executable-types/singulatiry-container
+https://www.purl.org/ivoa.net/executable-types/singularity-container
 \end{lstlisting}
 
 The \datamodel{} extension for a \singularity{} container contains .... tbd.
@@ -2421,11 +2423,12 @@ request:
 \subsubsection{Resources}
 \label{datamodel-resources}
 
-The second section of the request \codeword{body} describes the resources needed
+The \codeword{resources} section of the \codeword{request} block describes the resources needed
 to execute the task.
+
 The \codeword{resources} section contains two lists of resources, one for
 \codeword{compute} resources and one for \codeword{storage} resources.
-This structure enables many-to-many relationships between the \codeword{compute}
+Separating these into two lists enables many-to-many relationships between the \codeword{compute}
 and \codeword{storage} resources.
 
 \begin{lstlisting}[]
@@ -2449,11 +2452,8 @@ request:
 \subsubsection{Compute resources}
 \label{datamodel-compute-resources}
 
-The \codeword{compute} \codeword{resources} section lists
-the computing resources needed.
-
-The core \datamodel{} part of a \codeword{compute} resource contains
-a name for the resource that is unique within this request,
+The \datamodel{} for a \codeword{compute} resource contains
+a name for the resource, that is unique within the \codeword{request},
 a count of how many replicas of this resource are needed,
 a URL identifying the \codeword{type} of resource,
 and a \codeword{spec} placeholder for the type specific details.
@@ -2464,8 +2464,8 @@ request:
     compute:
     - # A unique name for this compute resource.
       name: <string>
-      # A count of how many replicas are needed (defaults to 1).
-      replicas: <integer> <optional>
+      # A count of how many replicas are needed.
+      replicas: <integer> <optional> # default: 1
       # A URI identifying the compute resource type.
       type: <string>
       # Type specific details of the compute resource.
@@ -2474,16 +2474,46 @@ request:
         ....
 \end{lstlisting}
 
+The \datamodel{} structure is designed to make it easy for 3rd parties
+to extend the \datamodel{} by defining their own types of computing
+resources.
+
+\subsubsection{Generic compute resources}
+\label{datamodel-generic-compute}
+
 The core \datamodel{} defines a generic computing resource
 that has cpu cores, memory and a hierarchical filesystem.
 
-The core \datamodel{} defines the URL to identify a generic computing resource:
+The data model for a generic computing resource defines the URL to identify
+the type.
 \begin{lstlisting}[]
 https://www.purl.org/ivoa.net/resource-types/generic-compute
 \end{lstlisting}
 
 The \codeword{spec} for a generic computing resource contains
 minimum and maximum values for the number of cpu cores and memory.
+
+\begin{lstlisting}[]
+request:
+  resources:
+    compute:
+    - # A unique name for this compute resource.
+      name: <string>
+      # A count of how many replicas are needed.
+      replicas: <integer> # default: 1
+      # A URL identifying the compute resource type.
+      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
+      spec:
+        # The minimum number of cpu cores needed.
+        mincores: <float> # default: 1
+        # The maximum number of cpu cores alloed.
+        maxcores: <float> # default: mincores
+        # The minimum amount of memory needed, in GiB.
+        minmemory: <float> # default: 1
+        # The maximum amount of memory allowed, in GiB.
+        maxmemory: <float> # default: minmemory
+        ....
+\end{lstlisting}
 
 The \codeword{spec} for a generic computing resource contains
 a list of \codeword{volumes} that describe how a storage resource
@@ -2501,24 +2531,17 @@ request:
     compute:
     - # A unique name for this compute resource.
       name: <string>
-      # A count of how many replicas are needed (defaults to 1).
-      replicas: <integer> <optional>
+      # A count of how many replicas are needed.
+      replicas: <integer> # default: 1
       # A URL identifying the compute resource type.
       type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
       spec:
-        # The minimum number of cpu cores needed.
-        mincores: <float>
-        # The maximum number of cpu cores alloed.
-        maxcores: <float>
-        # The minimum amount of memory needed, in GiB.
-        minmemory: <float>
-        # The maximum amount of memory allowed, in GiB.
-        maxmemory: <float>
+        ....
         # A list of volume mounts.
         volumes:
         - # A unique name for this volume.
           name: <string>
-          # A reference to the storage resource this volume is linked to.
+          # The name of the storage resource this volume is linked to.
           resource: <string>
           # The path in the compute resource's filesystem.
           path: <string>
