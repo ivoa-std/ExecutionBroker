@@ -2595,7 +2595,7 @@ request:
 \subsection{Response}
 \label{datamodel-response}
 
-A positive \execplanner{} service response contains \codeword{result}
+A positive (yes, this platform can execute the task) \execplanner{} service response contains \codeword{result}
 set to \codeword{YES}, and at least one offer.
 
 Each offer contains a unique identifier and an expiry time for the offer
@@ -2622,12 +2622,12 @@ response:
         ....
 \end{lstlisting}
 
-A negative \execplanner{} service response contains \codeword{result}
+A negative (no, this platform cannot execute the task) \execplanner{} service response contains \codeword{result}
 set to \codeword{NO}, followed by an optional list of messages
 explaining why the request was rejected.
 
-Each \codeword{message} consists of a path to an element in the original
-request and a text message explaining why the element was rejected.
+Each \codeword{message} consists of a \datamodel{} path to an element in the original
+\codeword{request} and a text message explaining why the element was rejected.
 
 \begin{lstlisting}[]
 response:
@@ -2646,7 +2646,7 @@ response:
 
 An \execworker{} \workerjob{} record consists of a unique identifier for the job,
 and a \codeword{phase} indicating what execution stage the \workerjob{} has reached.
-followed by an updated copy of the request \codeword{body} from the \execplanner{}
+Followed by an updated copy of the request \codeword{body} from the \execplanner{}
 offer with details filled in by the \execworker{} as the \workerjob{} is executed.
 
 \begin{lstlisting}[]
