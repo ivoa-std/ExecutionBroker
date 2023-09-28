@@ -2169,10 +2169,8 @@ and a list of offers for how the \job{} can be executed on this platform.
 \subsection{ExecutionWorker}
 \label{execution-worker-spec}
 
-Derived from IVOA UWS, using a similar \datamodel{}.
-
-Accepting an offer on an \execplanner{} creates a job on the associated \execworker{},
-with status PENDING until the \job{} is started automatically at the designated time.
+Accepting an offer from an \execplanner{} service creates a \job{} on an associated \execworker{},
+with status \codeword{PENDING} until the \job{} is started automatically by the \execworker{}.
 
 The offer from the \execplanner{} will contain the URL \job{} in the \execworker{}.
 
@@ -2188,9 +2186,10 @@ The offer from the \execplanner{} will contain the URL \job{} in the \execworker
 \section{The data model}
 \label{datamodel}
 
-The following section describes the core \datamodel{} using a YAML-like syntax
-to outline the structure with comments to describe the elements.
+The following section describes the core \datamodel{} using a YAML syntax
+to define the structure with comments to describe the elements.
 
+Note that this does not tie the \execplanner specification to a YAML representation.
 The intention is to define a portable \datamodel{} that can be serialised
 into a number of different formats, including YAML, JSON and XML.
 
@@ -2276,7 +2275,7 @@ and a \codeword{spec} placeholder for the type specific details.
 request:
   executable:
     # A URI identifying the executable type.
-    type: <string>
+    type: !!str
     # Type specific details of the executable type.
     spec:
       ....
@@ -2317,9 +2316,9 @@ request:
     # Type specific details of the executable type.
     spec:
       # A URL pointing to the notebook source code.
-      notebook: <string>
+      notebook: !!str
       # A URL pointing to an optional requirements file.
-      requirements: <string>
+      requirements: !!str
 \end{lstlisting}
 
 \subsubsection{Zeppelin notebook}
@@ -2350,9 +2349,9 @@ request:
     # Type specific details of the executable type.
     spec:
       # A URL pointing to the notebook source code.
-      notebook: <string>
+      notebook: !!str
       # A URL pointing to an optional requirements file
-      requirements: <string>
+      requirements: !!str
 \end{lstlisting}
 
 \subsubsection{OCI container}
@@ -2382,19 +2381,19 @@ request:
     # Type specific details of the executable type.
     spec:
       # The repository to download the image from.
-      repo: <string>
+      repo: !!str
       # The name of the container image.
-      image: <string>
+      image: !!str
       # The image tag to specify the version.
-      tag: <string>
+      tag: !!str
       # The image digest to specify the version.
-      digest: <string>
+      digest: !!str
       # Details of the platform(s) that the container is built for.
       platforms:
       - # The system architecture the container is built for.
-        architecture: <string> # default: "amd64".
+        architecture: !!str # default: "amd64".
         # The operating system the container is built for.
-        os: <string> # default: "linux".
+        os: !!str # default: "linux".
 \end{lstlisting}
 
 \subsubsection{Singularity container}
@@ -2463,11 +2462,11 @@ request:
   resources:
     compute:
     - # A unique name for this compute resource.
-      name: <string>
+      name: !!str
       # A count of how many replicas are needed.
-      replicas: <integer> <optional> # default: 1
+      replicas: !!int <optional> # default: 1
       # A URI identifying the compute resource type.
-      type: <string>
+      type: !!str
       # Type specific details of the compute resource.
       spec:
         ....
@@ -2498,20 +2497,20 @@ request:
   resources:
     compute:
     - # A unique name for this compute resource.
-      name: <string>
+      name: !!str
       # A count of how many replicas are needed.
-      replicas: <integer> # default: 1
+      replicas: !!int # default: 1
       # A URL identifying the compute resource type.
       type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
       spec:
         # The minimum number of cpu cores needed.
-        mincores: <float> # default: 1
+        mincores: !!float # default: 1
         # The maximum number of cpu cores alloed.
-        maxcores: <float> # default: mincores
+        maxcores: !!float # default: mincores
         # The minimum amount of memory needed, in GiB.
-        minmemory: <float> # default: 1
+        minmemory: !!float # default: 1
         # The maximum amount of memory allowed, in GiB.
-        maxmemory: <float> # default: minmemory
+        maxmemory: !!float # default: minmemory
         ....
 \end{lstlisting}
 
@@ -2530,9 +2529,9 @@ request:
   resources:
     compute:
     - # A unique name for this compute resource.
-      name: <string>
+      name: !!str
       # A count of how many replicas are needed.
-      replicas: <integer> # default: 1
+      replicas: !!int # default: 1
       # A URL identifying the compute resource type.
       type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
       spec:
@@ -2540,13 +2539,13 @@ request:
         # A list of volume mounts.
         volumes:
         - # A unique name for this volume.
-          name: <string>
+          name: !!str
           # The name of the storage resource this volume is linked to.
-          resource: <string>
+          resource: !!str
           # The path in the compute resource's filesystem.
-          path: <string>
+          path: !!str
           # The access mode, 'rw' or 'ro'.
-          mode: <string>
+          mode: !!str
 \end{lstlisting}
 
 \subsubsection{Storage resources}
@@ -2605,13 +2604,13 @@ filled in by the \execplanner{} service.
 \begin{lstlisting}[]
 response:
   # The top level result.
-  result: "YES"
+  result: !!str 'YES'
   # A list of offers to match the request.
   offers:
   - # Unique identifier for this offer.
-    ident:  <string>
+    ident:  !!str
     # Expiry date for this offer.
-    expires: <string> <ISO 8601 date+time>
+    expires: !!str <ISO 8601 date+time>
     # An updated copy of the request body.
     request:
       executable:
@@ -2632,13 +2631,13 @@ Each \codeword{message} consists of a \datamodel{} path to an element in the ori
 \begin{lstlisting}[]
 response:
   # The top level result.
-  result: "NO"
+  result: !!str 'NO'
   # A list of messages explaining why the request was rejected.
   messages:
   - # The path to an element in the request body
-    path: <string>
+    path: !!str
     # A text message why the element was rejected.
-    text: <string>
+    text: !!str
 \end{lstlisting}
 
 \subsection{Job}
@@ -2652,9 +2651,9 @@ offer with details filled in by the \execworker{} as the \workerjob{} is execute
 \begin{lstlisting}[]
 job:
   # A unique identifier for this job
-  ident: <string>
+  ident: !!str
   # The current execution phase.
-  phase: <string>
+  phase: !!str
   # An updated copy of the request body
   request:
     executable:
@@ -2750,7 +2749,11 @@ https://github.com/Zarquan/ExecutionPlanner/blob/main/types/authentication-types
 https://www.purl.org/ivoa.net/webservice-types/value-update
 https://github.com/Zarquan/ExecutionPlanner/blob/main/types/webservice-types/value-update.md
 
+YAML specification
+https://yaml.org/spec/
 
+YAML timestamp
+https://yaml.org/type/timestamp.html
 
 % NOTE: IVOA recommendations must be cited from docrepo rather than ivoabib
 % (REC entries there are for legacy documents only)
