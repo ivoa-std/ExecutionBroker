@@ -2183,7 +2183,7 @@ The offer from the \execplanner{} will contain the URL \job{} in the \execworker
 
 \pagebreak
 
-\section{The data model}
+\section{The \datamodel{}}
 \label{datamodel}
 
 The following section describes the core \datamodel{} using a YAML syntax
@@ -2250,7 +2250,7 @@ While it is possible to use \ivoa{} registry URIs to identify types, this specif
 recomends using a simple HTTP URLs. This lowers the barrier to entry and makes it simpler for the end user
 to resolve the URL into a description.
 
-\subsection{Request}
+\subsection{\execplanner{} request}
 \label{datamodel-request}
 
 The main section of the \execplanner{} \datamodel{} describes the \codeword{request} block,
@@ -2258,10 +2258,10 @@ which describes an \executablething{} and the resources needed to execute it.
 \\
 \\
 The \codeword{request} block is used in several places in the \datamodel{}:
-\begin{itemize}[]
-    \item It is the main body of the initial \execplanner{} request call.
-    \item It is the main body of each \codeword{offer} in an \execplanner{} response.
-    \item It is the main body of an \execworker{} \job{} record.
+\begin{itemize}
+    \item The main body of an \execplanner{} \codeword{request}.
+    \item The main body of each \codeword{offer} in an \execplanner{} response.
+    \item The main body of an \execworker{} \job{} record.
 \end{itemize}
 
 \subsubsection{Executable}
@@ -2282,7 +2282,6 @@ request:
 \end{lstlisting}
 
 The content of the \codeword{spec} section depends on the \codeword{type} of executable.
-
 The core \datamodel{} defines 4 types of \executable{};
 \jupyter{} and \zeppelin{} notebooks, and OCI (Docker) and \singularity{} containers.
 The structure is designed to make it easy for 3rd parties to extend the \datamodel{}
@@ -2292,21 +2291,26 @@ by defining their own types of \executable{}.
 \label{datamodel-jupyter-notebook}
 
 The \datamodel{} extension for a \jupyternotebook{} defines the URL
-to identify the \codeword{type}.
-
+to identify the \codeword{type}:
 \begin{lstlisting}[]
 https://www.purl.org/ivoa.net/executable-types/jupyter-notebook
 \end{lstlisting}
-
-The \datamodel{} extension for a \jupyternotebook{} contains
-a URL to download the \codeword{notebook} from, and an optional URL to download a
-\codeword{requirements} file that lists any additional \python{} modules
-needed by the notebook.
-
-The syntaxt of the \codeword{requirements} file is defined by the \codeword{pip}
-Requirements File Format\footurl{https://pip.pypa.io/en/stable/reference/requirements-file-format/}.
-
-The URL for the \codeword{requirements} file may be a relative URL based on the notebook URL.
+\hfill \break
+The \datamodel{} extension for a \jupyternotebook{} contains:
+\begin{itemize}
+    \item A URL to download the \codeword{notebook} from.
+    \item An optional URL to download a \codeword{requirements} file that lists any additional
+    \python{} modules needed by the notebook.
+    \begin{itemize}
+        \item The syntax of the \codeword{requirements} file is defined by the \codeword{pip}
+        Requirements File Format\footurl{https://pip.pypa.io/en/stable/reference/requirements-file-format/}.
+        \item The URL for the \codeword{requirements} file may be an absolute URL, or a relative URL based on the notebook URL.
+    \end{itemize}
+    \item An \codeword{endpoint} URL that points to the live notebook platform.
+    \begin{itemize}
+        \item The \codeword{endpoint} URL is set by the \execworker{} once the \job{} is \codeword{READY}.
+    \end{itemize}
+\end{itemize}
 
 \begin{lstlisting}[]
 request:
@@ -2319,27 +2323,34 @@ request:
       notebook: !!str
       # A URL pointing to an optional requirements file.
       requirements: !!str
+      # A URL pointing to the live notebook interface.
+      endpoint: !!str
 \end{lstlisting}
 
 \subsubsection{Zeppelin notebook}
 \label{datamodel-zeppelin-notebook}
 
 The \datamodel{} extension for a \zeppelin{} notebook defines the URL
-to identify the \codeword{type}.
-
+to identify the \codeword{type}:
 \begin{lstlisting}[]
 https://www.purl.org/ivoa.net/executable-types/zeppelin-notebook
 \end{lstlisting}
-
-The \datamodel{} extension for a \zeppelin{} notebook contains
-a URL to download the \codeword{notebook} from, and an optional URL to download a
-\codeword{requirements} file that lists any additional \python{} modules
-needed by the notebook.
-
-The syntaxt of the \codeword{requirements} file is defined by the \codeword{pip}
-Requirements File Format\footurl{https://pip.pypa.io/en/stable/reference/requirements-file-format/}.
-
-The URL for the \codeword{requirements} file may be a relative URL based on the notebook URL.
+\hfill \break
+The \datamodel{} extension for a \zeppelin{} notebook contains:
+\begin{itemize}
+    \item A URL to download the \codeword{notebook} from.
+    \item An optional URL to download a \codeword{requirements} file that lists any additional
+    \python{} modules needed by the notebook.
+    \begin{itemize}
+        \item The syntax of the \codeword{requirements} file is defined by the \codeword{pip}
+        Requirements File Format\footurl{https://pip.pypa.io/en/stable/reference/requirements-file-format/}.
+        \item The URL for the \codeword{requirements} file may be an absolute URL, or a relative URL based on the notebook URL.
+    \end{itemize}
+    \item An \codeword{endpoint} URL that points to the live notebook platform.
+    \begin{itemize}
+        \item The \codeword{endpoint} URL is set by the \execworker{} once the \job{} is \codeword{READY}.
+    \end{itemize}
+\end{itemize}
 
 \begin{lstlisting}[]
 request:
@@ -2352,26 +2363,34 @@ request:
       notebook: !!str
       # A URL pointing to an optional requirements file
       requirements: !!str
+      # A URL pointing to the live notebook interface.
+      endpoint: !!str
 \end{lstlisting}
 
 \subsubsection{OCI container}
 \label{datamodel-oci-container}
 
 The \datamodel{} extension for an \oci{} (Docker) container defines the URL
-to identify the \codeword{type}.
-
+to identify the \codeword{type}:
 \begin{lstlisting}[]
 https://www.purl.org/ivoa.net/executable-types/oci-container
 \end{lstlisting}
+\hfill \break
+The \datamodel{} extension for an \ocicontainer{} contains:
+\begin{itemize}
+    \item The \codeword{repo} endpoint address of the repository to download the container image from.
+    \item The name of the \codeword{image} to download.
+    \item The \codeword{tag} identifier to specify which version to download.
+    \item The \codeword{digest} identifier to specify which version to download.
+    \item An optional list of \codeword{platform} elements which contain:
+    \begin{itemize}
+        \item The operating system, \codeword{os}, that the container is built for (default \codeword{linux}).
+        \item The system \codeword{architecture} that the container is built for (default \codeword{amd64}).
+    \end{itemize}
 
-The \datamodel{} extension for an \ocicontainer{} contains
-the \codeword{repo} endpoint address of the repository to dowload the
-container image from, the \codeword{name} of the image and the \codeword{tag}
-or \codeword{digest} identifier to specify which version to doenload.
+    % TODO how to specify the network ports.
 
-The \datamodel{} extension for an \ocicontainer{} also includes
-an optional \codeword{platform} element which describes the operating system
-and system architecture that the container is built for.
+\end{itemize}
 
 \begin{lstlisting}[]
 request:
@@ -2400,13 +2419,15 @@ request:
 \label{datamodel-singularity-container}
 
 The \datamodel{} extension for a \singularity{} container defines the URL
-to identify the \codeword{type}.
-
+to identify the \codeword{type}:
 \begin{lstlisting}[]
 https://www.purl.org/ivoa.net/executable-types/singularity-container
 \end{lstlisting}
-
-The \datamodel{} extension for a \singularity{} container contains .... tbd.
+\hfill \break
+The \datamodel{} extension for a \singularity{} contains:
+\begin{itemize}
+    \item ....
+\end{itemize}
 
 \begin{lstlisting}[]
 request:
@@ -2451,11 +2472,13 @@ request:
 \subsubsection{Compute resources}
 \label{datamodel-compute-resources}
 
-The \datamodel{} for a \codeword{compute} resource contains
-a name for the resource, that is unique within the \codeword{request},
-a count of how many replicas of this resource are needed,
-a URL identifying the \codeword{type} of resource,
-and a \codeword{spec} placeholder for the type specific details.
+The \datamodel{} for a \codeword{compute} resource contains:
+\begin{itemize}
+    \item A \codeword{name} for the resource, unique within the \codeword{request}.
+    \item An optional count of how many \codeword{replicas} of the resource are needed.
+    \item A URL identifying the \codeword{type} of resource.
+    \item A \codeword{spec} placeholder for the type specific details.
+\end{itemize}
 
 \begin{lstlisting}[]
 request:
@@ -2464,7 +2487,7 @@ request:
     - # A unique name for this compute resource.
       name: !!str
       # A count of how many replicas are needed.
-      replicas: !!int <optional> # default: 1
+      replicas: !!int # default: 1
       # A URI identifying the compute resource type.
       type: !!str
       # Type specific details of the compute resource.
@@ -2482,15 +2505,22 @@ resources.
 
 The core \datamodel{} defines a generic computing resource
 that has cpu cores, memory and a hierarchical filesystem.
+This represents a common abstraction of a virtual machine,
+an OCI container runtime or a \kubernetes{} Pod.
 
 The data model for a generic computing resource defines the URL to identify
-the type.
+the type:
 \begin{lstlisting}[]
 https://www.purl.org/ivoa.net/resource-types/generic-compute
 \end{lstlisting}
-
-The \codeword{spec} for a generic computing resource contains
-minimum and maximum values for the number of cpu cores and memory.
+\hfill \break
+The \codeword{spec} for a generic computing resource may contain the following optional properties:
+\begin{itemize}
+    \item The minimum number of cpu cores needed, set by the client in the \execplanner{} \codeword{request}.
+    \item The maximum number of cpu cores available, set by the \execplanner{} service in an \codeword{offer}.
+    \item The minimum amount of memory needed (in GiB), set by the client in the \execplanner{} \codeword{request}.
+    \item The maximum amount of memory available (in GiB), set by the \execplanner{} service in an \codeword{offer}.
+\end{itemize}
 
 \begin{lstlisting}[]
 request:
@@ -2505,24 +2535,27 @@ request:
       spec:
         # The minimum number of cpu cores needed.
         mincores: !!float # default: 1
-        # The maximum number of cpu cores alloed.
+        # The maximum number of cpu cores available.
         maxcores: !!float # default: mincores
         # The minimum amount of memory needed, in GiB.
         minmemory: !!float # default: 1
-        # The maximum amount of memory allowed, in GiB.
+        # The maximum amount of memory available, in GiB.
         maxmemory: !!float # default: minmemory
         ....
 \end{lstlisting}
 
-The \codeword{spec} for a generic computing resource contains
+The \codeword{spec} for a generic computing resource may contain
 a list of \codeword{volumes} that describe how a storage resource
 should be mounted in the compute resource's filesystem.
 
-Each \codeword{volume} element contains a unique name for the volume,
-a reference (by name) to the corresponding \codeword{storage} resource,
-the \codeword{path} that the volume should be mounted at in the
-compute resource's filesystem, and the read write access mode
-('\codeword{rw}' for read and write, or '\codeword{ro}' for read only).
+\hfill \break
+Each \codeword{volume} element contains:
+\begin{itemize}
+    \item A \codeword{name} for the volume, unique within this \codeword{request}.
+    \item A reference (by name) to the corresponding storage \codeword{resource}.
+    \item The \codeword{path} that the volume should be mounted at in the compute resource's filesystem.
+    \item The read write access mode ('\codeword{rw}' for read and write, or '\codeword{ro}' for read only).
+\end{itemize}
 
 \begin{lstlisting}[]
 request:
