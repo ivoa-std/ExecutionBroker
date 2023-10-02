@@ -2177,9 +2177,10 @@ interface for accessing offers and updating their status.
 \label{execution-planner-request}
 
 The main \execplanner{} \webservice{} method is a \codeword{POST} \webservice{} that accepts
-either a \yaml{} or \json{} serialization of the \codeword{request} \datamodel{}.
-The content of the \codeword{request} \datamodel{} is defined in section \ref{datamodel-request}.
+a \codeword{request} as defined in section \ref{datamodel-request} of the \datamodel{}.
 
+An \execplanner{} \webservice{} MUST be able to accept both \yaml{} or \json{} serializations
+of the \codeword{request}.
 The serialization SHOULD be declared in the HTTP request using the \codeword{Content-Type} header.
 \begin{itemize}
     \item \codeword{application/yaml} for \yaml{}.
@@ -2298,7 +2299,7 @@ The serialization is determined by the \codeword{Accept} header in the HTTP requ
 \end{itemize}
 
 \begin{lstlisting}[]
-GET /offers/223 HTTP/1.1
+GET /offers/2c89f536-3fff-48f7-943f-bcc5c3225be7 HTTP/1.1
 Host: foo.example.org
 Accept: application/yaml
 \end{lstlisting}
@@ -2308,7 +2309,7 @@ HTTP/1.1 200 OK
 Content-Type: application/yaml; charset=utf-8
 
 offer:
-- ident: "2c89f536-3fff-48f7-943f-bcc5c3225be7"
+  ident: "2c89f536-3fff-48f7-943f-bcc5c3225be7"
   status: 'OFFERED'
   expires: "2023-09-18T07:05:21"
   request:
@@ -2324,8 +2325,64 @@ offer:
 The \codeword{offer} \codeword{POST} method provides the client with a method for
 updating the status of an \codeword{offer}.
 
+The identifier for the offer is encoded in the URL of the HTTP request by appending the
+identifier to the path of the HTP request URL.
 
+\begin{lstlisting}[]
+http[s]://foo.example.org/offers/{identifier}
+\end{lstlisting}
 
+The content of the \codeword{POST} method should contain the properties
+of the \codeword{offer} that the client wants to change, as defined by
+the \codeword{offer} \datamodel{} in section \ref{}.
+\begin{itemize}
+    \item Currently, only the \codeword{status} of an \codeword{offer} is modifiable.
+    \item The \codeword{POST} data MAY contain the \codeword{offer} \codeword{ident}.
+    \begin{itemize}
+        \item If the \codeword{offer} \codeword{ident} is presnet it MUST match the identifier used in the URL.
+    \end{itemize}
+\end{itemize}
+
+An \execplanner{} \webservice{} MUST be able to accept both \yaml{} or \json{} serializations
+of the \codeword{offer}.
+The serialization SHOULD be declared in the HTTP request using the \codeword{Content-Type} header.
+\begin{itemize}
+    \item \codeword{application/yaml} for \yaml{}.
+    \item \codeword{application/json} for \json{}.
+    \item If the serialization is not declared, the default is assumed to be \yaml{}.
+    \item If the both \yaml{} and \json{} are declared, the default is assumed to be \yaml{}.
+\end{itemize}
+
+\begin{lstlisting}[]
+POST /offers/2c89f536-3fff-48f7-943f-bcc5c3225be7 HTTP/1.1
+Host: foo.example.org
+Content-Type: application/yaml
+
+offer:
+  ident: "2c89f536-3fff-48f7-943f-bcc5c3225be7"
+  status: 'ACCEPTED'
+\end{lstlisting}
+
+If the update is successful, the content of the response is the updated state of the \codeword{offer}.
+The serialization of the response is determined by the \codeword{Accept} header in the HTTP request
+using the same rules as the \codeword{GET} method.
+
+\begin{lstlisting}[]
+HTTP/1.1 200 OK
+Content-Type: application/yaml; charset=utf-8
+
+offer:
+  ident: "2c89f536-3fff-48f7-943f-bcc5c3225be7"
+  status: 'ACCEPTED'
+  expires: "2023-09-18T07:05:21"
+  request:
+    executable:
+      ....
+    resources:
+      ....
+\end{lstlisting}
+
+If the update is not successful, the content of the response ... TBD ...
 
 
 \subsection{ExecutionWorker}
