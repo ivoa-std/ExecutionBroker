@@ -440,10 +440,11 @@ describing when and how the task would be executed.
 \begin{lstlisting}[]
 # ExecutionPlanner service response.
 response:
-  result: "YES"
+  result: 'YES'
   offers:
   - ident: "f185cd47-db9b-4765-a934-bf81ee9d2d34"
-    expiry: "20230918T070521"
+    status: 'OFFERED'
+    expires: "2023-09-18T07:05:21"
     body:
       executable:
         ....
@@ -452,7 +453,8 @@ response:
       datetime:
         ....
   - ident: "2c89f536-3fff-48f7-943f-bcc5c3225be7"
-    expiry: "20230918T070521"
+    status: 'OFFERED'
+    expires: "2023-09-18T07:05:21"
     body:
       executable:
         ....
@@ -1667,6 +1669,8 @@ from the beginning of the start time range. This means the \job{} is ready to st
 If the start time range expires before the trigger has been called, the resources are released as normal
 when the \job{} is cancelled.
 
+%TODO rename callouts actions, and add an email example too.
+
 \subsection{Remote callouts}
 \label{callouts}
 
@@ -1675,20 +1679,22 @@ enabling a client to set up \webservice{} API calls to remote services that the 
 call at specific points in the lifecycle of a \job{}.
 
 The following definition asks the \execplanner{} service to \codeword{POST} the name-value list defined in the
-\codeword{content} template to a remote \webservice{} endpoint when the status of this \job{} changes to be one
-of \codeword{RUNNING}, \codeword{COMPLETED}, \codeword{FAILED} or \codeword{CANCELLED}.
+\codeword{content} template to a remote \webservice{} endpoint when the status of this \job{} changes.
 
 \begin{lstlisting}[]
 ....
 callouts:
 - name: "callout-001"
+  status:
+  - 'RUNNING'
+  - 'COMPLETED'
+  - 'FAILED'
+  - 'CANCELLED'
   type: "https://www.purl.org/ivoa.net/webservice-types/value-update"
   spec:
-    triggers:
-    - state: "RUNNING,COMPLETED,FAILED,CANCELLED"
     method: "POST"
     endpoint: "http://ws.example.org/update"
-    content-type: "yaml
+    content-type: "application/yaml
     content: |
       name:  {{job.name}}
       date:  {{system.date}}
@@ -1773,10 +1779,13 @@ resources:
   ...
 callouts:
 - name: "callout-001"
+  status:
+  - 'RUNNING'
+  - 'COMPLETED'
+  - 'FAILED'
+  - 'CANCELLED'
   type: "https://www.purl.org/ivoa.net/webservice-types/value-update"
   spec:
-    triggers:
-    - status: "RUNNING,COMPLETED,FAILED,CANCELLED"
     method: "POST"
     endpoint: "https://..../offer-001/trigger-001"
     content-type: "yaml
@@ -2160,11 +2169,164 @@ Timeline of request, offer and accept.
 \subsection{ExecutionPlanner}
 \label{execution-planner-spec}
 
-Simple \codeword{POST} REST webservice.
-Single parameter, the \job{} description.
+The main \execplanner{} \webservice{} implements two interfaces;
+a \codeword{POST} method for sending requests, and a \codeword{GET/POST}
+interface for accessing offers and updating their status.
 
-Response contains a simple \codeword{YES} or \codeword{NO}
-and a list of offers for how the \job{} can be executed on this platform.
+\subsubsection{Request method}
+\label{execution-planner-request}
+
+The main \execplanner{} \webservice{} method is a \codeword{POST} \webservice{} that accepts
+either a \yaml{} or \json{} serialization of the \codeword{request} \datamodel{}.
+The content of the \codeword{request} \datamodel{} is defined in section \ref{datamodel-request}.
+
+The serialization SHOULD be declared in the HTTP request using the \codeword{Content-Type} header.
+\begin{itemize}
+    \item \codeword{application/yaml} for \yaml{}.
+    \item \codeword{application/json} for \json{}.
+    \item If the serialization is not declared, the default is assumed to be \yaml{}.
+    \item If the both \yaml{} and \json{} are declared, the default is assumed to be \yaml{}.
+\end{itemize}
+
+\begin{lstlisting}[]
+POST /request HTTP/1.1
+Host: foo.example.org
+Content-Type: application/yaml
+
+request:
+  executable:
+    ....
+  resources:
+    ....
+\end{lstlisting}
+
+\begin{lstlisting}[]
+POST /request HTTP/1.1
+Host: foo.example.org
+Content-Type: application/json
+
+"request": {
+  "executable": {
+    ....
+    }
+  "resources": {
+    ....
+    }
+  }
+\end{lstlisting}
+
+The \execplanner{} service will evaluate the request and respond with either a positive
+or negative \codeword{response} depending on whether the platform is able to execute the
+task descibed in the \codeword{request}.
+
+An \execplanner{} service MUST be able to provide both \yaml{} and \json{} serializations
+of the \codeword{response}.
+The serialization is determined by the \codeword{Accept} header in the HTTP request.
+\begin{itemize}
+    \item \codeword{application/yaml} for \yaml{}.
+    \item \codeword{application/json} for \json.
+    \item If the serialization is not declared, the default is assumed to be \yaml{}.
+    \item If the both \yaml{} and \json{} are declared, the default is assumed to be \yaml{}.
+\end{itemize}
+
+If the platform IS able to execute the task, then the \webservice{} will respond with a
+HTTP response code \codeword{200} and a positive \codeword{response} content as defined
+in section \ref{datamodel-positive-response}.
+
+\begin{lstlisting}[]
+HTTP/1.1 200 OK
+Content-Type: application/yaml; charset=utf-8
+
+response:
+  result: 'YES'
+  offers:
+    ....
+\end{lstlisting}
+
+If the platform IS NOT able to execute the task, then the \webservice{} will respond with a
+HTTP response code \codeword{200} and a negative \codeword{response} content as defined
+in section \ref{datamodel-negative-response}.
+
+\begin{lstlisting}[]
+HTTP/1.1 200 OK
+Content-Type: application/yaml; charset=utf-8
+
+response:
+  result: 'NO'
+  reasons:
+    ....
+\end{lstlisting}
+
+The \codeword{request} method is NOT idempotent. Sending the same \codeword{POST} request
+twice MAY return different results.
+
+\begin{itemize}
+    \item The list of offers in a response depends on the resources available at the point when the request is made.
+    \item Sending a request generates a new list of offers.
+    Those offers will contain references to resources that are reserved for the lifetime of the \codeword{offer}.
+    \item If a second request is made soon after the first request,
+    then the offers made in response to the first request may still be active.
+    In which case, the resources listed in those offers may still be reserved,
+    reducing the resources available for the second request.
+    \item If a second request is made some time after the first, then
+    other users may have requested and accepted offers reducing the resources available for the second request,
+    or the platform may have completed some tasks, increasing the resources available for the second request.
+\end{itemize}
+
+\subsubsection{Offer GET}
+\label{execution-planner-offer-get}
+
+The \codeword{offer} \codeword{GET} method requests the current state of an offer.
+The identifier for the offer is encoded in the URL of the HTTP request by appending the
+identifier to the path of the HTP request URL.
+
+\begin{lstlisting}[]
+http[s]://foo.example.org/offers/{identifier}
+\end{lstlisting}
+
+The \datamodel{} for the content of the \codeword{offer} response is described in section
+\ref{datamodel-offer}.
+
+An \execplanner{} service MUST be able to provide both \yaml{} and \json{} serializations
+of the \codeword{offer}.
+The serialization is determined by the \codeword{Accept} header in the HTTP request.
+\begin{itemize}
+    \item \codeword{application/yaml} for \yaml{}.
+    \item \codeword{application/json} for \json.
+    \item If the serialization is not declared, the default is assumed to be \yaml{}.
+    \item If the both \yaml{} and \json{} are declared, the default is assumed to be \yaml{}.
+\end{itemize}
+
+\begin{lstlisting}[]
+GET /offers/223 HTTP/1.1
+Host: foo.example.org
+Accept: application/yaml
+\end{lstlisting}
+
+\begin{lstlisting}[]
+HTTP/1.1 200 OK
+Content-Type: application/yaml; charset=utf-8
+
+offer:
+- ident: "2c89f536-3fff-48f7-943f-bcc5c3225be7"
+  status: 'OFFERED'
+  expires: "2023-09-18T07:05:21"
+  request:
+    executable:
+      ....
+    resources:
+      ....
+\end{lstlisting}
+
+\subsubsection{Offer POST}
+\label{execution-planner-offer-post}
+
+The \codeword{offer} \codeword{POST} method provides the client with a method for
+updating the status of an \codeword{offer}.
+
+
+
+
 
 \subsection{ExecutionWorker}
 \label{execution-worker-spec}
@@ -2621,18 +2783,22 @@ request:
 ....
 \end{lstlisting}
 
-
-
-
 \subsection{Response}
 \label{datamodel-response}
 
+\subsubsection{Positive response}
+\label{datamodel-positive-response}
 A positive (yes, this platform can execute the task) \execplanner{} service response contains \codeword{result}
-set to \codeword{YES}, and at least one offer.
+set to \codeword{YES}, and a list of offers.
 
-Each offer contains a unique identifier and an expiry time for the offer
-followed by an updated copy of the request \codeword{body} with details
+\subsubsection{Offer}
+\label{datamodel-offer}
+
+Each offer contains a unique identifier a status value and an expiry time for the offer
+followed by an updated copy of the \codeword{request} with details
 filled in by the \execplanner{} service.
+
+The \codeword{offer} \codeword{status} ....
 
 \begin{lstlisting}[]
 response:
@@ -2642,6 +2808,8 @@ response:
   offers:
   - # Unique identifier for this offer.
     ident:  !!str
+    # Status of this offer.
+    status: !!str # [OFFERED, ACCEPTED, REJECTED, EXPIRED]
     # Expiry date for this offer.
     expires: !!str # ISO 8601 date time
     # An updated copy of the request body.
@@ -2654,24 +2822,29 @@ response:
         ....
 \end{lstlisting}
 
+\subsubsection{Negative response}
+\label{datamodel-negative-response}
+
 A negative (no, this platform cannot execute the task) \execplanner{} service response contains \codeword{result}
-set to \codeword{NO}, followed by an optional list of messages
+set to \codeword{NO}, followed by an optional list of reasons
 explaining why the request was rejected.
 
-Each \codeword{message} consists of a \datamodel{} path to an element in the original
+Each \codeword{reason} consists of a \datamodel{} path to an element in the original
 \codeword{request} and a text message explaining why the element was rejected.
 
 \begin{lstlisting}[]
 response:
   # The top level result.
   result: !!str 'NO'
-  # A list of messages explaining why the request was rejected.
-  messages:
+  # A list of reasons explaining why the request was rejected.
+  reasons:
   - # The path to an element in the request body
     path: !!str
     # A text message why the element was rejected.
     text: !!str
 \end{lstlisting}
+
+%TODO more examples of reasons ...
 
 \subsection{Job}
 \label{datamodel-job}
