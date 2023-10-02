@@ -42,11 +42,16 @@
 \newcommand{\spark} {Spark}
 \newcommand{\pyspark} {PySpark}
 \newcommand{\zeppelin} {Zeppelin}
+\newcommand{\zeppelinnotebook} {Zeppelin notebook}
 
+\newcommand{\oci} {OCI}
 \newcommand{\ocicontainer} {OCI~container}
 \newcommand{\docker} {Docker}
 \newcommand{\dockercompose} {Docker compose}
-\newcommand{\dockercontainer} {Docker container}
+%\newcommand{\dockercontainer} {Docker container}
+
+\newcommand{\singularity} {Singularity}
+%\newcommand{\singularitycontainer} {Singularity container}
 
 \newcommand{\openstack} {Openstack}
 \newcommand{\kubernetes} {Kubernetes}
@@ -300,7 +305,7 @@ making it findable within the wider context of the VO.
 To understand the problem that the \ivoa{} \executionplanner{} is trying to solve
 it is useful to describe what an \executablething{} is in this context.
 In general terms, this document refers to something that can be executed, or run,
-as an \executable.
+as an \executable{}.
 
 To explain what this means we can start with a science domain function that we want to perform.
 For example, the mathematical concept of the square root of a number.
@@ -308,7 +313,7 @@ We can calculate the square root of a positive number using the Newton–Raphson
 algorithm\footurl{https://en.wikipedia.org/wiki/Newton\%27s_method}
 which produces successively closer approximations to the result.
 However, in general case, this mathematical description of the algorithm would not be
-considered to be an \executablething.
+considered to be an \executablething{}.
 
 We can write a \pythonprogram{} to use this algorithm to calculate the square root of a number.
 This is the first identifiable \executablething{} in our example.
@@ -359,64 +364,6 @@ This can include things like number of \cpu{} cores and amount of memory it need
 whether it needs a \gpu{}, the location of the input data, the storage space needed to perform
 the calculation and the storage space needed to save the results.
 
-\subsection{Type URIs and specifications}
-\label{type-and-spec}
-
-Several parts of the \ivoa{} \executionplanner{} \datamodel{} follow a common pattern, using a URI
-to identify a \codeword{type} followed a \codeword{spec} section to fill in the details.
-This pattern is adopted from a similar pattern used by \kubernetes{} to describe components
-deployed in the system.
-
-\begin{lstlisting}[]
-# A URI to identify the type of thing.
-type: "uri:type-A"
-
-# Type specific details about the thing.
-spec:
-  property-one: "...."
-  property-two: "...."
-  ....
-\end{lstlisting}
-
-However, the \executionplanner{} \datamodel{} specifically recomends using a long lasting resolvable
-HTTP URL as the type identifier.
-
-\begin{lstlisting}[]
-# A URL to identify the type of thing.
-type: "http://www.example.com/type-A"
-
-# Type specific details about the thing.
-spec:
-  property-one: "...."
-  property-two: "...."
-  ....
-\end{lstlisting}
-
-The reasoning behind this is that if a service provider notices several clients are requesting
-\textit{'encabulation'} on their compute nodes, the service provider may not know what this means.
-However, if we use a resolvable URL to identify the type, a service provider can use it to find a
-human readable description\footurl{https://tinyurl.com/encabulation} and decide whether they want
-to provide it on their platform.
-
-To the \webservice{} implementation, both of these requests are just a simple string comparison against a
-dictionary of known terms:
-
-\begin{lstlisting}[]
-Request  - Can you provide 'encabulation' ?
-Response - YES|NO
-\end{lstlisting}
-
-\begin{lstlisting}[]
-Request  - Can you provide 'https://tinyurl.com/encabulation' ?
-Response - YES|NO
-\end{lstlisting}
-
-The second form provides a simple mechanism for linking the type identifier to a human readable description.
-
-While it is possible to use \ivoa{} registry URIs to identify types, this specification
-recomends using a simple HTTP URLs. This lowers the barrier to entry and makes it simpler for the end user
-to resolve the URL into a description.
-
 \section{Service interaction}
 \label{service-interaction}
 
@@ -455,8 +402,20 @@ for the equivalent biochemistry discovery services and although the domain speci
 terms and vocabulary will be different, the techical details of the service interfaces
 should be the same.
 
+\subsubsection{Separation of concerns}
+\label{separate-concerns}
+
+Separate who knows what ..
+The players:
+\begin{itemize}
+    \item The researcher who creates the notebook
+    \item The developer who creates the container
+    \item The publisher who publishes the data
+    \item The user who is running the analysis
+\end{itemize}
+
 \subsection{Execution planner}
-\label{execution-planner}
+\label{execution-planner-desc}
 
 Once the client has built a description of the \executablething{} the user wants to
 execute, it send the description to one or more
@@ -475,28 +434,34 @@ could be executed on that platform.
 
 Each offer contains some metadata about the offer itself,
 including an identifier and an expiry time,
-followed by details of when and how the task would be executed.
+followed by an updated copy of the request \codeword{body}
+describing when and how the task would be executed.
 
 \begin{lstlisting}[]
 # ExecutionPlanner service response.
 response:
+  result: 'YES'
   offers:
   - ident: "f185cd47-db9b-4765-a934-bf81ee9d2d34"
-    expiry: "20230918T070521"
-    datetime:
-      ....
-    executable:
-      ....
-    resources:
-      ....
+    status: 'OFFERED'
+    expires: "2023-09-18T07:05:21"
+    body:
+      executable:
+        ....
+      resources:
+        ....
+      datetime:
+        ....
   - ident: "2c89f536-3fff-48f7-943f-bcc5c3225be7"
-    expiry: "20230918T070521"
-    datetime:
-      ....
-    executable:
-      ....
-    resources:
-      ....
+    status: 'OFFERED'
+    expires: "2023-09-18T07:05:21"
+    body:
+      executable:
+        ....
+      resources:
+        ....
+      datetime:
+        ....
 \end{lstlisting}
 
 The client can then ask its user to choose which of the offers best fits their requirements
@@ -529,7 +494,7 @@ service providing the front-end for multiple \execworker{} services.
 \includegraphics[width=0.9\textwidth]{diagrams/micro-services.pdf}
 
 \subsection{Execution worker}
-\label{execution-worker}
+\label{execution-worker-desc}
 
 The client can use the \workerjob{} details in the \execplanner{} response to contact
 the \execworker{} service and track its status.
@@ -597,7 +562,7 @@ This is because any workflow steps that follow after this step, will depend not 
 completed, but they also need the \teardown{} data transfers to complete so that the results from this step
 are in the right place for the next step to be able to access them.
 
-\subsection{The \executable{}}
+\section{The \executable{}}
 \label{executable}
 
 At the simplest level the client just needs to check whether a platform is able to execute a particular
@@ -633,7 +598,7 @@ request:
     spec: {}
 \end{lstlisting}
 
-\subsubsection{\jupyternotebook{}}
+\subsection{\jupyternotebook{}}
 \label{jupyternotebook}
 The \datamodel{} for each type of \executable{} defines the metadata needed to
 describe that particular type.
@@ -672,10 +637,10 @@ request:
       requirements: "https://.../requirements.txt"
 \end{lstlisting}
 
-\subsubsection{\ocicontainer{}}
+\subsection{\ocicontainer{}}
 \label{ocicontainer}
-The \datamodel{} for an \ocicontainer{} needs to describe what operating system and system architecture
-the container is built for, and where to fetch the binary image from.
+The \datamodel{} for an \ocicontainer{} describes the image name and version
+along with the hostname of the repository to fetch it from.
 
 % Type URLs
 % https://www.purl.org/ivoa.net/executable-types/oci-container
@@ -690,8 +655,6 @@ request:
 
     # The details, specific to an OCI container.
     spec:
-      os:    "linux"
-      arch:  "amd64"
       repo:  "ghcr.io"
       image: "ivoa/oligia-webtop"
       version: "ubuntu-2022.01.13"
@@ -716,7 +679,7 @@ Request  - Can this platform execute <unkown-type> ?
 Response - NO
 \end{lstlisting}
 
-\subsection{Resources}
+\section{Resources}
 \label{resources}
 
 At the next level the client may need to check whether a platform has sufficient compute resources
@@ -727,7 +690,7 @@ In order to do this the request would not only need to describe the \executable{
 but also the minimum level of compute resources needed in terms of \cpu{} cores, memory, \gpu{}s
 and disc space needed to execute it.
 
-\subsubsection{Compute resources}
+\subsection{Compute resources}
 \label{compute-resources}
 
 The \datamodel{} for describing compute resources is, in most cases, common to all types of \executable{},
@@ -908,7 +871,7 @@ FPGA and the tools needed to use it.
       \codeword{[https://github.com/..../resource-types/xilinx-vu19p.md]}
 \end{itemize}
 
-\subsubsection{Minimum and maximum}
+\subsection{Minimum and maximum}
 \label{minandmax}
 
 The \datamodel{} for describing compute resources includes elements for specifying the numeric size
@@ -968,8 +931,8 @@ This response represents an offer to start with a minimum of 8 \cpu{} cores and 
 as requested, with the option to use a maximum of 16 \cpu{} cores and 32G of memory if needed.
 
 The client may receive different offers from different platforms and can pass this information
-on the the user to allow them to choose the offer that best fits their use case.
-The our example notebook may specify a minimum of 8 \cpu{} cores and 16G of memory,
+on the user to allow them to choose the offer that best fits their use case.
+The notebook they have chose may specify a minimum of 8 \cpu{} cores and 16G of memory,
 but an offer of twice the resources allows the user more scope for experimenting with
 more data or more complex algorithms.
 
@@ -1009,12 +972,12 @@ Note that the term \textit{'compute resource'} specifically avoids stating wheth
 notebook will be run in an \openstack{} virtual machine or a \kubernetes{} cluster.
 As far as the user is concerned, it should not matter. As long as the compute resource provides
 sufficient \cpu{} cores and memory for the notebook to execute, the technical details of how the
-platform implements should not be relevant at this level of abstraction.
+platform implements this should not be relevant at this level of abstraction.
 
-The user just wants their notebook to run. The technical details of what platform is used to
-run it should be someone else's problem.
+The user just wants their notebook to run. The technical details of what technologies are used
+under the hood to make it happen should be someone else's problem.
 
-\subsubsection{Storage resources}
+\subsection{Storage resources}
 \label{storage-resources}
 
 The resources section of the request can also be used to specify storage resources.
@@ -1313,7 +1276,7 @@ enables a client to put together a workflow of interconnected steps, with the
 managing the lifecycle of the resources and releasing them automatically after they
 are no longer needed.
 
-\subsection{Authentication}
+\section{Authentication}
 \label{authentication}
 
 The client may also want to check whether the user account making the request
@@ -1378,9 +1341,9 @@ request:
 \end{lstlisting}
 
 This pattern allows the client to supply multiple authentication methods
-in the request. The \execplanner{} service SHOULD select the authentication
+in the request. The \execplanner{} service can select the authentication
 methods it accepts from those in the request and include the name and
-type of the methods in its reply along with enough non-secret
+type of the methods in its offer along with enough non-secret
 information to identify the authenticated identity.
 
 For example, if the client supplies both basic and token authentication
@@ -1403,13 +1366,12 @@ request:
     type: "https://.../token"
     mode: "explicit"
     spec:
-      subject: "user@domain"
       token: "..."
 \end{lstlisting}
 
-If the \execplanner{} service only accepts the token authentication, it MUST
-skip the basic authentication and only include the name and type of the token
-based authentication in its reply.
+If the \execplanner{} service only accepts the token authentication, it should
+skip the basic authentication and only include a reference to the token
+based authentication in its offer.
 
 \begin{lstlisting}[]
 # ExecutionPlanner server response.
@@ -1421,7 +1383,7 @@ response:
     type: "https://.../rfc7519"
     mode: "explicit"
     spec:
-      subject: "user@domain"
+      ....
 \end{lstlisting}
 
 If the \execplanner{} service does not recognise or support any of the authentication methods
@@ -1432,8 +1394,8 @@ Request  - Can I authenticate with <unknown method, unknown method, or unknown m
 Response - NO
 \end{lstlisting}
 
-The result is that an offer made by an \execplanner{} service SHOULD include details
-of all the authenticated identities that are allowed to use the offer.
+The result is that an offer made by an \execplanner{} service should only include details
+of the authenticated identities that are allowed to use the offer.
 
 If the original question is equivalent to:
 \textit{"Do \textbf{these identities} have sufficient access rights and quota to run this \jupyternotebook{}?"}
@@ -1464,7 +1426,7 @@ handles the authentication infomation it receives.
 This means that the \executionplanner{} services can be deployed in other domains outside the \ivoa{},
 without requiring them to adopt the full \ivoa{} SSO standard.
 
-\subsection{Date and time}
+\section{Date and time}
 \label{date-time}
 
 The \codeword{datetime} part of the \datamodel{} enables the client and server to have a
@@ -1622,22 +1584,22 @@ Even if all of the other parameters are the same, e.g. compute and storage resou
 Technically the \datamodel allows an array of values for the \codeword{datetime} section,
 but this would impose unnecessary complexity on the client for no real gain in user experience.
 
-\subsection{Triggers and callouts}
+\section{Triggers and callouts}
 \label{triggers-callouts}
 
 The final part of the \datamodel{} enables the client to set up
 \webservice{} API calls both to and from the \execplanner{} service
 that can be used to control the state of a \job{}.
 
-\subsubsection{Actions and triggers}
+\subsection{Actions and triggers}
 \label{triggers}
 
 The \codeword{triggers} section of the \datamodel{} allows the client to
 set up \webservice{} endpoints that will trigger actions that control the
 state of a \job{} in an \execworker service.
 
-The simplest of these \webservice{} calls is a \codeword{value-update} endpoint.
-This sets up a \codeword{POST} \webservice{} endpoint that a remote system can
+The simplest of these \webservice{} calls is a \codeword{value-update} service.
+This is a \codeword{POST} \webservice{} endpoint that a remote system can
 call with a set of name-value pairs.
 
 \begin{lstlisting}[]
@@ -1707,7 +1669,9 @@ from the beginning of the start time range. This means the \job{} is ready to st
 If the start time range expires before the trigger has been called, the resources are released as normal
 when the \job{} is cancelled.
 
-\subsubsection{Remote callouts}
+%TODO rename callouts actions, and add an email example too.
+
+\subsection{Remote callouts}
 \label{callouts}
 
 The \codeword{callouts} part of the \datamodel{} forms the other half of a callout-trigger pair,
@@ -1715,20 +1679,22 @@ enabling a client to set up \webservice{} API calls to remote services that the 
 call at specific points in the lifecycle of a \job{}.
 
 The following definition asks the \execplanner{} service to \codeword{POST} the name-value list defined in the
-\codeword{content} template to a remote \webservice{} endpoint when the status of this \job{} changes to be one
-of \codeword{RUNNING}, \codeword{COMPLETED}, \codeword{FAILED} or \codeword{CANCELLED}.
+\codeword{content} template to a remote \webservice{} endpoint when the status of this \job{} changes.
 
 \begin{lstlisting}[]
 ....
 callouts:
 - name: "callout-001"
+  status:
+  - 'RUNNING'
+  - 'COMPLETED'
+  - 'FAILED'
+  - 'CANCELLED'
   type: "https://www.purl.org/ivoa.net/webservice-types/value-update"
   spec:
-    triggers:
-    - state: "RUNNING,COMPLETED,FAILED,CANCELLED"
     method: "POST"
     endpoint: "http://ws.example.org/update"
-    content-type: "yaml
+    content-type: "application/yaml
     content: |
       name:  {{job.name}}
       date:  {{system.date}}
@@ -1749,7 +1715,7 @@ along with the current local system time on the \execplanner{} service sending t
 In a normal execution sequence, this callout would be called twice. Once when the \job{} \codeword{status}
 is set to \codeword{RUNNING}, and again when the \job{} \codeword{status} is set to \codeword{COMPLETED}.
 
-\subsubsection{Linked worflow}
+\subsection{Linked worflow}
 \label{linked-worflow}
 
 The following example describes how the callout and trigger functions can be used to
@@ -1813,10 +1779,13 @@ resources:
   ...
 callouts:
 - name: "callout-001"
+  status:
+  - 'RUNNING'
+  - 'COMPLETED'
+  - 'FAILED'
+  - 'CANCELLED'
   type: "https://www.purl.org/ivoa.net/webservice-types/value-update"
   spec:
-    triggers:
-    - status: "RUNNING,COMPLETED,FAILED,CANCELLED"
     method: "POST"
     endpoint: "https://..../offer-001/trigger-001"
     content-type: "yaml
@@ -1981,65 +1950,7 @@ Finally, the \codeword{managed} \vospace{} storage location is automatically
 deleted a day after the completion of step-a by the \execplanner{} service
 that was assigned to manage its lifecycle.
 
-\section{Separation of concerns}
-\label{separate-concerns}
-
-Separate who knows what ..
-The players:
-\begin{itemize}
-    \item The researcher who creates the notebook
-    \item The developer who creates the container
-    \item The publisher who publishes the data
-    \item The user who is running the analysis
-\end{itemize}
-
 \pagebreak
-
-\section{Request and response}
-\label{request-response}
-
-Details of the request and response messages.
-Timeline of request, offer and accept.
-
-\subsection{ExecutionPlanner}
-\label{execution-planner}
-
-Simple \codeword{POST} REST webservice.
-Single parameter, the \job{} description.
-
-Response contains a simple \codeword{YES} or \codeword{NO}
-and a list of offers for how the \job{} can be executed on this platform.
-
-
-
-\subsection{ExecutionWorker}
-\label{execution-worker}
-
-Derived from IVOA UWS, using a similar \datamodel{}.
-
-Accepting an offer on an \execplanner{} creates a job on the associated \execworker{},
-with status PENDING until the \job{} is started automatically at the designated time.
-
-The offer from the \execplanner{} will contain the URL \job{} in the \execworker{}.
-
-\begin{itemize}
-    \item \execplanner{} is responsible for creating and starting the \job{}.
-    \item Client can use a HEAD request to check network access at anytime.
-    \item Client can use a GET request to check the status of the \job{} at anytime.
-    \item Client can cancel the \job{} at anytime.
-\end{itemize}
-
-\pagebreak
-
-\section{General requirements}
-\label{general-requirements}
-
-\begin{itemize}
-    \item ....
-    \item ....
-    \item ....
-\end{itemize}
-
 
 \section{Federated architecture}
 \label{federation}
@@ -2239,6 +2150,811 @@ A complex Spark cluster analysis launched as a single task.
 ...
 
 \pagebreak
+
+\section{Service specification}
+\label{service-specification}
+
+Details of the request and response messages.
+Timeline of request, offer and accept.
+
+\subsection{General requirements}
+\label{general-requirements}
+
+\begin{itemize}
+    \item ....
+    \item ....
+    \item ....
+\end{itemize}
+
+\subsection{ExecutionPlanner}
+\label{execution-planner-spec}
+
+The main \execplanner{} \webservice{} implements two interfaces;
+a \codeword{POST} method for sending requests, and a \codeword{GET/POST}
+interface for accessing offers and updating their status.
+
+\subsubsection{Request method}
+\label{execution-planner-request}
+
+The main \execplanner{} \webservice{} method is a \codeword{POST} \webservice{} that accepts
+a \codeword{request} as defined in section \ref{datamodel-request} of the \datamodel{}.
+
+An \execplanner{} \webservice{} MUST be able to accept both \yaml{} or \json{} serializations
+of the \codeword{request}.
+The serialization SHOULD be declared in the HTTP request using the \codeword{Content-Type} header.
+\begin{itemize}
+    \item \codeword{application/yaml} for \yaml{}.
+    \item \codeword{application/json} for \json{}.
+    \item If the serialization is not declared, the default is assumed to be \yaml{}.
+    \item If the both \yaml{} and \json{} are declared, the default is assumed to be \yaml{}.
+\end{itemize}
+
+\begin{lstlisting}[]
+POST /request HTTP/1.1
+Host: foo.example.org
+Content-Type: application/yaml
+
+request:
+  executable:
+    ....
+  resources:
+    ....
+\end{lstlisting}
+
+\begin{lstlisting}[]
+POST /request HTTP/1.1
+Host: foo.example.org
+Content-Type: application/json
+
+"request": {
+  "executable": {
+    ....
+    }
+  "resources": {
+    ....
+    }
+  }
+\end{lstlisting}
+
+The \execplanner{} service will evaluate the request and respond with either a positive
+or negative \codeword{response} depending on whether the platform is able to execute the
+task descibed in the \codeword{request}.
+
+An \execplanner{} service MUST be able to provide both \yaml{} and \json{} serializations
+of the \codeword{response}.
+The serialization is determined by the \codeword{Accept} header in the HTTP request.
+\begin{itemize}
+    \item \codeword{application/yaml} for \yaml{}.
+    \item \codeword{application/json} for \json.
+    \item If the serialization is not declared, the default is assumed to be \yaml{}.
+    \item If the both \yaml{} and \json{} are declared, the default is assumed to be \yaml{}.
+\end{itemize}
+
+If the platform IS able to execute the task, then the \webservice{} will respond with a
+HTTP response code \codeword{200} and a positive \codeword{response} content as defined
+in section \ref{datamodel-positive-response}.
+
+\begin{lstlisting}[]
+HTTP/1.1 200 OK
+Content-Type: application/yaml; charset=utf-8
+
+response:
+  result: 'YES'
+  offers:
+    ....
+\end{lstlisting}
+
+If the platform IS NOT able to execute the task, then the \webservice{} will respond with a
+HTTP response code \codeword{200} and a negative \codeword{response} content as defined
+in section \ref{datamodel-negative-response}.
+
+\begin{lstlisting}[]
+HTTP/1.1 200 OK
+Content-Type: application/yaml; charset=utf-8
+
+response:
+  result: 'NO'
+  reasons:
+    ....
+\end{lstlisting}
+
+The \codeword{request} method is NOT idempotent. Sending the same \codeword{POST} request
+twice MAY return different results.
+
+\begin{itemize}
+    \item The list of offers in a response depends on the resources available at the point when the request is made.
+    \item Sending a request generates a new list of offers.
+    Those offers will contain references to resources that are reserved for the lifetime of the \codeword{offer}.
+    \item If a second request is made soon after the first request,
+    then the offers made in response to the first request may still be active.
+    In which case, the resources listed in those offers may still be reserved,
+    reducing the resources available for the second request.
+    \item If a second request is made some time after the first, then
+    other users may have requested and accepted offers reducing the resources available for the second request,
+    or the platform may have completed some tasks, increasing the resources available for the second request.
+\end{itemize}
+
+\subsubsection{Offer GET}
+\label{execution-planner-offer-get}
+
+The \codeword{offer} \codeword{GET} method requests the current state of an offer.
+The identifier for the offer is encoded in the URL of the HTTP request by appending the
+identifier to the path of the HTP request URL.
+
+\begin{lstlisting}[]
+http[s]://foo.example.org/offers/{identifier}
+\end{lstlisting}
+
+The \datamodel{} for the content of the \codeword{offer} response is described in section
+\ref{datamodel-offer}.
+
+An \execplanner{} service MUST be able to provide both \yaml{} and \json{} serializations
+of the \codeword{offer}.
+The serialization is determined by the \codeword{Accept} header in the HTTP request.
+\begin{itemize}
+    \item \codeword{application/yaml} for \yaml{}.
+    \item \codeword{application/json} for \json.
+    \item If the serialization is not declared, the default is assumed to be \yaml{}.
+    \item If the both \yaml{} and \json{} are declared, the default is assumed to be \yaml{}.
+\end{itemize}
+
+\begin{lstlisting}[]
+GET /offers/2c89f536-3fff-48f7-943f-bcc5c3225be7 HTTP/1.1
+Host: foo.example.org
+Accept: application/yaml
+\end{lstlisting}
+
+\begin{lstlisting}[]
+HTTP/1.1 200 OK
+Content-Type: application/yaml; charset=utf-8
+
+offer:
+  ident: "2c89f536-3fff-48f7-943f-bcc5c3225be7"
+  status: 'OFFERED'
+  expires: "2023-09-18T07:05:21"
+  request:
+    executable:
+      ....
+    resources:
+      ....
+\end{lstlisting}
+
+\subsubsection{Offer POST}
+\label{execution-planner-offer-post}
+
+The \codeword{offer} \codeword{POST} method provides the client with a method for
+updating the status of an \codeword{offer}.
+
+The identifier for the offer is encoded in the URL of the HTTP request by appending the
+identifier to the path of the HTP request URL.
+
+\begin{lstlisting}[]
+http[s]://foo.example.org/offers/{identifier}
+\end{lstlisting}
+
+The content of the \codeword{POST} method should contain the properties
+of the \codeword{offer} that the client wants to change, as defined by
+the \codeword{offer} \datamodel{} in section \ref{}.
+\begin{itemize}
+    \item Currently, only the \codeword{status} of an \codeword{offer} is modifiable.
+    \item The \codeword{POST} data MAY contain the \codeword{offer} \codeword{ident}.
+    \begin{itemize}
+        \item If the \codeword{offer} \codeword{ident} is presnet it MUST match the identifier used in the URL.
+    \end{itemize}
+\end{itemize}
+
+An \execplanner{} \webservice{} MUST be able to accept both \yaml{} or \json{} serializations
+of the \codeword{offer}.
+The serialization SHOULD be declared in the HTTP request using the \codeword{Content-Type} header.
+\begin{itemize}
+    \item \codeword{application/yaml} for \yaml{}.
+    \item \codeword{application/json} for \json{}.
+    \item If the serialization is not declared, the default is assumed to be \yaml{}.
+    \item If the both \yaml{} and \json{} are declared, the default is assumed to be \yaml{}.
+\end{itemize}
+
+\begin{lstlisting}[]
+POST /offers/2c89f536-3fff-48f7-943f-bcc5c3225be7 HTTP/1.1
+Host: foo.example.org
+Content-Type: application/yaml
+
+offer:
+  ident: "2c89f536-3fff-48f7-943f-bcc5c3225be7"
+  status: 'ACCEPTED'
+\end{lstlisting}
+
+If the update is successful, the content of the response is the updated state of the \codeword{offer}.
+The serialization of the response is determined by the \codeword{Accept} header in the HTTP request
+using the same rules as the \codeword{GET} method.
+
+\begin{lstlisting}[]
+HTTP/1.1 200 OK
+Content-Type: application/yaml; charset=utf-8
+
+offer:
+  ident: "2c89f536-3fff-48f7-943f-bcc5c3225be7"
+  status: 'ACCEPTED'
+  expires: "2023-09-18T07:05:21"
+  request:
+    executable:
+      ....
+    resources:
+      ....
+\end{lstlisting}
+
+If the update is not successful, the content of the response ... TBD ...
+
+
+\subsection{ExecutionWorker}
+\label{execution-worker-spec}
+
+Accepting an offer from an \execplanner{} service creates a \job{} on an associated \execworker{},
+with status \codeword{PENDING} until the \job{} is started automatically by the \execworker{}.
+
+The offer from the \execplanner{} will contain the URL \job{} in the \execworker{}.
+
+\begin{itemize}
+    \item \execplanner{} is responsible for creating and starting the \job{}.
+    \item Client can use a HEAD request to check network access at anytime.
+    \item Client can use a GET request to check the status of the \job{} at anytime.
+    \item Client can cancel the \job{} at anytime.
+\end{itemize}
+
+\pagebreak
+
+\section{The \datamodel{}}
+\label{datamodel}
+
+The following section describes the core \datamodel{} using a YAML syntax
+to define the structure with comments to describe the elements.
+
+Note that this does not tie the \execplanner specification to a YAML representation.
+The intention is to define a portable \datamodel{} that can be serialised
+into a number of different formats, including YAML, JSON and XML.
+
+\subsection{Type URIs and specifications}
+\label{type-and-spec}
+
+Several parts of the \ivoa{} \executionplanner{} \datamodel{} follow a common pattern, using a URI
+to identify a \codeword{type} followed a \codeword{spec} section to fill in the details.
+This pattern is adopted from a similar pattern used by \kubernetes{}.
+
+\begin{lstlisting}[]
+# A URI to identify the type of thing.
+type: "uri:type-a"
+
+# Type specific details about the thing.
+spec:
+  name: "...."
+  size: "...."
+  ....
+\end{lstlisting}
+
+However, the \executionplanner{} \datamodel{} specifically recomends using a long lasting resolvable
+HTTP URL as the type identifier.
+
+\begin{lstlisting}[]
+# A URL to identify the type of thing.
+type: "http://www.example.com/type-a"
+
+# Type specific details about the thing.
+spec:
+  name: "...."
+  size: "...."
+  ....
+\end{lstlisting}
+
+The reasoning behind this is that if a service provider notices several clients are requesting
+\textit{'encabulation'} on their compute nodes, the service provider may not know what this means.
+However, if we use a resolvable URL to identify the type, a service provider can use it to find a
+human readable description\footurl{https://tinyurl.com/encabulation} and decide whether they want
+to provide it on their platform.
+
+To the \webservice{} implementation, both of these requests are just a simple string comparison against a
+dictionary of known terms:
+
+\begin{lstlisting}[]
+Request  - Can you provide 'encabulation' ?
+Response - YES|NO
+\end{lstlisting}
+
+\begin{lstlisting}[]
+Request  - Can you provide 'https://tinyurl.com/encabulation' ?
+Response - YES|NO
+\end{lstlisting}
+
+The second form provides a simple mechanism for linking the type identifier to a human readable description.
+
+While it is possible to use \ivoa{} registry URIs to identify types, this specification
+recomends using a simple HTTP URLs. This lowers the barrier to entry and makes it simpler for the end user
+to resolve the URL into a description.
+
+\subsection{\execplanner{} request}
+\label{datamodel-request}
+
+The main section of the \execplanner{} \datamodel{} describes the \codeword{request} block,
+which describes an \executablething{} and the resources needed to execute it.
+\\
+\\
+The \codeword{request} block is used in several places in the \datamodel{}:
+\begin{itemize}
+    \item The main body of an \execplanner{} \codeword{request}.
+    \item The main body of each \codeword{offer} in an \execplanner{} response.
+    \item The main body of an \execworker{} \job{} record.
+\end{itemize}
+
+\subsubsection{Executable}
+\label{datamodel-executable}
+
+The \codeword{executable} section of the \codeword{request} block describes the \executablething{}.
+The core \datamodel{} simply defines this section as containing a URI identifying the \codeword{type} of executable,
+and a \codeword{spec} placeholder for the type specific details.
+
+\begin{lstlisting}[]
+request:
+  executable:
+    # A URI identifying the executable type.
+    type: !!str
+    # Type specific details of the executable type.
+    spec:
+      ....
+\end{lstlisting}
+
+The content of the \codeword{spec} section depends on the \codeword{type} of executable.
+The core \datamodel{} defines 4 types of \executable{};
+\jupyter{} and \zeppelin{} notebooks, and OCI (Docker) and \singularity{} containers.
+The structure is designed to make it easy for 3rd parties to extend the \datamodel{}
+by defining their own types of \executable{}.
+
+\subsubsection{Jupyter notebook}
+\label{datamodel-jupyter-notebook}
+
+The \datamodel{} extension for a \jupyternotebook{} defines the URL
+to identify the \codeword{type}:
+\begin{lstlisting}[]
+https://www.purl.org/ivoa.net/executable-types/jupyter-notebook
+\end{lstlisting}
+\hfill \break
+The \datamodel{} extension for a \jupyternotebook{} contains:
+\begin{itemize}
+    \item A URL to download the \codeword{notebook} from.
+    \item An optional URL to download a \codeword{requirements} file that lists any additional
+    \python{} modules needed by the notebook.
+    \begin{itemize}
+        \item The syntax of the \codeword{requirements} file is defined by the \codeword{pip}
+        Requirements File Format\footurl{https://pip.pypa.io/en/stable/reference/requirements-file-format/}.
+        \item The URL for the \codeword{requirements} file may be an absolute URL, or a relative URL based on the notebook URL.
+    \end{itemize}
+    \item An \codeword{endpoint} URL that points to the live notebook platform.
+    \begin{itemize}
+        \item The \codeword{endpoint} URL is set by the \execworker{} once the \job{} is \codeword{READY}.
+    \end{itemize}
+\end{itemize}
+
+\begin{lstlisting}[]
+request:
+  executable:
+    # A URL identifying the executable type.
+    type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
+    # Type specific details of the executable type.
+    spec:
+      # A URL pointing to the notebook source code.
+      notebook: !!str
+      # A URL pointing to an optional requirements file.
+      requirements: !!str
+      # A URL pointing to the live notebook interface.
+      endpoint: !!str
+\end{lstlisting}
+
+\subsubsection{Zeppelin notebook}
+\label{datamodel-zeppelin-notebook}
+
+The \datamodel{} extension for a \zeppelin{} notebook defines the URL
+to identify the \codeword{type}:
+\begin{lstlisting}[]
+https://www.purl.org/ivoa.net/executable-types/zeppelin-notebook
+\end{lstlisting}
+\hfill \break
+The \datamodel{} extension for a \zeppelin{} notebook contains:
+\begin{itemize}
+    \item A URL to download the \codeword{notebook} from.
+    \item An optional URL to download a \codeword{requirements} file that lists any additional
+    \python{} modules needed by the notebook.
+    \begin{itemize}
+        \item The syntax of the \codeword{requirements} file is defined by the \codeword{pip}
+        Requirements File Format\footurl{https://pip.pypa.io/en/stable/reference/requirements-file-format/}.
+        \item The URL for the \codeword{requirements} file may be an absolute URL, or a relative URL based on the notebook URL.
+    \end{itemize}
+    \item An \codeword{endpoint} URL that points to the live notebook platform.
+    \begin{itemize}
+        \item The \codeword{endpoint} URL is set by the \execworker{} once the \job{} is \codeword{READY}.
+    \end{itemize}
+\end{itemize}
+
+\begin{lstlisting}[]
+request:
+  executable:
+    # A URL identifying the executable type.
+    type: "https://www.purl.org/ivoa.net/executable-types/zeppelin-notebook"
+    # Type specific details of the executable type.
+    spec:
+      # A URL pointing to the notebook source code.
+      notebook: !!str
+      # A URL pointing to an optional requirements file
+      requirements: !!str
+      # A URL pointing to the live notebook interface.
+      endpoint: !!str
+\end{lstlisting}
+
+\subsubsection{OCI container}
+\label{datamodel-oci-container}
+
+The \datamodel{} extension for an \oci{} (Docker) container defines the URL
+to identify the \codeword{type}:
+\begin{lstlisting}[]
+https://www.purl.org/ivoa.net/executable-types/oci-container
+\end{lstlisting}
+\hfill \break
+The \datamodel{} extension for an \ocicontainer{} contains:
+\begin{itemize}
+    \item The \codeword{repo} endpoint address of the repository to download the container image from.
+    \item The name of the \codeword{image} to download.
+    \item The \codeword{tag} identifier to specify which version to download.
+    \item The \codeword{digest} identifier to specify which version to download.
+    \item An optional list of \codeword{platform} elements which contain:
+    \begin{itemize}
+        \item The operating system, \codeword{os}, that the container is built for (default \codeword{linux}).
+        \item The system \codeword{architecture} that the container is built for (default \codeword{amd64}).
+    \end{itemize}
+
+    % TODO how to specify the network ports.
+
+\end{itemize}
+
+\begin{lstlisting}[]
+request:
+  executable:
+    # A URL identifying the executable type.
+    type: "https://www.purl.org/ivoa.net/executable-types/oci-container"
+    # Type specific details of the executable type.
+    spec:
+      # The repository to download the image from.
+      repo: !!str
+      # The name of the container image.
+      image: !!str
+      # The image tag to specify the version.
+      tag: !!str
+      # The image digest to specify the version.
+      digest: !!str
+      # Details of the platform(s) that the container is built for.
+      platforms:
+      - # The system architecture the container is built for.
+        architecture: !!str # default: "amd64".
+        # The operating system the container is built for.
+        os: !!str # default: "linux".
+\end{lstlisting}
+
+\subsubsection{Singularity container}
+\label{datamodel-singularity-container}
+
+The \datamodel{} extension for a \singularity{} container defines the URL
+to identify the \codeword{type}:
+\begin{lstlisting}[]
+https://www.purl.org/ivoa.net/executable-types/singularity-container
+\end{lstlisting}
+\hfill \break
+The \datamodel{} extension for a \singularity{} contains:
+\begin{itemize}
+    \item ....
+\end{itemize}
+
+\begin{lstlisting}[]
+request:
+  executable:
+    # A URL identifying the executable type.
+    type: "https://www.purl.org/ivoa.net/executable-types/oci-container"
+    # Type specific details of the executable type.
+    spec:
+      ....
+      ....
+\end{lstlisting}
+
+\subsubsection{Resources}
+\label{datamodel-resources}
+
+The \codeword{resources} section of the \codeword{request} block describes the resources needed
+to execute the task.
+
+The \codeword{resources} section contains two lists of resources, one for
+\codeword{compute} resources and one for \codeword{storage} resources.
+Separating these into two lists enables many-to-many relationships between the \codeword{compute}
+and \codeword{storage} resources.
+
+\begin{lstlisting}[]
+request:
+  # Details of the executable
+  executable:
+    ....
+    ....
+  # Details of the resources
+  resources:
+    # List of compute resources
+    compute:
+      ....
+      ....
+    # List of storage resources
+    storage:
+      ....
+      ....
+\end{lstlisting}
+
+\subsubsection{Compute resources}
+\label{datamodel-compute-resources}
+
+The \datamodel{} for a \codeword{compute} resource contains:
+\begin{itemize}
+    \item A \codeword{name} for the resource, unique within the \codeword{request}.
+    \item An optional count of how many \codeword{replicas} of the resource are needed.
+    \item A URL identifying the \codeword{type} of resource.
+    \item A \codeword{spec} placeholder for the type specific details.
+\end{itemize}
+
+\begin{lstlisting}[]
+request:
+  resources:
+    compute:
+    - # A unique name for this compute resource.
+      name: !!str
+      # A count of how many replicas are needed.
+      replicas: !!int # default: 1
+      # A URI identifying the compute resource type.
+      type: !!str
+      # Type specific details of the compute resource.
+      spec:
+        ....
+        ....
+\end{lstlisting}
+
+The \datamodel{} structure is designed to make it easy for 3rd parties
+to extend the \datamodel{} by defining their own types of computing
+resources.
+
+\subsubsection{Generic compute resources}
+\label{datamodel-generic-compute}
+
+The core \datamodel{} defines a generic computing resource
+that has cpu cores, memory and a hierarchical filesystem.
+This represents a common abstraction of a virtual machine,
+an OCI container runtime or a \kubernetes{} Pod.
+
+The data model for a generic computing resource defines the URL to identify
+the type:
+\begin{lstlisting}[]
+https://www.purl.org/ivoa.net/resource-types/generic-compute
+\end{lstlisting}
+\hfill \break
+The \codeword{spec} for a generic computing resource may contain the following optional properties:
+\begin{itemize}
+    \item The minimum number of cpu cores needed, set by the client in the \execplanner{} \codeword{request}.
+    \item The maximum number of cpu cores available, set by the \execplanner{} service in an \codeword{offer}.
+    \item The minimum amount of memory needed (in GiB), set by the client in the \execplanner{} \codeword{request}.
+    \item The maximum amount of memory available (in GiB), set by the \execplanner{} service in an \codeword{offer}.
+\end{itemize}
+
+\begin{lstlisting}[]
+request:
+  resources:
+    compute:
+    - # A unique name for this compute resource.
+      name: !!str
+      # A count of how many replicas are needed.
+      replicas: !!int # default: 1
+      # A URL identifying the compute resource type.
+      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
+      spec:
+        # The minimum number of cpu cores needed.
+        mincores: !!float # default: 1
+        # The maximum number of cpu cores available.
+        maxcores: !!float # default: mincores
+        # The minimum amount of memory needed, in GiB.
+        minmemory: !!float # default: 1
+        # The maximum amount of memory available, in GiB.
+        maxmemory: !!float # default: minmemory
+        ....
+\end{lstlisting}
+
+The \codeword{spec} for a generic computing resource may contain
+a list of \codeword{volumes} that describe how a storage resource
+should be mounted in the compute resource's filesystem.
+
+\hfill \break
+Each \codeword{volume} element contains:
+\begin{itemize}
+    \item A \codeword{name} for the volume, unique within this \codeword{request}.
+    \item A reference (by name) to the corresponding storage \codeword{resource}.
+    \item The \codeword{path} that the volume should be mounted at in the compute resource's filesystem.
+    \item The read write access mode ('\codeword{rw}' for read and write, or '\codeword{ro}' for read only).
+\end{itemize}
+
+\begin{lstlisting}[]
+request:
+  resources:
+    compute:
+    - # A unique name for this compute resource.
+      name: !!str
+      # A count of how many replicas are needed.
+      replicas: !!int # default: 1
+      # A URL identifying the compute resource type.
+      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
+      spec:
+        ....
+        # A list of volume mounts.
+        volumes:
+        - # A unique name for this volume.
+          name: !!str
+          # The name of the storage resource this volume is linked to.
+          resource: !!str
+          # The path in the compute resource's filesystem.
+          path: !!str
+          # The access mode, 'rw' or 'ro'.
+          mode: !!str
+\end{lstlisting}
+
+\subsubsection{Storage resources}
+\label{datamodel-storage-resources}
+
+\begin{lstlisting}[]
+....
+....
+\end{lstlisting}
+
+\subsubsection{Authentication}
+\label{datamodel-authentication}
+
+\begin{lstlisting}[]
+....
+....
+\end{lstlisting}
+
+\subsubsection{DateTime}
+\label{datamodel-datetime}
+
+\begin{lstlisting}[]
+....
+....
+\end{lstlisting}
+
+\subsubsection{Triggers}
+\label{datamodel-triggers}
+
+\begin{lstlisting}[]
+....
+....
+\end{lstlisting}
+
+\subsubsection{Callouts}
+\label{datamodel-callouts}
+
+\begin{lstlisting}[]
+....
+....
+\end{lstlisting}
+
+\subsection{Response}
+\label{datamodel-response}
+
+\subsubsection{Positive response}
+\label{datamodel-positive-response}
+A positive (yes, this platform can execute the task) \execplanner{} service response contains \codeword{result}
+set to \codeword{YES}, and a list of offers.
+
+\subsubsection{Offer}
+\label{datamodel-offer}
+
+Each offer contains a unique identifier a status value and an expiry time for the offer
+followed by an updated copy of the \codeword{request} with details
+filled in by the \execplanner{} service.
+
+The \codeword{offer} \codeword{status} ....
+
+\begin{lstlisting}[]
+response:
+  # The top level result.
+  result: !!str 'YES'
+  # A list of offers to match the request.
+  offers:
+  - # Unique identifier for this offer.
+    ident:  !!str
+    # Status of this offer.
+    status: !!str # [OFFERED, ACCEPTED, REJECTED, EXPIRED]
+    # Expiry date for this offer.
+    expires: !!str # ISO 8601 date time
+    # An updated copy of the request body.
+    request:
+      executable:
+        ....
+      resources:
+        ....
+      datetime:
+        ....
+\end{lstlisting}
+
+\subsubsection{Negative response}
+\label{datamodel-negative-response}
+
+A negative (no, this platform cannot execute the task) \execplanner{} service response contains \codeword{result}
+set to \codeword{NO}, followed by an optional list of reasons
+explaining why the request was rejected.
+
+Each \codeword{reason} consists of a \datamodel{} path to an element in the original
+\codeword{request} and a text message explaining why the element was rejected.
+
+\begin{lstlisting}[]
+response:
+  # The top level result.
+  result: !!str 'NO'
+  # A list of reasons explaining why the request was rejected.
+  reasons:
+  - # The path to an element in the request body
+    path: !!str
+    # A text message why the element was rejected.
+    text: !!str
+\end{lstlisting}
+
+%TODO more examples of reasons ...
+
+\subsection{Job}
+\label{datamodel-job}
+
+An \execworker{} \workerjob{} record consists of a unique identifier for the job,
+and a \codeword{phase} indicating what execution stage the \workerjob{} has reached.
+Followed by an updated copy of the request \codeword{body} from the \execplanner{}
+offer with details filled in by the \execworker{} as the \workerjob{} is executed.
+
+\begin{lstlisting}[]
+job:
+  # A unique identifier for this job
+  ident: !!str
+  # The current execution phase.
+  phase: !!str
+  # An updated copy of the request body
+  request:
+    executable:
+      ....
+    resources:
+      ....
+    datetime:
+      ....
+\end{lstlisting}
+
+\subsection{Extensions}
+\label{datamodel-extensions}
+
+\begin{lstlisting}[]
+....
+....
+\end{lstlisting}
+
+\subsubsection{nvidia gpu}
+\label{datamodel-nvidia-gpu}
+
+\begin{lstlisting}[]
+....
+....
+\end{lstlisting}
+
+\subsubsection{Xilinx FPGA}
+\label{datamodel-xilinx-fpga}
+
+\begin{lstlisting}[]
+type: "https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p"
+# The details, specific to a 'Xilinx FPGA'.
+....
+....
+\end{lstlisting}
+
+
+\pagebreak
 \appendix
 \section{Changes from Previous Versions}
 
@@ -2296,7 +3012,11 @@ https://github.com/Zarquan/ExecutionPlanner/blob/main/types/authentication-types
 https://www.purl.org/ivoa.net/webservice-types/value-update
 https://github.com/Zarquan/ExecutionPlanner/blob/main/types/webservice-types/value-update.md
 
+YAML specification
+https://yaml.org/spec/
 
+YAML timestamp
+https://yaml.org/type/timestamp.html
 
 % NOTE: IVOA recommendations must be cited from docrepo rather than ivoabib
 % (REC entries there are for legacy documents only)
