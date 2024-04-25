@@ -7,7 +7,7 @@
 name: Check the IVOA document
 
 env:
-  doc_name: ExecutionPlanner
+  doc_name: ExecutionBroker
 
 on:
   pull_request:

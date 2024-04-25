@@ -7,7 +7,7 @@
 name: Update PDF Preview
 
 env:
-  doc_name: ExecutionPlanner
+  doc_name: ExecutionBroker
 
 on:
   push:
