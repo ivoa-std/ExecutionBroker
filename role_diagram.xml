@@ -98,7 +98,7 @@ of the various sections) to have the box centered.
   <!-- GWS: all over the place -->
   <rec name="SSO" x="450" y="115" w="31"/>
   <rec name="VOSpace" x="173" y="460" w="54"/>
-  <thisrec name="ExecutionPlanner" x="245" y="460" w="85"/>
+  <thisrec name="ExecutionBroker" x="245" y="460" w="85"/>
   <rec name="CDP" x="500" y="115" w="31"/>
   <rec name="UWS" x="633.5" y="460" w="33"/>
   <rec name="GMS" x="534" y="460" w="32"/>

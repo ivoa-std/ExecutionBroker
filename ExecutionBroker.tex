@@ -15,16 +15,16 @@
 \newcommand{\http} {HTTP}
 
 \newcommand{\datamodel} {data~model}
-\newcommand{\webservice} {webservice}
+\newcommand{\webservice} {web service}
 \newcommand{\webbrowser} {web browser}
 
 \newcommand{\ivoa} {IVOA}
 \newcommand{\uws} {UWS}
 \newcommand{\vospace} {VOSpace}
 
-\newcommand{\execplanner} {ExecutionPlanner}
-\newcommand{\execworker} {ExecutionWorker}
-\newcommand{\executionplanner} {Execution~Planner}
+\newcommand{\execbrokerclass} {ExecutionBroker}
+\newcommand{\execworkerclass} {ExecutionWorker}
+\newcommand{\executionbroker} {Execution~Broker}
 \newcommand{\executionplanning} {Execution~Planning}
 
 \newcommand{\jupyter} {Jupyter}
@@ -146,7 +146,7 @@
 
 \hyphenation{Exe-cut-able-Thing}
 
-\title{IVOA Execution Planner}
+\title{IVOA Execution Broker}
 
 % see ivoatexDoc for what group names to use here; use \ivoagroup[IG] for
 % interest groups.
@@ -175,13 +175,13 @@ of the \dataset{}s available in the virtual observatory increases.
 %\footurl{https://www.skao.int/en/explore/big-data}
 %\footurl{https://www.lsst.org/scientists/keynumbers}
 
-The \ivoa{} \executionplanner{} provides a step towards making this possible.
+The \ivoa{} \executionbroker{} provides a step towards making this possible.
 
-The \ivoa{} \executionplanner{} is designed to address a specific question;
+The \ivoa{} \executionbroker{} is designed to address a specific question;
 given an executable thing, e.g. a \pythonprogram{} or \jupyternotebook{}.
 What facilities are available to run it?
 
-To do this, the \ivoa{} \executionplanner{} specification defines
+To do this, the \ivoa{} \executionbroker{} specification defines
 a \datamodel{} and \webservice{} API for describing executable things
 and the resources needed to execute them.
 
@@ -217,11 +217,11 @@ infrastructure that enable VO applications.
 \label{preface}
 
 The current version of this document contains a significant amount of exposition
-explaning the details of the ideas behind the design of the \ivoa{} \executionplanner{}.
+explaning the details of the ideas behind the design of the \ivoa{} \executionbroker{}.
 
 As we transition from 'one guy with a good idea' to a team of people building prototypes
 and implementing services we will develop a common understanding of how we want
-the \executionplanner{} to function.
+the \executionbroker{} to function.
 In the process, I hope we will be able to edit a lot of the exposition and explanation
 down to make a more concise and readable document.
 
@@ -236,8 +236,8 @@ At some point, this preface will no longer be required.
 \section{Introduction}
 \label{introduction}
 
-The \ivoa{} \executionplanner{} specification defines two \webservice{} interfaces,
-the \execplanner{} and the \execworker{}, and a common \datamodel{} for describing
+The \ivoa{} \executionbroker{} specification defines two \webservice{} interfaces,
+the \execbrokerclass{} and the \execworkerclass{}, and a common \datamodel{} for describing
 executable tasks.
 
 Together these provide a common interface for service discovery, resource allocation
@@ -245,9 +245,9 @@ and execution scheduling across a heterogeneous federation of different types of
 execution platform.
 
 \begin{itemize}
-    \item \execplanner{} \webservice{} – a discovery service to find execution platforms, allocate resources and schedule execution.
-    \item \execworker{} \webservice{} – an asynchronous service for executing tasks (based on the \ivoa{} \uws{} pattern).
-    \item \execplanner{} \datamodel{} – a common data model for describing an executable thing and its resource requirements.
+    \item \execbrokerclass{} \webservice{} – a discovery service to find execution platforms, allocate resources and schedule execution.
+    \item \execworkerclass{} \webservice{} – an asynchronous service for executing tasks (based on the \ivoa{} \uws{} pattern).
+    \item \execbrokerclass{} \datamodel{} – a common data model for describing an executable thing and its resource requirements.
 \end{itemize}
 
 \subsection{Role within the VO Architecture}
@@ -261,14 +261,14 @@ execution platform.
 \begin{figure}
 \centering
 \includegraphics[width=0.9\textwidth]{role_diagram.pdf}
-\caption{Architecture diagram showing the \ivoa{} \executionplanner{}'s role in the \ivoa}
+\caption{Architecture diagram showing the \ivoa{} \executionbroker{}'s role in the \ivoa}
 \label{fig:archdiag}
 \end{figure}
 
 The IVOA Architecture\citep{2010ivoa.rept.1123A} provides a high-level view of how IVOA
 standards work together to connect users and applications with providers of data
 and services.
-Fig.~\ref{fig:archdiag} shows the role the \ivoa{} \executionplanner{} plays within this architecture.
+Fig.~\ref{fig:archdiag} shows the role the \ivoa{} \executionbroker{} plays within this architecture.
 
 In response to the increasing size and complexity of the next generation of science \dataset{}s
 a number of \ivoa{} members are developing intergrated \scienceplatform{}s which bring
@@ -283,30 +283,30 @@ data transfers to and from local storage co-located with the compute resources.
 
 However, to date the \ivoa{} does not provide any APIs or \webservice{} interfaces that
 enable \scienceplatform{}s to exchange the software used to analyse the data.
-The \ivoa{} \executionplanner{} provides a step towards making this possible.
+The \ivoa{} \executionbroker{} provides a step towards making this possible.
 
-This places the \ivoa{} \executionplanner{} in the same region of the \ivoa{} architecture
+This places the \ivoa{} \executionbroker{} in the same region of the \ivoa{} architecture
 as the \ivoa{} \vospace{} specification \citep{2009ivoa.specQ1007G},
 providing an infrastructure level service that enables service discovery,
 resource allocation and execution scheduling across a heterogeneous federation
 of execution platforms.
 
-The \ivoa{} \executionplanner{} specification refers to the
+The \ivoa{} \executionbroker{} specification refers to the
 \ivoa{} Single-Sign-On standard \citep{2017ivoa.spec.0524T}
 for authentication (see section xx )%\ref{subsec:authentication}
 and the
 \ivoa{} Credential Delegation Protocol \citep{2010ivoa.spec.0218P}
 for delegating credentials to other services.
 
-The \ivoa{} \executionplanner{} specification also describes how to register
-an \execplanner{} service in the
+The \ivoa{} \executionbroker{} specification also describes how to register
+an \execbrokerclass{} service in the
 \ivoa{} Registry \citep{2009ivoa.spec.1104B},
 making it findable within the wider context of the VO.
 
 \subsection{Executable things}
 \label{executablething}
 
-To understand the problem that the \ivoa{} \executionplanner{} is trying to solve
+To understand the problem that the \ivoa{} \executionbroker{} is trying to solve
 it is useful to describe what an \executablething{} is in this context.
 In general terms, this document refers to something that can be executed, or run,
 as an \executable{}.
@@ -362,7 +362,7 @@ However, if we have a \dataset{} of ten million numbers that we want to process,
 need to consider adding extra storage to handle the input data and the results.
 For a large \dataset{} it may also be worth using a \gpu{} to accelerate the calculation steps.
 
-The \ivoa{} \executionplanner{} \datamodel{} provides a way to describe what each of these \executablething{}s
+The \ivoa{} \executionbroker{} \datamodel{} provides a way to describe what each of these \executablething{}s
 are and what resources are needed to execute them.
 This can include things like number of \cpu{} cores and amount of memory it needs,
 whether it needs a \gpu{}, the location of the input data, the storage space needed to perform
@@ -372,7 +372,7 @@ the calculation and the storage space needed to save the results.
 \label{service-interaction}
 
 The interaction between user, client and services can be described as a conversation between the client
-and one or more \execplanner{} services to discover where, how, and when, an \executablething{} can be
+and one or more \execbrokerclass{} services to discover where, how, and when, an \executablething{} can be
 executed.
 
 \subsection{Discovery services}
@@ -395,9 +395,9 @@ a particular clustering algorithm, or a \dataset{} that is indexed according to 
 coordinate system.
 The programming language the software is written in and the file format of the \dataset{}
 are at best secondary criteria.
-Ideally, if the \executionplanner{} services function as intended, a science user should not
+Ideally, if the \executionbroker{} services function as intended, a science user should not
 need to know about programming languages or file formats.
-The \executionplanner{} services should make all of the technical details invisible,
+The \executionbroker{} services should make all of the technical details invisible,
 enabling the science user to get on with science.
 
 The interfaces for the discovery services should be designed to be domain agnostic.
@@ -418,13 +418,13 @@ The players:
     \item The user who is running the analysis
 \end{itemize}
 
-\subsection{Execution planner}
-\label{execution-planner-desc}
+\subsection{Execution broker}
+\label{execution-broker-desc}
 
 Once the client has built a description of the \executablething{} the user wants to
 execute, it send the description to one or more
-\execplanner{} services, asking them if they can execute the task.
-Each \execplanner{} service evaluates the task and responds with a top level
+\execbrokerclass{} services, asking them if they can execute the task.
+Each \execbrokerclass{} service evaluates the task and responds with a top level
 \codeword{YES|NO} answer, and if
 the answer is \codeword{YES}, a list of offers describing how it
 could be executed on that platform.
@@ -442,7 +442,7 @@ followed by an updated copy of the request \codeword{body}
 describing when and how the task would be executed.
 
 \begin{lstlisting}[]
-# ExecutionPlanner service response.
+# ExecutionBroker service response.
 response:
   result: 'YES'
   offers:
@@ -470,7 +470,7 @@ response:
 
 The client can then ask its user to choose which of the offers best fits their requirements
 and replies with a message accepting the offer.
-In response, the \execplanner{} will initiate a \workerjob{} in an \execworker{} service
+In response, the \execbrokerclass{} will initiate a \workerjob{} in an \execworkerclass{} service
 to execute the task and reply with details of how to access it.
 
 %\begin{lstlisting}[]
@@ -480,60 +480,60 @@ to execute the task and reply with details of how to access it.
 
 \includegraphics[width=0.9\textwidth]{diagrams/accept-offer.pdf}
 
-Once the client has accepted an offer, the conversation between the client and the \execplanner{}
-is finished. Once one offer has been accepted, the \execplanner{} will cancel the other offers and
+Once the client has accepted an offer, the conversation between the client and the \execbrokerclass{}
+is finished. Once one offer has been accepted, the \execbrokerclass{} will cancel the other offers and
 release their resources.
-The client does not need to cancel the offers made by the other \execplanner{} services.
+The client does not need to cancel the offers made by the other \execbrokerclass{} services.
 Offers are only valid for a limited period of time and they will expire naturally when they reach
 the end of their lifetime.
 
-How the \execplanner{} and \execworker{} services are linked is up the implementation architecture.
+How the \execbrokerclass{} and \execworkerclass{} services are linked is up the implementation architecture.
 One implementation may package both service interfaces into a single web-application.
 
 \includegraphics[width=0.9\textwidth]{diagrams/single-webapp.pdf}
 
-Another implementation may package each of them as separate micro-services, with one \execplanner{}
-service providing the front-end for multiple \execworker{} services.
+Another implementation may package each of them as separate micro-services, with one \execbrokerclass{}
+service providing the front-end for multiple \execworkerclass{} services.
 
 \includegraphics[width=0.9\textwidth]{diagrams/micro-services.pdf}
 
 \subsection{Execution worker}
 \label{execution-worker-desc}
 
-The client can use the \workerjob{} details in the \execplanner{} response to contact
-the \execworker{} service and track its status.
+The client can use the \workerjob{} details in the \execbrokerclass{} response to contact
+the \execworkerclass{} service and track its status.
 
 \includegraphics[width=0.9\textwidth]{diagrams/job-status.pdf}
 
-A \workerjob{} in an \execworker{} service goes through the following stages in its lifecycle.
+A \workerjob{} in an \execworkerclass{} service goes through the following stages in its lifecycle.
 
 \begin{itemize}
     \item \codeword{PENDING}   The \workerjob{} has been created, but the resources have not be prepared yet.
-    \item \codeword{SETUP}     The \execworker{} service is setting up the resources needed to execute the \workerjob{}.
+    \item \codeword{SETUP}     The \execworkerclass{} service is setting up the resources needed to execute the \workerjob{}.
                                This includes things like staging any \dataset{}s that will be needed locally.
     \item \codeword{READY}     The \workerjob{} is ready and waiting to start.
     \item \codeword{RUNNING}   The \workerjob{} is running.
-    \item \codeword{TEARDOWN}  The execution has finished and the \execworker{} service is clearing up the resources that were used.
+    \item \codeword{TEARDOWN}  The execution has finished and the \execworkerclass{} service is clearing up the resources that were used.
                                This includes things like transferring the results to permanent storage and releasing local resources.
     \item \codeword{COMPLETED} The \workerjob{} has been completed.
     \item \codeword{FAILED}    The \workerjob{} failed to complete.
     \item \codeword{CANCELLED} The \workerjob{} was cancelled.
 \end{itemize}
 
-When a \execplanner{} creates a \workerjob{} in an \execworker{} service the
+When a \execbrokerclass{} creates a \workerjob{} in an \execworkerclass{} service the
 \workerjob{} starts with the \codeword{phase} set to \codeword{PENDING}.
 
-It is up to the \execworker{} to select the right time to change the \workerjob{}
+It is up to the \execworkerclass{} to select the right time to change the \workerjob{}
 \codeword{phase} to \codeword{SETUP} and start preparing the resources so that
 the \workerjob{} is \codeword{READY} in time for the \codeword{starttime} declared
 in the \execoffer{}.
 
 If it will take 2 hours to transfer the input \dataset{} specified in the \execplan{}
 from cold storage to live storage co-located with the compute resources,
-then the \execworker{} needs to start the \codeword{SETUP} phase at least 2 hours
+then the \execworkerclass{} needs to start the \codeword{SETUP} phase at least 2 hours
 before the \codeword{starttime} declared in the \execoffer{}.
 
-Once all the resources are ready, the \execworker{} changes the \workerjob{}
+Once all the resources are ready, the \execworkerclass{} changes the \workerjob{}
 \codeword{phase} to \codeword{READY} to indicate that the all the resources
 are ready and the \workerjob{} is waiting to start.
 
@@ -548,7 +548,7 @@ to indicate that the \workerjob{} is running.
 
 When the \workerjob{} finishes executing, because the \ocicontainer{} finished executing,
 the user closed their \jupyternotebook, or the \codeword{maxduration} was reached,
-the \execworker{} will change the \workerjob{} \codeword{phase} to \codeword{TEARDOWN} and
+the \execworkerclass{} will change the \workerjob{} \codeword{phase} to \codeword{TEARDOWN} and
 begin the process of releasing the resources.
 
 If the \execplan{} declared some persistent storage that will last beyond the end of the \workerjob{},
@@ -559,7 +559,7 @@ When the \teardown{} process completes, the \workerjob{} \codeword{phase} is cha
 
 If an error occurs at any time in the process, the \workerjob{} \codeword{phase} is changed to \codeword{FAILED}.
 This includes any errors that occur during the \teardown{} process; for example, because
-the \execworker{} was unable to transfer the results onto persistent storage.
+the \execworkerclass{} was unable to transfer the results onto persistent storage.
 Then the \workerjob{} \codeword{phase} is changed to \codeword{FAILED}, even if the main part of the
 execution completed successfully.
 This is because any workflow steps that follow after this step, will depend not only on the execution being
@@ -588,9 +588,9 @@ To support this, the core \datamodel{} defines two fields:
 
 % Type URLs
 % https://www.purl.org/ivoa.net/executable-types/example
-% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/example-executable.md
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/executable-types/example-executable.md
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -611,9 +611,9 @@ to fetch the source code for the notebook from.
 
 % Type URLs
 % https://www.purl.org/ivoa.net/executable-types/jupyter-notebook
-% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/jupyter-notebook.md
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/executable-types/jupyter-notebook.md
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -628,7 +628,7 @@ request:
 It may also include a reference to a \codeword{requirements.txt} file that describes any additional \python{}
 libraries needed to run the notebook.
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -648,9 +648,9 @@ along with the hostname of the repository to fetch it from.
 
 % Type URLs
 % https://www.purl.org/ivoa.net/executable-types/oci-container
-% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/oci-container.md
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/executable-types/oci-container.md
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -666,7 +666,7 @@ request:
 
 This pattern of using a \codeword{type} URI to identify the type of thing, and then a
 \codeword{spec} block to add the type specific details is used in several places in the
-\executionplanner{} \datamodel{}.
+\executionbroker{} \datamodel{}.
 This enables us to keep the core \datamodel{} relatively small, defining the common aspects
 needed to describe an \executablething{} and the resources it needs while allowing the
 \datamodel{} to be extended to describe a wide range of different types of things.
@@ -698,14 +698,14 @@ and disc space needed to execute it.
 \label{compute-resources}
 
 The \datamodel{} for describing compute resources is, in most cases, common to all types of \executable{},
-so the \datamodel{} for these requirements are defined as part of the core \executionplanner{} \datamodel{}.
+so the \datamodel{} for these requirements are defined as part of the core \executionbroker{} \datamodel{}.
 
 It is important to note that all of the resource requirements are optional.
 As in the example from the previous section, a request to execute a simple \jupyternotebook{}
 does not need to include any resource details.
 
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -727,13 +727,13 @@ of \gpu{}.
 
 % Type URLs
 % https://www.purl.org/ivoa.net/resource-types/generic-compute
-% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/generic-compute.md
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/generic-compute.md
 % Type URLs
 % https://tinyurl.com/nvidia-ad104
 % https://www.purl.org/ivoa.net/resource-types/nvidia-ad104
-% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/nvidia-ad104.md
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/nvidia-ad104.md
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -782,9 +782,9 @@ e.g. the minimum amount of memory and number of shaders.
 % Type URLs
 % https://tinyurl.com/nvidia-ad104
 % https://www.purl.org/ivoa.net/resource-types/nvidia-ad104
-% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/nvidia-ad104.md
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/nvidia-ad104.md
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -812,9 +812,9 @@ and they can add their own type specific details to the \codeword{spec} section.
 % Type URLs
 % https://tinyurl.com/xilinx-vu19p
 % https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p
-% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/xilinx-vu19p.md
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/xilinx-vu19p.md
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -855,7 +855,7 @@ There are several options to choose from:
       \codeword{[https://tinyurl.com/nvidia-ad104]}
 \item The PURL service\footurl{https://purl.archive.org/} provided by the internet archive\footurl{http://www.archive.org/}.\\
       \codeword{[https://www.purl.org/ivoa.net/resource-types/nvidia-ad104]}.
-\item A page in our GitHub repository that directs the reader to more resources\footurl{https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/nvidia-ad104.md}.\\
+\item A page in our GitHub repository that directs the reader to more resources\footurl{https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/nvidia-ad104.md}.\\
       \codeword{[https://github.com/..../resource-types/nvidia-ad104.md]}.
 \end{itemize}
 
@@ -871,7 +871,7 @@ FPGA and the tools needed to use it.
 %\item A URL shortening service \codeword{[https://tinyurl.com/xilinx-vu19p]}.
 \item A PURL redirect to provide a long lasting URL.\\
       \codeword{[https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p]}
-\item A page in our GitHub repository describing the FPGA and the tools needed to use it\footurl{https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/xilinx-vu19p.md}.\\
+\item A page in our GitHub repository describing the FPGA and the tools needed to use it\footurl{https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/xilinx-vu19p.md}.\\
       \codeword{[https://github.com/..../resource-types/xilinx-vu19p.md]}
 \end{itemize}
 
@@ -885,7 +885,7 @@ If the \jupyternotebook{} in our example needs a minimum of 8 \cpu{} cores and 1
 to be able to perform its calculations, then this can be specified in the compute resource.
 
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -902,7 +902,7 @@ request:
 
 All of the \datamodel{} elements for specifying the size or number of resources are defined
 as pairs of minimum and maximum values.
-This allows a conversation between the \execplanner{} client and services
+This allows a conversation between the \execbrokerclass{} client and services
 to discover the best platform to execute the task.
 
 The client requests the minimun resources it needs,
@@ -914,7 +914,7 @@ For example, if a platform is able to provide double the compute resources,
 then it can indicate this by specifying higher maximum values in its response.
 
 \begin{lstlisting}[]
-# ExecutionPlanner service response.
+# ExecutionBroker service response.
 response:
   # Details of the executable.
   executable:
@@ -949,7 +949,7 @@ If the smallest flavor of virtual machine available on the platform has 16 \cpu{
 then the service can represent that by setting the minimum values in its offer to match available resources.
 
 \begin{lstlisting}[]
-# ExecutionPlanner service response.
+# ExecutionBroker service response.
 response:
   # Details of the executable.
   executable:
@@ -968,7 +968,7 @@ response:
 
 This response represents an offer to start with a fixed allocation of 16 \cpu{} cores and 24G of memory.
 
-An \execplanner{} MAY NOT make an offer with less than the minimum resources requested.
+An \execbrokerclass{} MAY NOT make an offer with less than the minimum resources requested.
 For example, if an \openstack{} platform only has a virtual machine flavor with 1 \cpu{} core and 2G of memory,
 then it MAY NOT offer this resource as it is less than the requested minimum.
 
@@ -1010,9 +1010,9 @@ then this can be specified in the request by defining an ephemeral storage resou
 
 % Type URLs
 % https://www.purl.org/ivoa.net/storage-types/ephemeral-storage
-% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/ephemeral-storage.md
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/ephemeral-storage.md
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -1037,7 +1037,7 @@ The compute volume is linked to the storage resource by the name of the
 storage resource.
 
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -1074,9 +1074,9 @@ and a corresponding volume mount inside the compute resource.
 
 % Type URLs
 % https://www.purl.org/ivoa.net/storage-types/amazon-s3
-% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/amazon-s3.md
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/amazon-s3.md
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -1111,9 +1111,9 @@ allocated by the system, and a corresponding volume mount inside the compute res
 
 % Type URLs
 % https://www.purl.org/ivoa.net/storage-types/persistent-storage
-% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/persistent-storage.md
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/persistent-storage.md
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -1140,22 +1140,22 @@ request:
 
 By setting the storage resource type to \codeword{https://.../persistent},
 and setting the \codeword{lifecycle} to \codeword{managed},
-the client is asking the \execplanner{} service to take care of allocating
+the client is asking the \execbrokerclass{} service to take care of allocating
 the storage and managing its lifecycle.
-It is up to the \execplanner{} service to decide where to store the data and
+It is up to the \execbrokerclass{} service to decide where to store the data and
 how make it accessible after the \job{} has completed.
 
 For example, a science platform may have a \rucio{} storage system co-located
 with the compute platform which it uses to store user generated data.
-In which case the \execplanner{} service would respond with an offer that
+In which case the \execbrokerclass{} service would respond with an offer that
 stores the results in the \rucio{} system and provides details of how the user
 can access it after the \job{} has completed.
 
 % Type URLs
 % https://www.purl.org/ivoa.net/storage-types/rucio-storage
-% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/rucio-storage.md
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/rucio-storage.md
 \begin{lstlisting}[]
-# ExecutionPlanner service response.
+# ExecutionBroker service response.
 response:
   # Details of the executable.
   executable:
@@ -1200,7 +1200,7 @@ The client doesn't need to worry about tidying up afterwards.
 
 It is important to note that at this point in time the storage is proposed, but not yet allocated.
 The persistent storage is only allocated if the client accepts this particular offer.
-This allows an \execplanner{} service to make multiple offers with different storage options,
+This allows an \execbrokerclass{} service to make multiple offers with different storage options,
 allowing the client to select and accept the one that best fits its use case.
 
 The same \datamodel{} can be used the other way around as well.
@@ -1209,9 +1209,9 @@ If the client already knows where it wants the data to be stored, for example at
 
 % Type URLs
 % https://www.purl.org/ivoa.net/storage-types/vospace-storage
-% https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/vospace-storage.md
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/vospace-storage.md
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -1235,23 +1235,23 @@ request:
         lifecycle: "unmanaged"
 \end{lstlisting}
 
-It is up to the \execplanner{} service to work out if it is able to access the
+It is up to the \execbrokerclass{} service to work out if it is able to access the
 \vospace{} location and mount it as a volume in the compute resource,
 using either its own authentication, or a delegated form of the authentication
 provided by the client.
 
-If it can access the \vospace{} location, then the \execplanner{} MAY respond
+If it can access the \vospace{} location, then the \execbrokerclass{} MAY respond
 with an offer, otherwise if it can't access the \vospace{} location for whatever
-reason the \execplanner{} MUST respond with \codeword{NO}.
+reason the \execbrokerclass{} MUST respond with \codeword{NO}.
 
 Note that in this example, the client has specified the lifecycle as \codeword{unmanaged},
-which means that the \execplanner{} is not involved in managing the creation or deletion
+which means that the \execbrokerclass{} is not involved in managing the creation or deletion
 of the data in \vospace.
-It is also possible for the client to ask the \execplanner{} service to manage
+It is also possible for the client to ask the \execbrokerclass{} service to manage
 data in an external resource.
 
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -1271,12 +1271,12 @@ request:
 \end{lstlisting}
 
 In this example, the client is specifying an external \vospace{} location to store the data,
-but it is asking the \execplanner{} service to manage the lifecycle, creating the location
+but it is asking the \execbrokerclass{} service to manage the lifecycle, creating the location
 in \vospace{} at the start of the \job{} and deleting it 2 days after the \job{} completes.
 
 This negotiation of who is responsible for creating and deleting storage resources
 enables a client to put together a workflow of interconnected steps, with the
-\execplanner{} services
+\execbrokerclass{} services
 managing the lifecycle of the resources and releasing them automatically after they
 are no longer needed.
 
@@ -1289,22 +1289,22 @@ has sufficient access rights and resource quota needed to execute a \task{}.
 This is equivalent to asking:
 \textit{"Do I have permission to use these resources to run this \jupyternotebook{}?"}
 
-There are two ways for the \execplanner{} service to check the user's identity,
+There are two ways for the \execbrokerclass{} service to check the user's identity,
 using implicit and explicit authentication.
 
-The implicit method is for the client to authenticate to the \execplanner{} service
+The implicit method is for the client to authenticate to the \execbrokerclass{} service
 as normal and the service will use the identity from the request headers to check if the
 user has sufficient access rights and resource quota to execute the \job{}.
 
-If the \webservice{} call to the \execplanner{} service is authenticated
+If the \webservice{} call to the \execbrokerclass{} service is authenticated
 using OpenIDConnect
 (OIDC)\footurl{https://auth0.com/docs/authenticate/protocols/openid-connect-protocol},
-then the \execplanner{} MUST include a reference to the implicit
+then the \execbrokerclass{} MUST include a reference to the implicit
 authentication in its reply, including enough non-secret
 information to identify the authenticated identity.
 
 \begin{lstlisting}[]
-# ExecutionPlanner server response.
+# ExecutionBroker server response.
 response:
   ....
   # Details of the authentication offered.
@@ -1317,9 +1317,9 @@ response:
 \end{lstlisting}
 
 If the client uses an unknown authentication method in the \webservice{} call and
-the \execplanner{} service recognises that an anthentication attempt has been made,
+the \execbrokerclass{} service recognises that an anthentication attempt has been made,
 then it MUST reject the \webservice{} call with a 401 "Unauthenticated" response.
-If the \execplanner{} service does not realise that an anthentication attempt has been made,
+If the \execbrokerclass{} service does not realise that an anthentication attempt has been made,
 then this MAY result in the request being treated as an anonymous unauthenticated call.
 
 The \datamodel{} also allows for an explicit statement of identity in the request.
@@ -1330,7 +1330,7 @@ and a \codeword{spec} section for the type specific details.
 For example, to explicitly include a basic authentication with username and password
 in the request:
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -1345,7 +1345,7 @@ request:
 \end{lstlisting}
 
 This pattern allows the client to supply multiple authentication methods
-in the request. The \execplanner{} service can select the authentication
+in the request. The \execbrokerclass{} service can select the authentication
 methods it accepts from those in the request and include the name and
 type of the methods in its offer along with enough non-secret
 information to identify the authenticated identity.
@@ -1353,7 +1353,7 @@ information to identify the authenticated identity.
 For example, if the client supplies both basic and token authentication
 in the request:
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 request:
   # Details of the executable.
   executable:
@@ -1373,12 +1373,12 @@ request:
       token: "..."
 \end{lstlisting}
 
-If the \execplanner{} service only accepts the token authentication, it should
+If the \execbrokerclass{} service only accepts the token authentication, it should
 skip the basic authentication and only include a reference to the token
 based authentication in its offer.
 
 \begin{lstlisting}[]
-# ExecutionPlanner server response.
+# ExecutionBroker server response.
 response:
   ....
   # Details of the authentication offered.
@@ -1390,7 +1390,7 @@ response:
       ....
 \end{lstlisting}
 
-If the \execplanner{} service does not recognise or support any of the authentication methods
+If the \execbrokerclass{} service does not recognise or support any of the authentication methods
 included in the request, then the service MUST reject the request and reply with \codeword{NO}.
 
 \begin{lstlisting}[]
@@ -1398,21 +1398,21 @@ Request  - Can I authenticate with <unknown method, unknown method, or unknown m
 Response - NO
 \end{lstlisting}
 
-The result is that an offer made by an \execplanner{} service should only include details
+The result is that an offer made by an \execbrokerclass{} service should only include details
 of the authenticated identities that are allowed to use the offer.
 
 If the original question is equivalent to:
 \textit{"Do \textbf{these identities} have sufficient access rights and quota to run this \jupyternotebook{}?"}
 
-Then the response from the \execplanner{} service is equivalent to:
+Then the response from the \execbrokerclass{} service is equivalent to:
 \textit{"This offer asserts that \textbf{these identities} have sufficient access rights and quota to run this \jupyternotebook{}?"}
 
 The client MUST use one of the authentication methods listed in the offer when
-contacting the \execplanner{} service to accept the offer and start the \job{}.
+contacting the \execbrokerclass{} service to accept the offer and start the \job{}.
 The client MUST continue to use the same authentication method when making subsequent
-requests to the \execworker{} service to access the \job{} status and results.
+requests to the \execworkerclass{} service to access the \job{} status and results.
 
-The \executionplanner{} specification includes an initial set of authentication methods
+The \executionbroker{} specification includes an initial set of authentication methods
 corresponding to the methods defined in the
 \ivoa{} Single-Sign-On standard\citep{2017ivoa.spec.0524T}
 
@@ -1421,13 +1421,13 @@ corresponding to the methods defined in the
     \item ....
 \end{itemize}
 
-However, the \datamodel{} also allows an \execplanner{} service to accept authentication
+However, the \datamodel{} also allows an \execbrokerclass{} service to accept authentication
 methods that are not covered by the \ivoa{} SSO standard.
 A client is free to use any authentication method, including ones not covered by the
-\ivoa{} SSO standard. It is up to the \execplanner{} service to decide how it
+\ivoa{} SSO standard. It is up to the \execbrokerclass{} service to decide how it
 handles the authentication infomation it receives.
 
-This means that the \executionplanner{} services can be deployed in other domains outside the \ivoa{},
+This means that the \executionbroker{} services can be deployed in other domains outside the \ivoa{},
 without requiring them to adopt the full \ivoa{} SSO standard.
 
 \section{Date and time}
@@ -1439,7 +1439,7 @@ conversation about when a \job{} can be executed.
 The client can specify one or more time periods when it would like to start the \job{},
 and the minimum duration that it thinks would be needed to complete the \job{}.
 
-The \execplanner{} service may respond with one or more offers that specify when the \job{}
+The \execbrokerclass{} service may respond with one or more offers that specify when the \job{}
 would start and the maximum duration that the \job{} would be allowed to consume.
 It is then up to the client to select which of the offers best suits its use case.
 
@@ -1455,7 +1455,7 @@ time range during which the \job{} may start.
 If no duration is specified, this means an absolute start time;
 e.g. the \job{} SHOULD start at 11:30 on 14 August.
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 ....
 datetime:
 - start: "2023-08-14T11:30Z"
@@ -1465,7 +1465,7 @@ If the start and end are specified, this means the \job{} SHOULD start somewhere
 the start and end values;
 e.g. the \job{} SHOULD start between 11:30 and 12:00 on 14 August.
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 ....
 datetime:
 - start: "2023-08-14T11:30Z/T12:00Z"
@@ -1475,13 +1475,13 @@ If a duration is specified, this means the \job{} SHOULD start somewhere between
 start and the start plus duration;
 e.g. the \job{} SHOULD start between 11:30 and 12:00 on 14 August.
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 ....
 datetime:
 - start: "2023-08-14T11:30Z/PT30M"
 \end{lstlisting}
 
-The \execplanner{} service SHOULD respond with one or more offers that start within
+The \execbrokerclass{} service SHOULD respond with one or more offers that start within
 the ranges specified in the request.
 The start times in the offers MAY be more precise than the start times in the request,
 but they MUST all occur within at least one of the ranges specified in the request.
@@ -1494,18 +1494,18 @@ when their \job{} starts, but they may want to specify the minimum duration need
 
 In which case, the client may simply request a minimum duration of 1 hour.
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 ....
 datetime:
 - minduration: "1H"
 \end{lstlisting}
 
-The \execplanner{} service MAY respond with offers that start at different times and
+The \execbrokerclass{} service MAY respond with offers that start at different times and
 set different values for the maximum duration.
 
 It MAY offer a maximum duration of 1 hour in the morning, starting at 11:00.
 \begin{lstlisting}[]
-# ExecutionPlanner server response.
+# ExecutionBroker server response.
 ....
 datetime:
 - start: "2023-08-14T11:30Z"
@@ -1516,7 +1516,7 @@ datetime:
 It MAY also offer a longer allocation of 4 hours later in the evening,
 starting sometime between 22:00 and 23:00.
 \begin{lstlisting}[]
-# ExecutionPlanner server response.
+# ExecutionBroker server response.
 ....
 datetime:
 - start: "2023-08-14T22:00Z/PT1H"
@@ -1529,7 +1529,7 @@ compute resources to make a range of different offers to the client.
 
 For example, if a client asks for 2 cores and 2G of memory for 1 hour sometime on 14 August:
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
   ...
 resources:
   compute:
@@ -1540,13 +1540,13 @@ datetime:
     minduration: "P1H"
 \end{lstlisting}
 
-The  \execplanner{} service may respond with 2 offers,
+The  \execbrokerclass{} service may respond with 2 offers,
 the minimum 2 cores and 2G of memory for 1 hour starting at 11:30,
 and a larger offer of up to 8 cores and 8Gb of memory for up to 4 hours
 starting between 22:00 and 23:00.
 
 \begin{lstlisting}[]
-# ExecutionPlanner server response.
+# ExecutionBroker server response.
 offers:
 - name: "offer-001"
   executable:
@@ -1581,10 +1581,10 @@ It is then up to the client to decide which offer better suits their use case.
 Accept the limited offer in the morning, or accept the more generous offer with
 more resources and more time later in the day.
 
-If an \execplanner{} service is offering more than one option for the \codeword{datetime}
+If an \execbrokerclass{} service is offering more than one option for the \codeword{datetime}
 section it MUST make separate offers for each different option.
 Even if all of the other parameters are the same, e.g. compute and storage resources, the
-\execplanner{} service MUST NOT include more than one time slot in the same offer.
+\execbrokerclass{} service MUST NOT include more than one time slot in the same offer.
 Technically the \datamodel allows an array of values for the \codeword{datetime} section,
 but this would impose unnecessary complexity on the client for no real gain in user experience.
 
@@ -1595,7 +1595,7 @@ but this would impose unnecessary complexity on the client for no real gain in u
 \label{triggers}
 
 The \codeword{triggers} section of the \datamodel{} defines triggers that
-enable an external system to control the state of an \execworker{} \job{}.
+enable an external system to control the state of an \execworkerclass{} \job{}.
 
 The core \datamodel{} for \codeword{triggers} uses the \codeword{type} and
 \codeword{spec} pattern to support different types of \codeword{triggers}
@@ -1604,10 +1604,10 @@ using \datamodel{} extensions.
 \subsubsection{HTTP trigger}
 \label{http-trigger}
 
-The \executionplanner{} specification includes a \datamodel{} extension for
+The \executionbroker{} specification includes a \datamodel{} extension for
 a \http{} \webservice{} trigger which can be called by an external system.
 
-The following example asks the \execplanner{} service to set up a \http{} \webservice{}
+The following example asks the \execbrokerclass{} service to set up a \http{} \webservice{}
 endpoint that expects the \codeword{POST} data to contain a \yaml{} document with the
 following fields:
 
@@ -1620,7 +1620,7 @@ A \http{} \codeword{POST} to this endpoint will trigger an action depending the 
 \codeword{trigger.colour} in the \yaml{} document that it receives.
 
 \begin{lstlisting}[]
-# ExecutionPlanner client request.
+# ExecutionBroker client request.
 ....
 triggers:
 - name: "trigger-001"
@@ -1645,22 +1645,22 @@ In this case the action depends on the value of the \codeword{trigger.colour} fi
 
 Defining a \codeword{start} action in the \codeword{triggers} section will modify the effect of the
 \codeword{starttime} declared in the \codeword{datetime} section.
-The \execworker{} service will not automatically start the \job{} when the specified \codeword{starttime} is reached.
-Instead the \execworker{} service will wait until the start action has been triggered before it starts the \job{}.
+The \execworkerclass{} service will not automatically start the \job{} when the specified \codeword{starttime} is reached.
+Instead the \execworkerclass{} service will wait until the start action has been triggered before it starts the \job{}.
 
 \begin{itemize}
-    \item If the trigger is called before the specified \codeword{starttime} is reached, the \execworker{} will
+    \item If the trigger is called before the specified \codeword{starttime} is reached, the \execworkerclass{} will
     wait until the \codeword{starttime} is reached before starting the \job{}.
-    \item If the \codeword{starttime} is reached before the trigger has been called, the \execworker{} will wait
+    \item If the \codeword{starttime} is reached before the trigger has been called, the \execworkerclass{} will wait
     until the trigger is called before starting the \job{}.
-    \item If the trigger is called within the \codeword{starttime} range, the \execworker{} service will start \job{}.
-    \item If the \codeword{starttime} range expires before the trigger has been called, the \execworker{} will cancel the \job{}.
+    \item If the trigger is called within the \codeword{starttime} range, the \execworkerclass{} service will start \job{}.
+    \item If the \codeword{starttime} range expires before the trigger has been called, the \execworkerclass{} will cancel the \job{}.
     \item If the trigger is called after the \codeword{starttime} range, it has no effect. The \job{} should already have been cancelled.
 \end{itemize}
 
 In effect, the \codeword{starttime} range acts as a constraint on the action of the trigger.
 Preventing it from starting the \job{} too early or too late.
-The \execworker{} service is responsible for allocating the required compute and storage resources
+The \execworkerclass{} service is responsible for allocating the required compute and storage resources
 before the beginning of the \codeword{starttime},
 making sure that the \job{} is ready to start as soon as the trigger is called.
 If the \codeword{starttime} range expires before the trigger has been called, the resources are released as normal
@@ -1669,19 +1669,19 @@ when the \job{} is cancelled.
 \subsection{Actions}
 \label{actions}
 
-The \codeword{actions} part of the \datamodel{} enables a client to ask the \execworker{} service
+The \codeword{actions} part of the \datamodel{} enables a client to ask the \execworkerclass{} service
 to perform user defined actions at specific points in the lifecycle of a \job{}.
 
 The core \datamodel{} for actions uses the \codeword{type} and \codeword{spec} pattern to
 support different types of \codeword{actions} using \datamodel{} extensions.
 
-The \executionplanner{} specification includes \datamodel{} extensions for two types of \codeword{actions},
+The \executionbroker{} specification includes \datamodel{} extensions for two types of \codeword{actions},
 one for sending an email and one for calling a HTTP \webservice{}.
 
 \subsubsection{Email action}
 \label{email-action}
 
-The following definition asks the \execworker{} service to send an email to the user
+The following definition asks the \execworkerclass{} service to send an email to the user
 when the \codeword{status} of their \jupyternotebook{} \job{} changes to \codeword{RUNNING}.
 
 \begin{lstlisting}[]
@@ -1707,25 +1707,25 @@ Note the difference in the terminology used to describe the \job{} status.
 From the user's perspective their notebook is \textit{'running'} when they login and click the
 \textit{'run'} button.
 
-From the \execworker{} service's perspective, the \job{} \codeword{status} changes to \codeword{RUNNING}
+From the \execworkerclass{} service's perspective, the \job{} \codeword{status} changes to \codeword{RUNNING}
 once the compute resources have been allocated, the data staging has been completed
 and the \job{} \codeword{starttime} is reached.
 In many cases, the \jupyternotebook{} service \codeword{endpoint} will not be available until the
-\execworker{} \job{} is \codeword{RUNNING}.
+\execworkerclass{} \job{} is \codeword{RUNNING}.
 
-In the simple case with no data staging, the \execworker{} \job{} \codeword{status} may change to
+In the simple case with no data staging, the \execworkerclass{} \job{} \codeword{status} may change to
 \codeword{RUNNING} almost immediately, in which case the notification email is not necessary.
 
-However, in a more complex case where the the \execworker{} service needs to do a lot of work
+However, in a more complex case where the the \execworkerclass{} service needs to do a lot of work
 allocating the resources and staging the data, there may be a significant delay before for the
-\execworker{} \job{} \codeword{status} changes to \codeword{RUNNING}.
+\execworkerclass{} \job{} \codeword{status} changes to \codeword{RUNNING}.
 In which case, being able send the user an email when their session
 is ready improves the user experience.
 
 \subsubsection{HTTP action}
 \label{http-action}
 
-The following definition asks the \execworker{} service to \codeword{POST} content from a \yaml{} template
+The following definition asks the \execworkerclass{} service to \codeword{POST} content from a \yaml{} template
 to a HTTP \webservice{} at \codeword{http://foo.example.org/update} when the status of this \job{} changes.
 
 \begin{lstlisting}[]
@@ -1750,7 +1750,7 @@ actions:
 \end{lstlisting}
 
 When the status of this \job{} changes to one of the specified values, the
-\execworker{} service will \codeword{POST} the document described in the
+\execworkerclass{} service will \codeword{POST} the document described in the
 \codeword{content} template to the HTTP \codeword{endpoint}, filling in the \codeword{\{\{...\}\}}
 markers in the template with values from the \datamodel{} representing the \job{}
 at that point in time.
@@ -1814,9 +1814,9 @@ triggers:
 \end{lstlisting}
 
 Note that the client doesn't set the endpoint location for the \codeword{trigger}, that will
-come from the \execplanner{} service when it makes an offer.
+come from the \execbrokerclass{} service when it makes an offer.
 The \webservice{} endpoint location for the trigger may be different for each of the
-offers in the \execplanner{} service response.
+offers in the \execbrokerclass{} service response.
 
 \begin{lstlisting}[]
 ....
@@ -1876,7 +1876,7 @@ datetime:
 \end{lstlisting}
 
 The client can also set up a \codeword{managed} storage resource in \vospace{} to transfer data
-between the steps which is automatically created and deleted by the \execplanner{} service.
+between the steps which is automatically created and deleted by the \execbrokerclass{} service.
 
 Adding a \codeword{managed} storage resource to step-a which points a location in a \vospace{} service
 with a \codeword{maxlifetime} and \codeword{minlifetime} set to 1 day means that the \vospace{} location
@@ -1921,7 +1921,7 @@ resources:
 \end{lstlisting}
 
 If all goes to plan, when the \codeword{starttime} for step-a is reached,
-the first \execworker{} service will allocate the managed space in \vospace{},
+the first \execworkerclass{} service will allocate the managed space in \vospace{},
 and then start the execution of step-a.
 
 The executable in step-a can access the storage location using an internal
@@ -1957,7 +1957,7 @@ As far as the code inside the \executable{} is concerned, it writes its results 
 filesystem directory at \codeword{/results}.
 The code inside the \executable{} does not need to know anything about the
 details of where the data is stored.
-The \execworker{} service for step-a is responsible for ensuring that anything written to
+The \execworkerclass{} service for step-a is responsible for ensuring that anything written to
 \codeword{/results} in the local filesystem is transferred to \codeword{/step-a/results}
 in the remote \vospace{} service during the \codeword{TEARDONW} phase of step-a.
 
@@ -1994,8 +1994,8 @@ The code inside the \executable{} does not need to know anything about the
 details of where the data is stored.
 
 As soon as step-a starts, the \job{} status changes to \codeword{RUNNING},
-the \codeword{http-action} on this \execworker{} will call the \codeword{http-trigger}
-on the \execworker{} running step-b.
+the \codeword{http-action} on this \execworkerclass{} will call the \codeword{http-trigger}
+on the \execworkerclass{} running step-b.
 This first call will have no effect, as the \codeword{http-trigger}
 on step-b will only perform an action when the \codeword{job.status}
 value is \codeword{COMPLETED}, \codeword{FAILED} or \codeword{CANCELLED}.
@@ -2010,11 +2010,11 @@ The managed resource has a \codeword{minlifetime} of \codeword{1D},
 which means that the space will not be deleted until a day after step-a has completed.
 This allows sufficient time for step-b to execute, reading its input data
 from the results of step-a.
-The second \execworker{} service runs step-b to completion as normal,
+The second \execworkerclass{} service runs step-b to completion as normal,
 freeing up any resources it was allocated at the end.
 
 Finally, the \codeword{managed} \vospace{} storage location is automatically
-deleted a day after the completion of step-a by the \execworker{} service
+deleted a day after the completion of step-a by the \execworkerclass{} service
 that was assigned to manage its lifecycle.
 
 \pagebreak
@@ -2022,9 +2022,9 @@ that was assigned to manage its lifecycle.
 \section{Federated architecture}
 \label{federation}
 
-The \execplanner{} and \execworker{} services are designed to be used at multiple levels within an organization.
+The \execbrokerclass{} and \execworkerclass{} services are designed to be used at multiple levels within an organization.
 
-At the low level, an \execplanner{} and \execworker{} pair may be implemented as a
+At the low level, an \execbrokerclass{} and \execworkerclass{} pair may be implemented as a
 single web-application linked to a simple \docker{} execution service.
 The configuration may be hard coded to only accept a fixed white list of container images
 and a fixed allocation of compute resources for each job{}.
@@ -2041,7 +2041,7 @@ endpoint address.
 This information could come from the \ivoa{} Registry, or it could simply
 be provided as a flat list in a configuration file for the client.
 
-A more flexible architecture could add another \execplanner{} service
+A more flexible architecture could add another \execbrokerclass{} service
 a level above the low level task specific services.
 This service would be configured with a list of the local task specific services
 and act as an aggregator service sitting between the client and the low level services.
@@ -2058,26 +2058,26 @@ which low level serviecs to send the requests to.
 The aggregator service may also have an understanding of the location of \dataset{}s within the organization and
 be able to route requests to different low level services depending on which \dataset{}s were required.
 
-The aggregator service may expose the low level \execworker{} endpoints in its responses,
-or it may implement a proxy interface acting as an aggregator for the \execworker{}
+The aggregator service may expose the low level \execworkerclass{} endpoints in its responses,
+or it may implement a proxy interface acting as an aggregator for the \execworkerclass{}
 services as well.
 
-This configuration could be used to provide \execplanner{} and \execworker{} service interfaces
+This configuration could be used to provide \execbrokerclass{} and \execworkerclass{} service interfaces
 that bridged a firewall. Providing a public interface for external clients and forwarding the requests
-to the internal \execplanner{} and \execworker{} services that are not accessible from outside the
+to the internal \execbrokerclass{} and \execworkerclass{} services that are not accessible from outside the
 firewall.
 
-A large organization with multiple sites couls also deploy a single high level \execplanner{} and \execworker{}
+A large organization with multiple sites couls also deploy a single high level \execbrokerclass{} and \execworkerclass{}
 interface that handles task execution for the whole organization, forwarding the requests to mid-level
-\execplanner{} and \execworker{} services at each site which in turn forwards the requests to
-individual low-level \execplanner{} and \execworker{} services within the local site networks.
+\execbrokerclass{} and \execworkerclass{} services at each site which in turn forwards the requests to
+individual low-level \execbrokerclass{} and \execworkerclass{} services within the local site networks.
 
 The implementation at each level may be different, providing different levels of routing
 and aggregation based on internal knowledge of the capabilities of the level below,
-but the \execplanner{} and \execworker{} interfaces would be the same at each level
+but the \execbrokerclass{} and \execworkerclass{} interfaces would be the same at each level
 in the organization.
 
-This could be expanded to include another level of \execplanner{} and \execworker{} services that
+This could be expanded to include another level of \execbrokerclass{} and \execworkerclass{} services that
 cross organization bondaries, providing a gateway that allows users from one project to access services
 from other projects and organizations. This gateway service may also provide an authentication translation
 layer between external public accounts internal project specific identities and authentication methods.
@@ -2233,20 +2233,20 @@ Timeline of request, offer and accept.
     \item ....
 \end{itemize}
 
-\subsection{ExecutionPlanner}
+\subsection{ExecutionBroker}
 \label{execution-planner-spec}
 
-The main \execplanner{} \webservice{} implements two interfaces;
+The main \execbrokerclass{} \webservice{} implements two interfaces;
 a \codeword{POST} method for sending requests, and a \codeword{GET/POST}
 interface for accessing offers and updating their status.
 
 \subsubsection{Request method}
 \label{execution-planner-request}
 
-The main \execplanner{} \webservice{} method is a \codeword{POST} \webservice{} that accepts
+The main \execbrokerclass{} \webservice{} method is a \codeword{POST} \webservice{} that accepts
 a \codeword{request} as defined in section \ref{datamodel-request} of the \datamodel{}.
 
-An \execplanner{} \webservice{} MUST be able to accept both \yaml{} or \json{} serializations
+An \execbrokerclass{} \webservice{} MUST be able to accept both \yaml{} or \json{} serializations
 of the \codeword{request}.
 The serialization SHOULD be declared in the HTTP request using the \codeword{Content-Type} header.
 \begin{itemize}
@@ -2283,11 +2283,11 @@ Content-Type: application/json
   }
 \end{lstlisting}
 
-The \execplanner{} service will evaluate the request and respond with either a positive
+The \execbrokerclass{} service will evaluate the request and respond with either a positive
 or negative \codeword{response} depending on whether the platform is able to execute the
 task descibed in the \codeword{request}.
 
-An \execplanner{} service MUST be able to provide both \yaml{} and \json{} serializations
+An \execbrokerclass{} service MUST be able to provide both \yaml{} and \json{} serializations
 of the \codeword{response}.
 The serialization is determined by the \codeword{Accept} header in the HTTP request.
 \begin{itemize}
@@ -2355,7 +2355,7 @@ http[s]://foo.example.org/offers/{identifier}
 The \datamodel{} for the content of the \codeword{offer} response is described in section
 \ref{datamodel-offer}.
 
-An \execplanner{} service MUST be able to provide both \yaml{} and \json{} serializations
+An \execbrokerclass{} service MUST be able to provide both \yaml{} and \json{} serializations
 of the \codeword{offer}.
 The serialization is determined by the \codeword{Accept} header in the HTTP request.
 \begin{itemize}
@@ -2410,7 +2410,7 @@ the \codeword{offer} \datamodel{} in section \ref{}.
     \end{itemize}
 \end{itemize}
 
-An \execplanner{} \webservice{} MUST be able to accept both \yaml{} or \json{} serializations
+An \execbrokerclass{} \webservice{} MUST be able to accept both \yaml{} or \json{} serializations
 of the \codeword{offer}.
 The serialization SHOULD be declared in the HTTP request using the \codeword{Content-Type} header.
 \begin{itemize}
@@ -2455,13 +2455,13 @@ If the update is not successful, the content of the response ... TBD ...
 \subsection{ExecutionWorker}
 \label{execution-worker-spec}
 
-Accepting an offer from an \execplanner{} service creates a \job{} on an associated \execworker{},
-with status \codeword{PENDING} until the \job{} is started automatically by the \execworker{}.
+Accepting an offer from an \execbrokerclass{} service creates a \job{} on an associated \execworkerclass{},
+with status \codeword{PENDING} until the \job{} is started automatically by the \execworkerclass{}.
 
-The offer from the \execplanner{} will contain the URL \job{} in the \execworker{}.
+The offer from the \execbrokerclass{} will contain the URL \job{} in the \execworkerclass{}.
 
 \begin{itemize}
-    \item \execplanner{} is responsible for creating and starting the \job{}.
+    \item \execbrokerclass{} is responsible for creating and starting the \job{}.
     \item Client can use a HEAD request to check network access at anytime.
     \item Client can use a GET request to check the status of the \job{} at anytime.
     \item Client can cancel the \job{} at anytime.
@@ -2475,14 +2475,14 @@ The offer from the \execplanner{} will contain the URL \job{} in the \execworker
 The following section describes the core \datamodel{} using a YAML syntax
 to define the structure with comments to describe the elements.
 
-Note that this does not tie the \execplanner specification to a YAML representation.
+Note that this does not tie the \execbrokerclass specification to a YAML representation.
 The intention is to define a portable \datamodel{} that can be serialised
 into a number of different formats, including YAML, JSON and XML.
 
 \subsection{Type URIs and specifications}
 \label{type-and-spec}
 
-Several parts of the \ivoa{} \executionplanner{} \datamodel{} follow a common pattern, using a URI
+Several parts of the \ivoa{} \executionbroker{} \datamodel{} follow a common pattern, using a URI
 to identify a \codeword{type} followed a \codeword{spec} section to fill in the details.
 This pattern is adopted from a similar pattern used by \kubernetes{}.
 
@@ -2497,7 +2497,7 @@ spec:
   ....
 \end{lstlisting}
 
-However, the \executionplanner{} \datamodel{} specifically recomends using a long lasting resolvable
+However, the \executionbroker{} \datamodel{} specifically recomends using a long lasting resolvable
 HTTP URL as the type identifier.
 
 \begin{lstlisting}[]
@@ -2536,18 +2536,18 @@ While it is possible to use \ivoa{} registry URIs to identify types, this specif
 recomends using a simple HTTP URLs. This lowers the barrier to entry and makes it simpler for the end user
 to resolve the URL into a description.
 
-\subsection{\execplanner{} request}
+\subsection{\execbrokerclass{} request}
 \label{datamodel-request}
 
-The main section of the \execplanner{} \datamodel{} describes the \codeword{request} block,
+The main section of the \execbrokerclass{} \datamodel{} describes the \codeword{request} block,
 which describes an \executablething{} and the resources needed to execute it.
 \\
 \\
 The \codeword{request} block is used in several places in the \datamodel{}:
 \begin{itemize}
-    \item The main body of an \execplanner{} \codeword{request}.
-    \item The main body of each \codeword{offer} in an \execplanner{} response.
-    \item The main body of an \execworker{} \job{} record.
+    \item The main body of an \execbrokerclass{} \codeword{request}.
+    \item The main body of each \codeword{offer} in an \execbrokerclass{} response.
+    \item The main body of an \execworkerclass{} \job{} record.
 \end{itemize}
 
 \subsubsection{Executable}
@@ -2594,7 +2594,7 @@ The \datamodel{} extension for a \jupyternotebook{} contains:
     \end{itemize}
     \item An \codeword{endpoint} URL that points to the live notebook platform.
     \begin{itemize}
-        \item The \codeword{endpoint} URL is set by the \execworker{} once the \job{} is \codeword{READY}.
+        \item The \codeword{endpoint} URL is set by the \execworkerclass{} once the \job{} is \codeword{READY}.
     \end{itemize}
 \end{itemize}
 
@@ -2634,7 +2634,7 @@ The \datamodel{} extension for a \zeppelin{} notebook contains:
     \end{itemize}
     \item An \codeword{endpoint} URL that points to the live notebook platform.
     \begin{itemize}
-        \item The \codeword{endpoint} URL is set by the \execworker{} once the \job{} is \codeword{READY}.
+        \item The \codeword{endpoint} URL is set by the \execworkerclass{} once the \job{} is \codeword{READY}.
     \end{itemize}
 \end{itemize}
 
@@ -2802,10 +2802,10 @@ https://www.purl.org/ivoa.net/resource-types/generic-compute
 \hfill \break
 The \codeword{spec} for a generic computing resource may contain the following optional properties:
 \begin{itemize}
-    \item The minimum number of cpu cores needed, set by the client in the \execplanner{} \codeword{request}.
-    \item The maximum number of cpu cores available, set by the \execplanner{} service in an \codeword{offer}.
-    \item The minimum amount of memory needed (in GiB), set by the client in the \execplanner{} \codeword{request}.
-    \item The maximum amount of memory available (in GiB), set by the \execplanner{} service in an \codeword{offer}.
+    \item The minimum number of cpu cores needed, set by the client in the \execbrokerclass{} \codeword{request}.
+    \item The maximum number of cpu cores available, set by the \execbrokerclass{} service in an \codeword{offer}.
+    \item The minimum amount of memory needed (in GiB), set by the client in the \execbrokerclass{} \codeword{request}.
+    \item The maximum amount of memory available (in GiB), set by the \execbrokerclass{} service in an \codeword{offer}.
 \end{itemize}
 
 \begin{lstlisting}[]
@@ -2912,7 +2912,7 @@ request:
 
 \subsubsection{Positive response}
 \label{datamodel-positive-response}
-A positive (yes, this platform can execute the task) \execplanner{} service response contains \codeword{result}
+A positive (yes, this platform can execute the task) \execbrokerclass{} service response contains \codeword{result}
 set to \codeword{YES}, and a list of offers.
 
 \subsubsection{Offer}
@@ -2920,7 +2920,7 @@ set to \codeword{YES}, and a list of offers.
 
 Each offer contains a unique identifier a status value and an expiry time for the offer
 followed by an updated copy of the \codeword{request} with details
-filled in by the \execplanner{} service.
+filled in by the \execbrokerclass{} service.
 
 The \codeword{offer} \codeword{status} ....
 
@@ -2949,7 +2949,7 @@ response:
 \subsubsection{Negative response}
 \label{datamodel-negative-response}
 
-A negative (no, this platform cannot execute the task) \execplanner{} service response contains \codeword{result}
+A negative (no, this platform cannot execute the task) \execbrokerclass{} service response contains \codeword{result}
 set to \codeword{NO}, followed by an optional list of reasons
 explaining why the request was rejected.
 
@@ -2973,10 +2973,10 @@ response:
 \subsection{Job}
 \label{datamodel-job}
 
-An \execworker{} \workerjob{} record consists of a unique identifier for the job,
+An \execworkerclass{} \workerjob{} record consists of a unique identifier for the job,
 and a \codeword{phase} indicating what execution stage the \workerjob{} has reached.
-Followed by an updated copy of the request \codeword{body} from the \execplanner{}
-offer with details filled in by the \execworker{} as the \workerjob{} is executed.
+Followed by an updated copy of the request \codeword{body} from the \execbrokerclass{}
+offer with details filled in by the \execworkerclass{} as the \workerjob{} is executed.
 
 \begin{lstlisting}[]
 job:
@@ -3035,49 +3035,49 @@ No previous versions yet.
 
 
 https://www.purl.org/ivoa.net/executable-types/example
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/example-executable.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/executable-types/example-executable.md
 
 https://www.purl.org/ivoa.net/executable-types/jupyter-notebook
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/jupyter-notebook.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/executable-types/jupyter-notebook.md
 
 https://www.purl.org/ivoa.net/executable-types/oci-container
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/executable-types/oci-container.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/executable-types/oci-container.md
 
 https://www.purl.org/ivoa.net/resource-types/generic-compute
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/generic-compute.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/generic-compute.md
 
 https://www.purl.org/ivoa.net/resource-types/nvidia-ad104
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/nvidia-ad104.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/nvidia-ad104.md
 
 https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/resource-types/xilinx-vu19p.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/xilinx-vu19p.md
 
 https://www.purl.org/ivoa.net/storage-types/ephemeral-storage
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/ephemeral-storage.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/ephemeral-storage.md
 
 https://www.purl.org/ivoa.net/storage-types/amazon-s3
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/amazon-s3.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/amazon-s3.md
 
 https://www.purl.org/ivoa.net/storage-types/persistent-storage
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/persistent-storage.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/persistent-storage.md
 
 https://www.purl.org/ivoa.net/storage-types/rucio-storage
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/rucio-storage.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/rucio-storage.md
 
 https://www.purl.org/ivoa.net/storage-types/vospace-storage
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/storage-types/vospace-storage.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/vospace-storage.md
 
 https://www.purl.org/ivoa.net/authentication-types/basic-auth
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/authentication-types/basic-auth.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/authentication-types/basic-auth.md
 
 https://www.purl.org/ivoa.net/authentication-types/oidc-auth
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/authentication-types/oidc-auth.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/authentication-types/oidc-auth.md
 
 https://www.purl.org/ivoa.net/authentication-types/rfc7519-token
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/authentication-types/rfc7519-token.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/authentication-types/rfc7519-token.md
 
 https://www.purl.org/ivoa.net/webservice-types/value-update
-https://github.com/Zarquan/ExecutionPlanner/blob/main/types/webservice-types/value-update.md
+https://github.com/ivoa-std/ExecutionBroker/blob/main/types/webservice-types/value-update.md
 
 YAML specification
 https://yaml.org/spec/
