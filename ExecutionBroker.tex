@@ -216,18 +216,16 @@ infrastructure that enable VO applications.
 \section{Introduction}
 \label{introduction}
 
-The \ivoa{} \executionbroker{} specification defines two \webservice{} interfaces,
-the \execbrokerclass{} and the \execworkerclass{}, and a common \datamodel{} for describing
-executable tasks.
-
+The \ivoa{} \executionbroker{} specification defines a \datamodel{} for describing executable tasks
+and two \webservice{} interfaces, \execbrokerclass{} and \execworkerclass{}.
 Together these provide a common interface for service discovery, resource allocation
 and execution scheduling across a heterogeneous federation of different types of
 execution platform.
 
 \begin{itemize}
-    \item \execbrokerclass{} \webservice{} – a discovery service to find execution platforms, allocate resources and schedule execution.
-    \item \execworkerclass{} \webservice{} – an asynchronous service for executing tasks (based on the \ivoa{} \uws{} pattern).
-    \item \execbrokerclass{} \datamodel{} – a common data model for describing an executable thing and its resource requirements.
+    \item \execbrokerclass{} \datamodel{}  – a data model for describing execution sessions and their resource requirements.
+    \item \execbrokerclass{} \webservice{} – a discovery service to find execution platforms, allocate resources and schedule execution sessions.
+    \item \execworkerclass{} \webservice{} – a monitoring service for monitoring and interacting with execution sessions.
 \end{itemize}
 
 \subsection{Role within the VO Architecture}
@@ -273,7 +271,7 @@ of execution platforms.
 
 The \ivoa{} \executionbroker{} specification refers to the
 \ivoa{} Single-Sign-On standard \citep{2017ivoa.spec.0524T}
-for authentication (see section xx )%\ref{subsec:authentication}
+for authentication (see section xx) %\ref{subsec:authentication}
 and the
 \ivoa{} Credential Delegation Protocol \citep{2010ivoa.spec.0218P}
 for delegating credentials to other services.
@@ -326,7 +324,7 @@ the appropriate hardware and software environment.
 In this case, a computer with the \jupyternotebook{} platform installed along with all the \python{} modules
 needed by our \pythonprogram{}.
 In the context of \scienceplatform{}s and \datascience{}, a common pattern is to provide this environment as a \webservice{}
-that allows the user to interact with to the \jupyternotebook{} via a \webbrowser.
+that allows the user to interact with the \jupyternotebook{} via a \webbrowser.
 
 From one algorithm that implements a science domain function, we have created three different \executablething{}s.
 A \pythonprogram{}, an \ocicontainer{} packaging the \pythonprogram{}, and an interactive \jupyternotebook{}
@@ -363,12 +361,12 @@ selects the software and \dataset{}s that they want to work with.
 
 \includegraphics[width=0.9\textwidth]{diagrams/data-discovery.pdf}
 
-The detailed specification for the software and data discovery services is beyond the
+The detailed specification for the software and data discovery services are beyond the
 scope of this document.
 However we can outline some general requirements for them.
 
 In both cases, the discovery process should not depend on the technical details
-of the software or \dataset{}s, but on their science domain functionality and properties.
+of the software or the \dataset{}s, but on their science domain functionality and properties.
 
 From a science user's perspective they want to be able to find software that implements
 a particular clustering algorithm, or a \dataset{} that is indexed according to a particular
@@ -401,13 +399,14 @@ The players:
 \subsection{Execution broker}
 \label{execution-broker-desc}
 
-Once the client has built a description of the \executablething{} the user wants to
-execute, it send the description to one or more
-\execbrokerclass{} services, asking them if they can execute the task.
-Each \execbrokerclass{} service evaluates the task and responds with a top level
+Once the user has selected the \executablething{} they want to use and the
+data they want to apply it to, the client combines this information to create a
+description of the session the user wants to execute and sends it to one or more
+\execbrokerclass{} services.
+Each \execbrokerclass{} service evaluates the request and responds with a top level
 \codeword{YES|NO} answer, and if
-the answer is \codeword{YES}, a list of offers describing how it
-could be executed on that platform.
+the answer is \codeword{YES}, a list of one or more offers describing how
+the requested session could be executed on that platform.
 
 %\begin{lstlisting}[]
 %Request  - Can this platform execute <task> ?
@@ -418,8 +417,8 @@ could be executed on that platform.
 
 Each offer contains some metadata about the offer itself,
 including an identifier and an expiry time,
-followed by an updated copy of the request \codeword{body}
-describing when and how the task would be executed.
+followed by an updated version of the session description
+including details of when and how it would be executed.
 
 \begin{lstlisting}[]
 # ExecutionBroker service response.
@@ -448,10 +447,12 @@ response:
         ....
 \end{lstlisting}
 
-The client can then ask its user to choose which of the offers best fits their requirements
-and replies with a message accepting the offer.
-In response, the \execbrokerclass{} will initiate a \workerjob{} in an \execworkerclass{} service
-to execute the task and reply with details of how to access it.
+The client can then ask its user to choose which of the offers best fits their requirements.
+The client sends a message to the \execbrokerclass{} accepting that offer.
+
+In response, the \execbrokerclass{} will update the status of the offer to \codeword{ACCEPTED} and return a URL
+pointing to a \workerjob{} in a \execworkerclass{} service, enabling the client to monitor the \workerjob{}
+status while it is executing.
 
 %\begin{lstlisting}[]
 %Request  - accept <offer>
@@ -467,7 +468,7 @@ The client does not need to cancel the offers made by the other \execbrokerclass
 Offers are only valid for a limited period of time and they will expire naturally when they reach
 the end of their lifetime.
 
-How the \execbrokerclass{} and \execworkerclass{} services are linked is up the implementation architecture.
+How the \execbrokerclass{} and \execworkerclass{} services are linked is up to the implementation architecture.
 One implementation may package both service interfaces into a single web-application.
 
 \includegraphics[width=0.9\textwidth]{diagrams/single-webapp.pdf}
@@ -481,7 +482,7 @@ service providing the front-end for multiple \execworkerclass{} services.
 \label{execution-worker-desc}
 
 The client can use the \workerjob{} details in the \execbrokerclass{} response to contact
-the \execworkerclass{} service and track its status.
+the \execworkerclass{} service and track the \workerjob{} status.
 
 \includegraphics[width=0.9\textwidth]{diagrams/job-status.pdf}
 
