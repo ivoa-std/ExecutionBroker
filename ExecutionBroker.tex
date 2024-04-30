@@ -47,13 +47,15 @@
 \newcommand{\zeppelinnotebook} {Zeppelin notebook}
 
 \newcommand{\oci} {OCI}
-\newcommand{\ocicontainer} {OCI~container}
+\newcommand{\ociruntime} {OCI runtime}
+\newcommand{\ocicontainer} {OCI container}
 \newcommand{\docker} {Docker}
 \newcommand{\dockercompose} {Docker compose}
-%\newcommand{\dockercontainer} {Docker container}
+\newcommand{\dockerruntime} {Docker runtime}
+\newcommand{\dockercontainer} {Docker container}
 
 \newcommand{\singularity} {Singularity}
-%\newcommand{\singularitycontainer} {Singularity container}
+\newcommand{\singularitycontainer} {Singularity container}
 
 \newcommand{\openstack} {Openstack}
 \newcommand{\kubernetes} {Kubernetes}
@@ -305,8 +307,8 @@ installed along with any additional \python{} modules required by the program.
 This environment is often referred to as the \python{} runtime.
 
 In the context of \scienceplatform{}s and \datascience{}, a common pattern is to provide this environment
-using an OCI\footurl{https://opencontainers.org/},
-or Docker\footurl{https://docs.docker.com/get-started/what-is-a-container/} container,
+using a Docker\footurl{https://docs.docker.com/get-started/what-is-a-container/}
+or OCI\footurl{https://opencontainers.org/} container
 to package the \pythonprogram{} and runtime together as a single binary object.
 This package, or container, is itself an \executablething{}. One which requires a different execution
 environment than the original \pythonprogram{}.
@@ -314,7 +316,7 @@ The aim of containerization is to package software components together with all 
 they need as a single binary object that interfaces with a standard execution environment,
 referred to as the \textit{container runtime}.
 To be able to use this \executablething{}, you would need a computing resource with the appropriate
-hardware and software environment. In this case, a computing resource with the \ocicontainer{} runtime installed.
+hardware and software environment. In this case, a computing resource with the \dockerruntime{} installed.
 
 We could also create a \jupyternotebook{} that demonstrates how to use our \pythonprogram{}.
 This is the third \executablething{} in our example.
@@ -327,10 +329,10 @@ In the context of \scienceplatform{}s and \datascience{}, a common pattern is to
 that allows the user to interact with the \jupyternotebook{} via a \webbrowser.
 
 From one algorithm that implements a science domain function, we have created three different \executablething{}s.
-A \pythonprogram{}, an \ocicontainer{} packaging the \pythonprogram{}, and an interactive \jupyternotebook{}
+A \pythonprogram{}, a \dockercontainer{} packaging the \pythonprogram{}, and an interactive \jupyternotebook{}
 that demonstrates how to use the \pythonprogram{}.
 Each of which requires a different computing environment to execute.
-A basic \python{} runtime, the \ocicontainer{} runtime, and a \jupyternotebook{} service.
+A basic \python{} runtime, the \dockerruntime{}, and a \jupyternotebook{} service.
 
 We may also want to consider the data that we are applying the algorithm to and the compute resources that
 will be needed to process it.
@@ -527,7 +529,7 @@ For an \execplan{} with a start trigger, the \workerjob{} will stay at \codeword
 When the \workerjob{} start executing, the \codeword{phase} is changed to \codeword{RUNNING}
 to indicate that the \workerjob{} is running.
 
-When the \workerjob{} finishes executing, because the \ocicontainer{} finished executing,
+When the \workerjob{} finishes executing, because the \dockercontainer{} finished executing,
 the user closed their \jupyternotebook, or the \codeword{maxduration} was reached,
 the \execworkerclass{} will change the \workerjob{} \codeword{phase} to \codeword{TEARDOWN} and
 begin the process of releasing the resources.
@@ -622,9 +624,9 @@ request:
       requirements: "https://.../requirements.txt"
 \end{lstlisting}
 
-\subsection{\ocicontainer{}}
-\label{ocicontainer}
-The \datamodel{} for an \ocicontainer{} describes the image name and version
+\subsection{\dockercontainer{}}
+\label{dockercontainer}
+The \datamodel{} for an \dockercontainer{} describes the image name and version
 along with the hostname of the repository to fetch it from.
 
 % Type URLs
@@ -636,9 +638,9 @@ request:
   # Details of the executable.
   executable:
     # A URI identifying the type of executable.
-    type: "https://www.purl.org/ivoa.net/executable-types/oci-container"
+    type: "https://www.purl.org/ivoa.net/executable-types/docker-container"
 
-    # The details, specific to an OCI container.
+    # The details, specific to a Docker container.
     spec:
       repo:  "ghcr.io"
       image: "ivoa/oligia-webtop"
@@ -1470,7 +1472,7 @@ but they MUST all occur within at least one of the ranges specified in the reque
 The client MAY also specify the maximum and minimum execution duration,
 expressed as time periods as defined by ISO 8601.
 
-For example, for the unattended batch mode execution of an \ocicontainer, the user might not be concerned about
+For example, for the unattended batch mode execution of an \dockercontainer, the user might not be concerned about
 when their \job{} starts, but they may want to specify the minimum duration needed to complete the task.
 
 In which case, the client may simply request a minimum duration of 1 hour.
@@ -2163,25 +2165,25 @@ A \jupyternotebook{} with specific input data and compute resources.
 \subsection{Simple container}
 \label{simple-container}
 
-A simple \ocicontainer{}.
+A simple \dockercontainer{}.
 ...
 
 \subsection{Container with data}
 \label{container-with-data}
 
-An \ocicontainer{} with specific input data.
+An \dockercontainer{} with specific input data.
 ...
 
 \subsection{Container with compute}
 \label{container-with-compute}
 
-An \ocicontainer{} with specific input and output data, and compute resources.
+An \dockercontainer{} with specific input and output data, and compute resources.
 ...
 
 \subsection{Container triggering notebook}
 \label{container-triggering-notebook}
 
-An \ocicontainer{} that notifies the user and launches a \jupyternotebook{} session
+An \dockercontainer{} that notifies the user and launches a \jupyternotebook{} session
 when the container finishes executing.
 ...
 
@@ -2637,13 +2639,13 @@ request:
 \subsubsection{OCI container}
 \label{datamodel-oci-container}
 
-The \datamodel{} extension for an \oci{} (Docker) container defines the URL
+The \datamodel{} extension for an \dockercontainer{} defines the URL
 to identify the \codeword{type}:
 \begin{lstlisting}[]
-https://www.purl.org/ivoa.net/executable-types/oci-container
+https://www.purl.org/ivoa.net/executable-types/docker-container
 \end{lstlisting}
 \hfill \break
-The \datamodel{} extension for an \ocicontainer{} contains:
+The \datamodel{} extension for an \dockercontainer{} contains:
 \begin{itemize}
     \item The \codeword{repo} endpoint address of the repository to download the container image from.
     \item The name of the \codeword{image} to download.
