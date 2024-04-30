@@ -68,7 +68,7 @@
 \newcommand{\scienceplatform} {science~platform}
 
 \newcommand{\executable} {\textit{executable}}
-\newcommand{\executablething} {\textit{executable}~thing}
+\newcommand{\executablething}[1] {\textit{executable~thing#1}}
 \newcommand{\excutabletask} {\textit{executable} task}
 
 \newcommand{\execplan} {\textit{plan}}
@@ -328,7 +328,7 @@ needed by our \pythonprogram{}.
 In the context of \scienceplatform{}s and \datascience{}, a common pattern is to provide this environment as a \webservice{}
 that allows the user to interact with the \jupyternotebook{} via a \webbrowser.
 
-From one algorithm that implements a science domain function, we have created three different \executablething{}s.
+From one algorithm that implements a science domain function, we have created three different \executablething{s}.
 A \pythonprogram{}, a \dockercontainer{} packaging the \pythonprogram{}, and an interactive \jupyternotebook{}
 that demonstrates how to use the \pythonprogram{}.
 Each of which requires a different computing environment to execute.
@@ -342,7 +342,7 @@ However, if we have a \dataset{} of ten million numbers that we want to process,
 need to consider adding extra storage to handle the input data and the results.
 For a large \dataset{} it may also be worth using a \gpu{} to accelerate the calculation steps.
 
-The \ivoa{} \executionbroker{} \datamodel{} provides a way to describe what each of these \executablething{}s
+The \ivoa{} \executionbroker{} \datamodel{} provides a way to describe what each of these \executablething{s}
 are and what resources are needed to execute them.
 This can include things like number of \cpu{} cores and amount of memory it needs,
 whether it needs a \gpu{}, the location of the input data, the storage space needed to perform
@@ -655,7 +655,7 @@ needed to describe an \executablething{} and the resources it needs while allowi
 \datamodel{} to be extended to describe a wide range of different types of things.
 
 This pattern makes it easy for projects outside the core \ivoa{} community to add new
-types of \executablething{}s and resources appropriate for their science domain.
+types of \executablething{s} and resources appropriate for their science domain.
 
 Using a URI to identify the task type means that implementations do not need to understand
 all of the different possible types of \executable{}.
