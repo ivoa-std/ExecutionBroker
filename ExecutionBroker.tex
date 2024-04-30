@@ -784,8 +784,10 @@ request:
           type: "https://tinyurl.com/nvidia-ad104"
           # The details, specific to a 'NVIDIA AD104 GPU'.
           spec:
-            minmemory: 20
-            minshaders: 6144
+            memory:
+              min: 20
+            shaders:
+              min: 6144
 \end{lstlisting}
 
 This pattern make it easy for projects to add new types of compute resources to their
@@ -879,8 +881,10 @@ request:
     - name: "compute-001"
       type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
       spec:
-        mincores:   8
-        minmemory: 16
+        cores:
+          min: 8
+        memory:
+          min: 16
 \end{lstlisting}
 
 All of the \datamodel{} elements for specifying the size or number of resources are defined
@@ -908,10 +912,12 @@ response:
     - name: "compute-001"
       type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
       spec:
-        mincores:   8
-        maxcores:  16
-        minmemory: 16
-        maxmemory: 32
+        cores:
+          min:  8
+          max: 16
+        memory:
+          min: 16
+          max: 32
 \end{lstlisting}
 
 This response represents an offer to start with a minimum of 8 \cpu{} cores and 16G of memory
@@ -943,10 +949,12 @@ response:
     - name: "compute-001"
       type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
       spec:
-        mincores:  16
-        maxcores:  16
-        minmemory: 24
-        maxmemory: 24
+        cores:
+          min: 16
+          max: 16
+        memory:
+          min: 24
+          max: 24
 \end{lstlisting}
 
 This response represents an offer to start with a fixed allocation of 16 \cpu{} cores and 24G of memory.
@@ -1117,8 +1125,10 @@ request:
       type: "https://www.purl.org/ivoa.net/storage-types/persistent-storage"
       spec:
         lifecycle: "managed"
-        minlifetime: "1D"
-        minsize: 100
+        lifetime:
+          min: "P1D"
+        size:
+          min: 100
 \end{lstlisting}
 
 By setting the storage resource type to \codeword{https://.../persistent},
@@ -1159,10 +1169,12 @@ response:
       type: "https://www.purl.org/ivoa.net/storage-types/rucio-storage"
       spec:
         lifecycle: "managed"
-        minlifetime: "1D"
-        maxlifetime: "5D"
-        minsize:  100
-        maxsize:  200
+        lifetime:
+          min: "P1D"
+          max: "P5D"
+        size:
+          min: 100
+          max: 200
         endpoint: "http://...."
         domain: "Project 51"
         objectid: "cdc78e7d-8032-497e-9a5b-01c720ea2223"
@@ -1175,7 +1187,7 @@ It is up to the client to check if it can access the particular \rucio{} system
 described in the response before it accepts the offer.
 
 Making an offer with the \codeword{lifecycle} set to \codeword{managed} and the
-\codeword{maxlifetime} set to \codeword{5D}
+\codeword{lifetime.max} set to \codeword{P5D}
 means that the service will manage the lifecycle.
 The storage will be available for 5 days after the \job{} completes and then it
 will be deleted automatically.
@@ -1250,7 +1262,8 @@ request:
         type: "container"
         path: "/experiment-21/results"
         lifecycle: "managed"
-        maxlifetime: "2D"
+        lifetime:
+          max: "P2D"
 \end{lstlisting}
 
 In this example, the client is specifying an external \vospace{} location to store the data,
@@ -1480,7 +1493,8 @@ In which case, the client may simply request a minimum duration of 1 hour.
 # ExecutionBroker client request.
 ....
 datetime:
-- minduration: "1H"
+- duration:
+    min: "P1H"
 \end{lstlisting}
 
 The \execbrokerclass{} service MAY respond with offers that start at different times and
@@ -1492,8 +1506,9 @@ It MAY offer a maximum duration of 1 hour in the morning, starting at 11:00.
 ....
 datetime:
 - start: "2023-08-14T11:30Z"
-  minduration: "1H"
-  maxduration: "1H"
+  duration:
+    min: "P1H"
+    max: "P1H"
 \end{lstlisting}
 
 It MAY also offer a longer allocation of 4 hours later in the evening,
@@ -1503,8 +1518,9 @@ starting sometime between 22:00 and 23:00.
 ....
 datetime:
 - start: "2023-08-14T22:00Z/PT1H"
-  minduration: "P1H"
-  maxduration: "P4H"
+  duration:
+    min: "P1H"
+    max: "P4H"
 \end{lstlisting}
 
 Different values for start time and duration can be combined with different values for the
@@ -1516,11 +1532,14 @@ For example, if a client asks for 2 cores and 2G of memory for 1 hour sometime o
   ...
 resources:
   compute:
-    mincores: 2
-    minmemory: 2
+    cores:
+      min: 2
+    memory:
+      min: 2
 datetime:
   - start: "2023-08-14/P1D"
-    minduration: "P1H"
+    duration:
+      min: "P1H"
 \end{lstlisting}
 
 The  \execbrokerclass{} service may respond with 2 offers,
@@ -1536,28 +1555,34 @@ offers:
     ...
   resources:
     compute:
-      mincores:  2
-      maxcores:  2
-      minmemory: 2
-      maxmemory: 2
+      cores:
+        min: 2
+        max: 2
+      memory:
+        min: 2
+        max: 2
   datetime:
     - start: "2023-08-14T11:30Z"
-      minduration: "P1H"
-      maxduration: "P1H"
+      duration:
+        min: "P1H"
+        max: "P1H"
 
 - name: "offer-002"
   executable:
     ...
   resources:
     compute:
-      mincores:  2
-      maxcores:  8
-      minmemory: 2
-      maxmemory: 8
+      cores:
+        min: 2
+        max: 8
+      memory:
+        min: 2
+        max: 8
   datetime:
     - start: "2023-08-14T22:00Z/T23:00Z"
-      minduration: "P1H"
-      maxduration: "P4H"
+      duration:
+        min: "P1H"
+        max: "P4H"
 \end{lstlisting}
 
 It is then up to the client to decide which offer better suits their use case.
@@ -1881,8 +1906,9 @@ resources:
       endpoint: "http://...."
       path: "/step-a/results"
       lifecycle: "managed"
-      minlifetime: "1D"
-      maxlifetime: "1D"
+      lifetime:
+        min: "P1D"
+        max: "P1D"
 \end{lstlisting}
 
 The data in this location can be made available to step-b using an \codeword{unmanaged} resource
@@ -1932,8 +1958,9 @@ resources:
       endpoint: "http://...."
       path: "/step-a/results"
       lifecycle: "managed"
-      minlifetime: "1D"
-      maxlifetime: "1D"
+      lifetime:
+        min: "P1D"
+        max: "P1D"
 \end{lstlisting}
 
 As far as the code inside the \executable{} is concerned, it writes its results to a
@@ -1989,7 +2016,7 @@ This time, the \codeword{job.status} value of \codeword{COMPLETED} will match th
 criteria to start step-b.
 
 At this point, although step-a has completed, the managed space in \vospace{} is not deleted.
-The managed resource has a \codeword{minlifetime} of \codeword{1D},
+The managed resource has a \codeword{lifetime.min} of \codeword{P1D},
 which means that the space will not be deleted until a day after step-a has completed.
 This allows sufficient time for step-b to execute, reading its input data
 from the results of step-a.
@@ -2802,14 +2829,14 @@ request:
       # A URL identifying the compute resource type.
       type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
       spec:
-        # The minimum number of cpu cores needed.
-        mincores: !!float # default: 1
-        # The maximum number of cpu cores available.
-        maxcores: !!float # default: mincores
-        # The minimum amount of memory needed, in GiB.
-        minmemory: !!float # default: 1
-        # The maximum amount of memory available, in GiB.
-        maxmemory: !!float # default: minmemory
+        # The minimum and maximum number of cpu cores needed.
+        cores:
+          min: !!float # default: 1
+          max: !!float # default: cores.min
+        # The minimum and maximum amount of memory needed, in GiB.
+        memory:
+          min: !!float # default: 1
+          max: !!float # default: memory.min
         ....
 \end{lstlisting}
 
