@@ -449,8 +449,8 @@ response:
         ....
 \end{lstlisting}
 
-The client can then ask its user to choose which of the offers best fits their requirements.
-The client sends a message to the \execbrokerclass{} accepting that offer.
+The client can then ask its user to choose which of the offers best fits their requirements
+and sends a message to the \execbrokerclass{} accepting that offer.
 
 In response, the \execbrokerclass{} will update the status of the offer to \codeword{ACCEPTED} and return a URL
 pointing to a \workerjob{} in a \execworkerclass{} service, enabling the client to monitor the \workerjob{}
