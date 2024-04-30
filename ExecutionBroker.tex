@@ -63,9 +63,9 @@
 \newcommand{\codeword}[1] {\texttt{#1}}
 \newcommand{\footurl}[1] {\footnote{\url{#1}}}
 
-\newcommand{\dataset} {dataset}
+\newcommand{\dataset}[1] {dataset#1}
 \newcommand{\datascience} {data~science}
-\newcommand{\scienceplatform} {science~platform}
+\newcommand{\scienceplatform}[1] {science~platform#1}
 
 \newcommand{\executable} {\textit{executable}}
 \newcommand{\executablething}[1] {\textit{executable~thing#1}}
@@ -76,8 +76,8 @@
 \newcommand{\workerjob} {\textit{job}}
 \newcommand{\teardown} {tear-down}
 
-\newcommand{\cpu} {CPU}
-\newcommand{\gpu} {GPU}
+\newcommand{\cpu}[1] {CPU#1}
+\newcommand{\gpu}[1] {GPU#1}
 \newcommand{\nvidiagpu} {NVIDIA~AD104~GPU}
 
 \newcommand{\job} {\textit{job}}
@@ -172,7 +172,7 @@
 One of the long term goals of the IVOA has been to enable users to
 move the code to the data.
 This is becoming more and more important as the size and complexity
-of the \dataset{}s available in the virtual observatory increases.
+of the \dataset{s} available in the virtual observatory increases.
 %\citep{gaia-at-esac}
 %\footurl{https://www.skao.int/en/explore/big-data}
 %\footurl{https://www.lsst.org/scientists/keynumbers}
@@ -190,7 +190,7 @@ and the resources needed to execute them.
 Together these components enable a user to ask a simple question
 \textit{"Where (and when) can I execute my program?"}
 
-This in turn enables users to move code between \scienceplatform{}s.
+This in turn enables users to move code between \scienceplatform{s}.
 Allowing them to develop their code on one platform and then apply it to a different
 \dataset{} by sending it to execute on another platform.
 
@@ -250,19 +250,19 @@ standards work together to connect users and applications with providers of data
 and services.
 Fig.~\ref{fig:archdiag} shows the role the \ivoa{} \executionbroker{} plays within this architecture.
 
-In response to the increasing size and complexity of the next generation of science \dataset{}s
-a number of \ivoa{} members are developing intergrated \scienceplatform{}s which bring
-together the \dataset{}s co-located with the compute resources needed to analyse
+In response to the increasing size and complexity of the next generation of science \dataset{s}
+a number of \ivoa{} members are developing intergrated \scienceplatform{s} which bring
+together the \dataset{s} co-located with the compute resources needed to analyse
 them.\footurl{https://data.lsst.cloud/}\footurl{https://rsp.lsst.io/index.html}
 
-The \scienceplatform{}s make extensive use of the \ivoa{} data models and
-vocabularies to describe their \dataset{}s, and use the \ivoa{} data access
+The \scienceplatform{s} make extensive use of the \ivoa{} data models and
+vocabularies to describe their \dataset{s}, and use the \ivoa{} data access
 services to find and access data from other data providers.
-In addition, some of the \scienceplatform{}s use \ivoa{} \vospace{} services to manage
+In addition, some of the \scienceplatform{s} use \ivoa{} \vospace{} services to manage
 data transfers to and from local storage co-located with the compute resources.
 
 However, to date the \ivoa{} does not provide any APIs or \webservice{} interfaces that
-enable \scienceplatform{}s to exchange the software used to analyse the data.
+enable \scienceplatform{s} to exchange the software used to analyse the data.
 The \ivoa{} \executionbroker{} provides a step towards making this possible.
 
 This places the \ivoa{} \executionbroker{} in the same region of the \ivoa{} architecture
@@ -306,7 +306,7 @@ hardware and software environment. In this case, a computing resource with the \
 installed along with any additional \python{} modules required by the program.
 This environment is often referred to as the \python{} runtime.
 
-In the context of \scienceplatform{}s and \datascience{}, a common pattern is to provide this environment
+In the context of \scienceplatform{s} and \datascience{}, a common pattern is to provide this environment
 using a Docker\footurl{https://docs.docker.com/get-started/what-is-a-container/}
 or OCI\footurl{https://opencontainers.org/} container
 to package the \pythonprogram{} and runtime together as a single binary object.
@@ -325,7 +325,7 @@ As before, to be able to use this \executablething{}, we would need a computing 
 the appropriate hardware and software environment.
 In this case, a computer with the \jupyternotebook{} platform installed along with all the \python{} modules
 needed by our \pythonprogram{}.
-In the context of \scienceplatform{}s and \datascience{}, a common pattern is to provide this environment as a \webservice{}
+In the context of \scienceplatform{s} and \datascience{}, a common pattern is to provide this environment as a \webservice{}
 that allows the user to interact with the \jupyternotebook{} via a \webbrowser.
 
 From one algorithm that implements a science domain function, we have created three different \executablething{s}.
@@ -359,7 +359,7 @@ executed.
 \label{discovery-services}
 
 The conversation starts at the discovery stage, where the user uses discovery services to
-selects the software and \dataset{}s that they want to work with.
+selects the software and \dataset{s} that they want to work with.
 
 \includegraphics[width=0.9\textwidth]{diagrams/data-discovery.pdf}
 
@@ -368,7 +368,7 @@ scope of this document.
 However we can outline some general requirements for them.
 
 In both cases, the discovery process should not depend on the technical details
-of the software or the \dataset{}s, but on their science domain functionality and properties.
+of the software or the \dataset{s}, but on their science domain functionality and properties.
 
 From a science user's perspective they want to be able to find software that implements
 a particular clustering algorithm, or a \dataset{} that is indexed according to a particular
@@ -493,7 +493,7 @@ A \workerjob{} in an \execworkerclass{} service goes through the following stage
 \begin{itemize}
     \item \codeword{PENDING}   The \workerjob{} has been created, but the resources have not be prepared yet.
     \item \codeword{SETUP}     The \execworkerclass{} service is setting up the resources needed to execute the \workerjob{}.
-                               This includes things like staging any \dataset{}s that will be needed locally.
+                               This includes things like staging any \dataset{s} that will be needed locally.
     \item \codeword{READY}     The \workerjob{} is ready and waiting to start.
     \item \codeword{RUNNING}   The \workerjob{} is running.
     \item \codeword{TEARDOWN}  The execution has finished and the \execworkerclass{} service is clearing up the resources that were used.
@@ -674,7 +674,7 @@ needed to execute a particular task.
 For example, \textit{"Can this platform provide enough resources to run this \jupyternotebook{}?"}
 
 In order to do this the request would not only need to describe the \executable{} itself,
-but also the minimum level of compute resources needed in terms of \cpu{} cores, memory, \gpu{}s
+but also the minimum level of compute resources needed in terms of \cpu{} cores, memory, \gpu{s}
 and disc space needed to execute it.
 
 \subsection{Compute resources}
@@ -1845,7 +1845,7 @@ actions:
 \end{lstlisting}
 
 The \codeword{starttime} on both step-a and step-b can be set to a range that starts today and lasts for a day.
-This will ensure that even if the triggers don't get called, and neither \job{} is executed, both \job{}s will
+This will ensure that even if the triggers don't get called, and neither of them is executed, both of them will
 be cancelled and their resources released when the \codeword{starttime} range expires at the end of the day.
 
 \begin{lstlisting}[]
@@ -2038,8 +2038,8 @@ A more complex aggregator service may have some prior knowledge about what types
 each of the lower level services were able to offer, enabling it to make more informed decisions about
 which low level serviecs to send the requests to.
 
-The aggregator service may also have an understanding of the location of \dataset{}s within the organization and
-be able to route requests to different low level services depending on which \dataset{}s were required.
+The aggregator service may also have an understanding of the location of \dataset{s} within the organization and
+be able to route requests to different low level services depending on which \dataset{s} were required.
 
 The aggregator service may expose the low level \execworkerclass{} endpoints in its responses,
 or it may implement a proxy interface acting as an aggregator for the \execworkerclass{}
