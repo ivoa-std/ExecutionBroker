@@ -47,13 +47,15 @@
 \newcommand{\zeppelinnotebook} {Zeppelin notebook}
 
 \newcommand{\oci} {OCI}
-\newcommand{\ocicontainer} {OCI~container}
+\newcommand{\ociruntime} {OCI runtime}
+\newcommand{\ocicontainer} {OCI container}
 \newcommand{\docker} {Docker}
 \newcommand{\dockercompose} {Docker compose}
-%\newcommand{\dockercontainer} {Docker container}
+\newcommand{\dockerruntime} {Docker runtime}
+\newcommand{\dockercontainer} {Docker container}
 
 \newcommand{\singularity} {Singularity}
-%\newcommand{\singularitycontainer} {Singularity container}
+\newcommand{\singularitycontainer} {Singularity container}
 
 \newcommand{\openstack} {Openstack}
 \newcommand{\kubernetes} {Kubernetes}
@@ -61,12 +63,12 @@
 \newcommand{\codeword}[1] {\texttt{#1}}
 \newcommand{\footurl}[1] {\footnote{\url{#1}}}
 
-\newcommand{\dataset} {dataset}
+\newcommand{\dataset}[1] {dataset#1}
 \newcommand{\datascience} {data~science}
-\newcommand{\scienceplatform} {science~platform}
+\newcommand{\scienceplatform}[1] {science~platform#1}
 
 \newcommand{\executable} {\textit{executable}}
-\newcommand{\executablething} {\textit{executable}~thing}
+\newcommand{\executablething}[1] {\textit{executable~thing#1}}
 \newcommand{\excutabletask} {\textit{executable} task}
 
 \newcommand{\execplan} {\textit{plan}}
@@ -74,8 +76,8 @@
 \newcommand{\workerjob} {\textit{job}}
 \newcommand{\teardown} {tear-down}
 
-\newcommand{\cpu} {CPU}
-\newcommand{\gpu} {GPU}
+\newcommand{\cpu}[1] {CPU#1}
+\newcommand{\gpu}[1] {GPU#1}
 \newcommand{\nvidiagpu} {NVIDIA~AD104~GPU}
 
 \newcommand{\job} {\textit{job}}
@@ -170,7 +172,7 @@
 One of the long term goals of the IVOA has been to enable users to
 move the code to the data.
 This is becoming more and more important as the size and complexity
-of the \dataset{}s available in the virtual observatory increases.
+of the \dataset{s} available in the virtual observatory increases.
 %\citep{gaia-at-esac}
 %\footurl{https://www.skao.int/en/explore/big-data}
 %\footurl{https://www.lsst.org/scientists/keynumbers}
@@ -188,7 +190,7 @@ and the resources needed to execute them.
 Together these components enable a user to ask a simple question
 \textit{"Where (and when) can I execute my program?"}
 
-This in turn enables users to move code between \scienceplatform{}s.
+This in turn enables users to move code between \scienceplatform{s}.
 Allowing them to develop their code on one platform and then apply it to a different
 \dataset{} by sending it to execute on another platform.
 
@@ -213,41 +215,19 @@ The \href{https://www.ivoa.net}{International Virtual Observatory Alliance (IVOA
 is a global collaboration of separately funded projects to develop standards and
 infrastructure that enable VO applications.
 
-\section{Preface}
-\label{preface}
-
-The current version of this document contains a significant amount of exposition
-explaning the details of the ideas behind the design of the \ivoa{} \executionbroker{}.
-
-As we transition from 'one guy with a good idea' to a team of people building prototypes
-and implementing services we will develop a common understanding of how we want
-the \executionbroker{} to function.
-In the process, I hope we will be able to edit a lot of the exposition and explanation
-down to make a more concise and readable document.
-
-I am also aware that the same ideas are explained more than once in different sections.
-This is a result of how the document developed over time, with different sections added at
-different times.
-Again, as we develop a common understanding I hope we can distil these into a simpler and
-more concise document with less repetition.
-
-At some point, this preface will no longer be required.
-
 \section{Introduction}
 \label{introduction}
 
-The \ivoa{} \executionbroker{} specification defines two \webservice{} interfaces,
-the \execbrokerclass{} and the \execworkerclass{}, and a common \datamodel{} for describing
-executable tasks.
-
+The \ivoa{} \executionbroker{} specification defines a \datamodel{} for describing executable tasks
+and two \webservice{} interfaces, \execbrokerclass{} and \execworkerclass{}.
 Together these provide a common interface for service discovery, resource allocation
 and execution scheduling across a heterogeneous federation of different types of
 execution platform.
 
 \begin{itemize}
-    \item \execbrokerclass{} \webservice{} – a discovery service to find execution platforms, allocate resources and schedule execution.
-    \item \execworkerclass{} \webservice{} – an asynchronous service for executing tasks (based on the \ivoa{} \uws{} pattern).
-    \item \execbrokerclass{} \datamodel{} – a common data model for describing an executable thing and its resource requirements.
+    \item \execbrokerclass{} \datamodel{}  – a data model for describing execution sessions and their resource requirements.
+    \item \execbrokerclass{} \webservice{} – a discovery service to find execution platforms, allocate resources and schedule execution sessions.
+    \item \execworkerclass{} \webservice{} – a monitoring service for monitoring and interacting with execution sessions.
 \end{itemize}
 
 \subsection{Role within the VO Architecture}
@@ -270,19 +250,19 @@ standards work together to connect users and applications with providers of data
 and services.
 Fig.~\ref{fig:archdiag} shows the role the \ivoa{} \executionbroker{} plays within this architecture.
 
-In response to the increasing size and complexity of the next generation of science \dataset{}s
-a number of \ivoa{} members are developing intergrated \scienceplatform{}s which bring
-together the \dataset{}s co-located with the compute resources needed to analyse
+In response to the increasing size and complexity of the next generation of science \dataset{s}
+a number of \ivoa{} members are developing intergrated \scienceplatform{s} which bring
+together the \dataset{s} co-located with the compute resources needed to analyse
 them.\footurl{https://data.lsst.cloud/}\footurl{https://rsp.lsst.io/index.html}
 
-The \scienceplatform{}s make extensive use of the \ivoa{} data models and
-vocabularies to describe their \dataset{}s, and use the \ivoa{} data access
+The \scienceplatform{s} make extensive use of the \ivoa{} data models and
+vocabularies to describe their \dataset{s}, and use the \ivoa{} data access
 services to find and access data from other data providers.
-In addition, some of the \scienceplatform{}s use \ivoa{} \vospace{} services to manage
+In addition, some of the \scienceplatform{s} use \ivoa{} \vospace{} services to manage
 data transfers to and from local storage co-located with the compute resources.
 
 However, to date the \ivoa{} does not provide any APIs or \webservice{} interfaces that
-enable \scienceplatform{}s to exchange the software used to analyse the data.
+enable \scienceplatform{s} to exchange the software used to analyse the data.
 The \ivoa{} \executionbroker{} provides a step towards making this possible.
 
 This places the \ivoa{} \executionbroker{} in the same region of the \ivoa{} architecture
@@ -293,7 +273,7 @@ of execution platforms.
 
 The \ivoa{} \executionbroker{} specification refers to the
 \ivoa{} Single-Sign-On standard \citep{2017ivoa.spec.0524T}
-for authentication (see section xx )%\ref{subsec:authentication}
+for authentication (see section xx) %\ref{subsec:authentication}
 and the
 \ivoa{} Credential Delegation Protocol \citep{2010ivoa.spec.0218P}
 for delegating credentials to other services.
@@ -326,9 +306,9 @@ hardware and software environment. In this case, a computing resource with the \
 installed along with any additional \python{} modules required by the program.
 This environment is often referred to as the \python{} runtime.
 
-In the context of \scienceplatform{}s and \datascience{}, a common pattern is to provide this environment
-using an OCI\footurl{https://opencontainers.org/},
-or Docker\footurl{https://docs.docker.com/get-started/what-is-a-container/} container,
+In the context of \scienceplatform{s} and \datascience{}, a common pattern is to provide this environment
+using a Docker\footurl{https://docs.docker.com/get-started/what-is-a-container/}
+or OCI\footurl{https://opencontainers.org/} container
 to package the \pythonprogram{} and runtime together as a single binary object.
 This package, or container, is itself an \executablething{}. One which requires a different execution
 environment than the original \pythonprogram{}.
@@ -336,7 +316,7 @@ The aim of containerization is to package software components together with all 
 they need as a single binary object that interfaces with a standard execution environment,
 referred to as the \textit{container runtime}.
 To be able to use this \executablething{}, you would need a computing resource with the appropriate
-hardware and software environment. In this case, a computing resource with the \ocicontainer{} runtime installed.
+hardware and software environment. In this case, a computing resource with the \dockerruntime{} installed.
 
 We could also create a \jupyternotebook{} that demonstrates how to use our \pythonprogram{}.
 This is the third \executablething{} in our example.
@@ -345,14 +325,14 @@ As before, to be able to use this \executablething{}, we would need a computing 
 the appropriate hardware and software environment.
 In this case, a computer with the \jupyternotebook{} platform installed along with all the \python{} modules
 needed by our \pythonprogram{}.
-In the context of \scienceplatform{}s and \datascience{}, a common pattern is to provide this environment as a \webservice{}
-that allows the user to interact with to the \jupyternotebook{} via a \webbrowser.
+In the context of \scienceplatform{s} and \datascience{}, a common pattern is to provide this environment as a \webservice{}
+that allows the user to interact with the \jupyternotebook{} via a \webbrowser.
 
-From one algorithm that implements a science domain function, we have created three different \executablething{}s.
-A \pythonprogram{}, an \ocicontainer{} packaging the \pythonprogram{}, and an interactive \jupyternotebook{}
+From one algorithm that implements a science domain function, we have created three different \executablething{s}.
+A \pythonprogram{}, a \dockercontainer{} packaging the \pythonprogram{}, and an interactive \jupyternotebook{}
 that demonstrates how to use the \pythonprogram{}.
 Each of which requires a different computing environment to execute.
-A basic \python{} runtime, the \ocicontainer{} runtime, and a \jupyternotebook{} service.
+A basic \python{} runtime, the \dockerruntime{}, and a \jupyternotebook{} service.
 
 We may also want to consider the data that we are applying the algorithm to and the compute resources that
 will be needed to process it.
@@ -362,7 +342,7 @@ However, if we have a \dataset{} of ten million numbers that we want to process,
 need to consider adding extra storage to handle the input data and the results.
 For a large \dataset{} it may also be worth using a \gpu{} to accelerate the calculation steps.
 
-The \ivoa{} \executionbroker{} \datamodel{} provides a way to describe what each of these \executablething{}s
+The \ivoa{} \executionbroker{} \datamodel{} provides a way to describe what each of these \executablething{s}
 are and what resources are needed to execute them.
 This can include things like number of \cpu{} cores and amount of memory it needs,
 whether it needs a \gpu{}, the location of the input data, the storage space needed to perform
@@ -379,16 +359,16 @@ executed.
 \label{discovery-services}
 
 The conversation starts at the discovery stage, where the user uses discovery services to
-selects the software and \dataset{}s that they want to work with.
+selects the software and \dataset{s} that they want to work with.
 
 \includegraphics[width=0.9\textwidth]{diagrams/data-discovery.pdf}
 
-The detailed specification for the software and data discovery services is beyond the
+The detailed specification for the software and data discovery services are beyond the
 scope of this document.
 However we can outline some general requirements for them.
 
 In both cases, the discovery process should not depend on the technical details
-of the software or \dataset{}s, but on their science domain functionality and properties.
+of the software or the \dataset{s}, but on their science domain functionality and properties.
 
 From a science user's perspective they want to be able to find software that implements
 a particular clustering algorithm, or a \dataset{} that is indexed according to a particular
@@ -421,13 +401,14 @@ The players:
 \subsection{Execution broker}
 \label{execution-broker-desc}
 
-Once the client has built a description of the \executablething{} the user wants to
-execute, it send the description to one or more
-\execbrokerclass{} services, asking them if they can execute the task.
-Each \execbrokerclass{} service evaluates the task and responds with a top level
+Once the user has selected the \executablething{} they want to use and the
+data they want to apply it to, the client combines this information to create a
+description of the session the user wants to execute and sends it to one or more
+\execbrokerclass{} services.
+Each \execbrokerclass{} service evaluates the request and responds with a top level
 \codeword{YES|NO} answer, and if
-the answer is \codeword{YES}, a list of offers describing how it
-could be executed on that platform.
+the answer is \codeword{YES}, a list of one or more offers describing how
+the requested session could be executed on that platform.
 
 %\begin{lstlisting}[]
 %Request  - Can this platform execute <task> ?
@@ -438,8 +419,8 @@ could be executed on that platform.
 
 Each offer contains some metadata about the offer itself,
 including an identifier and an expiry time,
-followed by an updated copy of the request \codeword{body}
-describing when and how the task would be executed.
+followed by an updated version of the session description
+including details of when and how it would be executed.
 
 \begin{lstlisting}[]
 # ExecutionBroker service response.
@@ -469,9 +450,11 @@ response:
 \end{lstlisting}
 
 The client can then ask its user to choose which of the offers best fits their requirements
-and replies with a message accepting the offer.
-In response, the \execbrokerclass{} will initiate a \workerjob{} in an \execworkerclass{} service
-to execute the task and reply with details of how to access it.
+and sends a message to the \execbrokerclass{} accepting that offer.
+
+In response, the \execbrokerclass{} will update the status of the offer to \codeword{ACCEPTED} and return a URL
+pointing to a \workerjob{} in a \execworkerclass{} service, enabling the client to monitor the \workerjob{}
+status while it is executing.
 
 %\begin{lstlisting}[]
 %Request  - accept <offer>
@@ -487,7 +470,7 @@ The client does not need to cancel the offers made by the other \execbrokerclass
 Offers are only valid for a limited period of time and they will expire naturally when they reach
 the end of their lifetime.
 
-How the \execbrokerclass{} and \execworkerclass{} services are linked is up the implementation architecture.
+How the \execbrokerclass{} and \execworkerclass{} services are linked is up to the implementation architecture.
 One implementation may package both service interfaces into a single web-application.
 
 \includegraphics[width=0.9\textwidth]{diagrams/single-webapp.pdf}
@@ -501,7 +484,7 @@ service providing the front-end for multiple \execworkerclass{} services.
 \label{execution-worker-desc}
 
 The client can use the \workerjob{} details in the \execbrokerclass{} response to contact
-the \execworkerclass{} service and track its status.
+the \execworkerclass{} service and track the \workerjob{} status.
 
 \includegraphics[width=0.9\textwidth]{diagrams/job-status.pdf}
 
@@ -510,7 +493,7 @@ A \workerjob{} in an \execworkerclass{} service goes through the following stage
 \begin{itemize}
     \item \codeword{PENDING}   The \workerjob{} has been created, but the resources have not be prepared yet.
     \item \codeword{SETUP}     The \execworkerclass{} service is setting up the resources needed to execute the \workerjob{}.
-                               This includes things like staging any \dataset{}s that will be needed locally.
+                               This includes things like staging any \dataset{s} that will be needed locally.
     \item \codeword{READY}     The \workerjob{} is ready and waiting to start.
     \item \codeword{RUNNING}   The \workerjob{} is running.
     \item \codeword{TEARDOWN}  The execution has finished and the \execworkerclass{} service is clearing up the resources that were used.
@@ -546,7 +529,7 @@ For an \execplan{} with a start trigger, the \workerjob{} will stay at \codeword
 When the \workerjob{} start executing, the \codeword{phase} is changed to \codeword{RUNNING}
 to indicate that the \workerjob{} is running.
 
-When the \workerjob{} finishes executing, because the \ocicontainer{} finished executing,
+When the \workerjob{} finishes executing, because the \dockercontainer{} finished executing,
 the user closed their \jupyternotebook, or the \codeword{maxduration} was reached,
 the \execworkerclass{} will change the \workerjob{} \codeword{phase} to \codeword{TEARDOWN} and
 begin the process of releasing the resources.
@@ -641,9 +624,9 @@ request:
       requirements: "https://.../requirements.txt"
 \end{lstlisting}
 
-\subsection{\ocicontainer{}}
-\label{ocicontainer}
-The \datamodel{} for an \ocicontainer{} describes the image name and version
+\subsection{\dockercontainer{}}
+\label{dockercontainer}
+The \datamodel{} for an \dockercontainer{} describes the image name and version
 along with the hostname of the repository to fetch it from.
 
 % Type URLs
@@ -655,9 +638,9 @@ request:
   # Details of the executable.
   executable:
     # A URI identifying the type of executable.
-    type: "https://www.purl.org/ivoa.net/executable-types/oci-container"
+    type: "https://www.purl.org/ivoa.net/executable-types/docker-container"
 
-    # The details, specific to an OCI container.
+    # The details, specific to a Docker container.
     spec:
       repo:  "ghcr.io"
       image: "ivoa/oligia-webtop"
@@ -672,7 +655,7 @@ needed to describe an \executablething{} and the resources it needs while allowi
 \datamodel{} to be extended to describe a wide range of different types of things.
 
 This pattern makes it easy for projects outside the core \ivoa{} community to add new
-types of \executablething{}s and resources appropriate for their science domain.
+types of \executablething{s} and resources appropriate for their science domain.
 
 Using a URI to identify the task type means that implementations do not need to understand
 all of the different possible types of \executable{}.
@@ -691,7 +674,7 @@ needed to execute a particular task.
 For example, \textit{"Can this platform provide enough resources to run this \jupyternotebook{}?"}
 
 In order to do this the request would not only need to describe the \executable{} itself,
-but also the minimum level of compute resources needed in terms of \cpu{} cores, memory, \gpu{}s
+but also the minimum level of compute resources needed in terms of \cpu{} cores, memory, \gpu{s}
 and disc space needed to execute it.
 
 \subsection{Compute resources}
@@ -801,8 +784,10 @@ request:
           type: "https://tinyurl.com/nvidia-ad104"
           # The details, specific to a 'NVIDIA AD104 GPU'.
           spec:
-            minmemory: 20
-            minshaders: 6144
+            memory:
+              min: 20
+            shaders:
+              min: 6144
 \end{lstlisting}
 
 This pattern make it easy for projects to add new types of compute resources to their
@@ -896,8 +881,10 @@ request:
     - name: "compute-001"
       type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
       spec:
-        mincores:   8
-        minmemory: 16
+        cores:
+          min: 8
+        memory:
+          min: 16
 \end{lstlisting}
 
 All of the \datamodel{} elements for specifying the size or number of resources are defined
@@ -925,10 +912,12 @@ response:
     - name: "compute-001"
       type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
       spec:
-        mincores:   8
-        maxcores:  16
-        minmemory: 16
-        maxmemory: 32
+        cores:
+          min:  8
+          max: 16
+        memory:
+          min: 16
+          max: 32
 \end{lstlisting}
 
 This response represents an offer to start with a minimum of 8 \cpu{} cores and 16G of memory
@@ -960,10 +949,12 @@ response:
     - name: "compute-001"
       type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
       spec:
-        mincores:  16
-        maxcores:  16
-        minmemory: 24
-        maxmemory: 24
+        cores:
+          min: 16
+          max: 16
+        memory:
+          min: 24
+          max: 24
 \end{lstlisting}
 
 This response represents an offer to start with a fixed allocation of 16 \cpu{} cores and 24G of memory.
@@ -1134,8 +1125,10 @@ request:
       type: "https://www.purl.org/ivoa.net/storage-types/persistent-storage"
       spec:
         lifecycle: "managed"
-        minlifetime: "1D"
-        minsize: 100
+        lifetime:
+          min: "P1D"
+        size:
+          min: 100
 \end{lstlisting}
 
 By setting the storage resource type to \codeword{https://.../persistent},
@@ -1176,10 +1169,12 @@ response:
       type: "https://www.purl.org/ivoa.net/storage-types/rucio-storage"
       spec:
         lifecycle: "managed"
-        minlifetime: "1D"
-        maxlifetime: "5D"
-        minsize:  100
-        maxsize:  200
+        lifetime:
+          min: "P1D"
+          max: "P5D"
+        size:
+          min: 100
+          max: 200
         endpoint: "http://...."
         domain: "Project 51"
         objectid: "cdc78e7d-8032-497e-9a5b-01c720ea2223"
@@ -1192,7 +1187,7 @@ It is up to the client to check if it can access the particular \rucio{} system
 described in the response before it accepts the offer.
 
 Making an offer with the \codeword{lifecycle} set to \codeword{managed} and the
-\codeword{maxlifetime} set to \codeword{5D}
+\codeword{lifetime.max} set to \codeword{P5D}
 means that the service will manage the lifecycle.
 The storage will be available for 5 days after the \job{} completes and then it
 will be deleted automatically.
@@ -1267,7 +1262,8 @@ request:
         type: "container"
         path: "/experiment-21/results"
         lifecycle: "managed"
-        maxlifetime: "2D"
+        lifetime:
+          max: "P2D"
 \end{lstlisting}
 
 In this example, the client is specifying an external \vospace{} location to store the data,
@@ -1489,7 +1485,7 @@ but they MUST all occur within at least one of the ranges specified in the reque
 The client MAY also specify the maximum and minimum execution duration,
 expressed as time periods as defined by ISO 8601.
 
-For example, for the unattended batch mode execution of an \ocicontainer, the user might not be concerned about
+For example, for the unattended batch mode execution of an \dockercontainer, the user might not be concerned about
 when their \job{} starts, but they may want to specify the minimum duration needed to complete the task.
 
 In which case, the client may simply request a minimum duration of 1 hour.
@@ -1497,7 +1493,8 @@ In which case, the client may simply request a minimum duration of 1 hour.
 # ExecutionBroker client request.
 ....
 datetime:
-- minduration: "1H"
+- duration:
+    min: "P1H"
 \end{lstlisting}
 
 The \execbrokerclass{} service MAY respond with offers that start at different times and
@@ -1509,8 +1506,9 @@ It MAY offer a maximum duration of 1 hour in the morning, starting at 11:00.
 ....
 datetime:
 - start: "2023-08-14T11:30Z"
-  minduration: "1H"
-  maxduration: "1H"
+  duration:
+    min: "P1H"
+    max: "P1H"
 \end{lstlisting}
 
 It MAY also offer a longer allocation of 4 hours later in the evening,
@@ -1520,8 +1518,9 @@ starting sometime between 22:00 and 23:00.
 ....
 datetime:
 - start: "2023-08-14T22:00Z/PT1H"
-  minduration: "P1H"
-  maxduration: "P4H"
+  duration:
+    min: "P1H"
+    max: "P4H"
 \end{lstlisting}
 
 Different values for start time and duration can be combined with different values for the
@@ -1533,11 +1532,14 @@ For example, if a client asks for 2 cores and 2G of memory for 1 hour sometime o
   ...
 resources:
   compute:
-    mincores: 2
-    minmemory: 2
+    cores:
+      min: 2
+    memory:
+      min: 2
 datetime:
   - start: "2023-08-14/P1D"
-    minduration: "P1H"
+    duration:
+      min: "P1H"
 \end{lstlisting}
 
 The  \execbrokerclass{} service may respond with 2 offers,
@@ -1553,28 +1555,34 @@ offers:
     ...
   resources:
     compute:
-      mincores:  2
-      maxcores:  2
-      minmemory: 2
-      maxmemory: 2
+      cores:
+        min: 2
+        max: 2
+      memory:
+        min: 2
+        max: 2
   datetime:
     - start: "2023-08-14T11:30Z"
-      minduration: "P1H"
-      maxduration: "P1H"
+      duration:
+        min: "P1H"
+        max: "P1H"
 
 - name: "offer-002"
   executable:
     ...
   resources:
     compute:
-      mincores:  2
-      maxcores:  8
-      minmemory: 2
-      maxmemory: 8
+      cores:
+        min: 2
+        max: 8
+      memory:
+        min: 2
+        max: 8
   datetime:
     - start: "2023-08-14T22:00Z/T23:00Z"
-      minduration: "P1H"
-      maxduration: "P4H"
+      duration:
+        min: "P1H"
+        max: "P4H"
 \end{lstlisting}
 
 It is then up to the client to decide which offer better suits their use case.
@@ -1585,7 +1593,7 @@ If an \execbrokerclass{} service is offering more than one option for the \codew
 section it MUST make separate offers for each different option.
 Even if all of the other parameters are the same, e.g. compute and storage resources, the
 \execbrokerclass{} service MUST NOT include more than one time slot in the same offer.
-Technically the \datamodel allows an array of values for the \codeword{datetime} section,
+Technically the \datamodel{} allows an array of values for the \codeword{datetime} section,
 but this would impose unnecessary complexity on the client for no real gain in user experience.
 
 \section{Triggers and Actions}
@@ -1862,7 +1870,7 @@ actions:
 \end{lstlisting}
 
 The \codeword{starttime} on both step-a and step-b can be set to a range that starts today and lasts for a day.
-This will ensure that even if the triggers don't get called, and neither \job{} is executed, both \job{}s will
+This will ensure that even if the triggers don't get called, and neither of them is executed, both of them will
 be cancelled and their resources released when the \codeword{starttime} range expires at the end of the day.
 
 \begin{lstlisting}[]
@@ -1898,8 +1906,9 @@ resources:
       endpoint: "http://...."
       path: "/step-a/results"
       lifecycle: "managed"
-      minlifetime: "1D"
-      maxlifetime: "1D"
+      lifetime:
+        min: "P1D"
+        max: "P1D"
 \end{lstlisting}
 
 The data in this location can be made available to step-b using an \codeword{unmanaged} resource
@@ -1949,8 +1958,9 @@ resources:
       endpoint: "http://...."
       path: "/step-a/results"
       lifecycle: "managed"
-      minlifetime: "1D"
-      maxlifetime: "1D"
+      lifetime:
+        min: "P1D"
+        max: "P1D"
 \end{lstlisting}
 
 As far as the code inside the \executable{} is concerned, it writes its results to a
@@ -2006,7 +2016,7 @@ This time, the \codeword{job.status} value of \codeword{COMPLETED} will match th
 criteria to start step-b.
 
 At this point, although step-a has completed, the managed space in \vospace{} is not deleted.
-The managed resource has a \codeword{minlifetime} of \codeword{1D},
+The managed resource has a \codeword{lifetime.min} of \codeword{P1D},
 which means that the space will not be deleted until a day after step-a has completed.
 This allows sufficient time for step-b to execute, reading its input data
 from the results of step-a.
@@ -2055,8 +2065,8 @@ A more complex aggregator service may have some prior knowledge about what types
 each of the lower level services were able to offer, enabling it to make more informed decisions about
 which low level serviecs to send the requests to.
 
-The aggregator service may also have an understanding of the location of \dataset{}s within the organization and
-be able to route requests to different low level services depending on which \dataset{}s were required.
+The aggregator service may also have an understanding of the location of \dataset{s} within the organization and
+be able to route requests to different low level services depending on which \dataset{s} were required.
 
 The aggregator service may expose the low level \execworkerclass{} endpoints in its responses,
 or it may implement a proxy interface acting as an aggregator for the \execworkerclass{}
@@ -2182,25 +2192,25 @@ A \jupyternotebook{} with specific input data and compute resources.
 \subsection{Simple container}
 \label{simple-container}
 
-A simple \ocicontainer{}.
+A simple \dockercontainer{}.
 ...
 
 \subsection{Container with data}
 \label{container-with-data}
 
-An \ocicontainer{} with specific input data.
+An \dockercontainer{} with specific input data.
 ...
 
 \subsection{Container with compute}
 \label{container-with-compute}
 
-An \ocicontainer{} with specific input and output data, and compute resources.
+An \dockercontainer{} with specific input and output data, and compute resources.
 ...
 
 \subsection{Container triggering notebook}
 \label{container-triggering-notebook}
 
-An \ocicontainer{} that notifies the user and launches a \jupyternotebook{} session
+An \dockercontainer{} that notifies the user and launches a \jupyternotebook{} session
 when the container finishes executing.
 ...
 
@@ -2656,13 +2666,13 @@ request:
 \subsubsection{OCI container}
 \label{datamodel-oci-container}
 
-The \datamodel{} extension for an \oci{} (Docker) container defines the URL
+The \datamodel{} extension for an \dockercontainer{} defines the URL
 to identify the \codeword{type}:
 \begin{lstlisting}[]
-https://www.purl.org/ivoa.net/executable-types/oci-container
+https://www.purl.org/ivoa.net/executable-types/docker-container
 \end{lstlisting}
 \hfill \break
-The \datamodel{} extension for an \ocicontainer{} contains:
+The \datamodel{} extension for an \dockercontainer{} contains:
 \begin{itemize}
     \item The \codeword{repo} endpoint address of the repository to download the container image from.
     \item The name of the \codeword{image} to download.
@@ -2819,14 +2829,14 @@ request:
       # A URL identifying the compute resource type.
       type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
       spec:
-        # The minimum number of cpu cores needed.
-        mincores: !!float # default: 1
-        # The maximum number of cpu cores available.
-        maxcores: !!float # default: mincores
-        # The minimum amount of memory needed, in GiB.
-        minmemory: !!float # default: 1
-        # The maximum amount of memory available, in GiB.
-        maxmemory: !!float # default: minmemory
+        # The minimum and maximum number of cpu cores needed.
+        cores:
+          min: !!float # default: 1
+          max: !!float # default: cores.min
+        # The minimum and maximum amount of memory needed, in GiB.
+        memory:
+          min: !!float # default: 1
+          max: !!float # default: memory.min
         ....
 \end{lstlisting}
 
