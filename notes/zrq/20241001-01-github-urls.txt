@@ -1,0 +1,54 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2024, Manchester (http://www.manchester.ac.uk/)
+#
+#     This information is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This information is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   </meta:licence>
+# </meta:header>
+#
+#zrq-notes-indent
+#
+# AIMetrics: []
+#
+
+    Target:
+
+        Replace purls with github.io urls in the text.
+        Add purls to link to them as a test.
+
+    Result:
+
+        Work in progress ...
+        This is probably a different branch ?
+
+# -----------------------------------------------------
+
+    #
+    # Login to archive.org using my own identity.
+    #
+    # Login to purl.archive.org to manage our URLs
+    # https://purl.archive.org/domain/ivoa.net
+    #
+    # Not sure how reliable this is at the moment.
+    # Create everything as github.io urls first.
+    #
+
+# -----------------------------------------------------
+
+
+    #
+    # Add a core set of URLs for our core types.
+    #
+
