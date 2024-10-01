@@ -29,47 +29,71 @@
 
         Work in progress ...
 
+
+# -----------------------------------------------------
+# Create our project env file.
+#[user@desktop]
+
+cat > "${HOME:?}/execbroker.env" << 'EOF'
+source "${HOME:?}/projects.env"
+EXECBROKER_REPO=git@github.com:Zarquan/ExecutionBroker.git
+EXECBROKER_HOME=${PROJECTS_ROOT:?}/IVOA/ivoa-std/ExecutionBroker
+EXECBROKER_CODE=${EXECBROKER_HOME:?}/github-zrq
+EOF
+
+
 # -----------------------------------------------------
 # Merge upstream changes.
 #[user@desktop]
 
-    git checkout main
+    source "${HOME:?}/execbroker.env"
+    pushd "${EXECBROKER_CODE}"
 
-    git pull
+        git checkout main
 
-    git fetch upstream
+        git pull
 
-    git merge upstream/main
+        git fetch upstream
 
-    git status
+        git merge upstream/main
 
-    git push
+        git status
+
+        git push
+
+    popd
 
 # -----------------------------------------------------
 # Create a new git branch.
 #[user@desktop]
 
-    branchname=gardening
+    source "${HOME:?}/execbroker.env"
+    pushd "${EXECBROKER_CODE}"
 
-    newbranch=$(date '+%Y%m%d')-zrq-${branchname:?}
+        branchname=gardening
 
-    git checkout main
+        newbranch=$(date '+%Y%m%d')-zrq-${branchname:?}
 
-    git checkout -b "${newbranch:?}"
+        git checkout main
 
-    git push --set-upstream 'origin' "$(git branch --show-current)"
+        git checkout -b "${newbranch:?}"
 
+        git push --set-upstream 'origin' "$(git branch --show-current)"
+
+    popd
 
 # -----------------------------------------------------
 # Start a new build container.
 #[user@desktop]
+
+    source "${HOME:?}/execbroker.env"
 
     podman run \
         --rm \
         --tty \
         --interactive \
         --name document-builder \
-        --volume "$(pwd):/document:rw,z" \
+        --volume "${EXECBROKER_CODE}:/document:rw,z" \
         debian \
             bash
 
