@@ -13,19 +13,37 @@
 \newcommand{\json} {JSON}
 \newcommand{\yaml} {YAML}
 \newcommand{\http} {HTTP}
+\newcommand{\rest} {REST}
 
 \newcommand{\datamodel} {data~model}
 \newcommand{\webservice} {web service}
 \newcommand{\webbrowser} {web browser}
 
+\newcommand{\vo} {VO}
+\newcommand{\vofull} {Virtual Observatory}
 \newcommand{\ivoa} {IVOA}
+\newcommand{\ivoafull} {International Virtual Observatory Alliance}
 \newcommand{\uws} {UWS}
 \newcommand{\vospace} {VOSpace}
 
+\newcommand{\execworkerclass} {**ExecutionWorker**}
 \newcommand{\execbrokerclass} {ExecutionBroker}
-\newcommand{\execworkerclass} {ExecutionWorker}
+\newcommand{\execbrokerservice}[1] {ExecutionBroker~service#1}
+
+\newcommand{\execoffer}[1] {\textit{ExecutionBroker~offer#1}}
+\newcommand{\execofferset}[1] {\textit{ExecutionBroker~offerset#1}}
+\newcommand{\execsession}[1] {\textit{ExecutionBroker~session#1}}
+
 \newcommand{\executionbroker} {Execution~Broker}
 \newcommand{\executionplanning} {Execution~Planning}
+
+\newcommand{\executable} {\textit{executable}}
+\newcommand{\executablething}[1] {\textit{executable~thing#1}}
+\newcommand{\excutabletask} {\textit{executable} task}
+
+%\newcommand{\execoffer}[1] {\textit{offer#1}}
+\newcommand{\workerjob}[1] {\textit{session#1}}
+\newcommand{\teardown} {tear-down}
 
 \newcommand{\jupyter} {Jupyter}
 \newcommand{\jupyterhub} {JupyterHub}
@@ -66,14 +84,6 @@
 \newcommand{\dataset}[1] {dataset#1}
 \newcommand{\datascience} {data~science}
 \newcommand{\scienceplatform}[1] {science~platform#1}
-
-\newcommand{\executable} {\textit{executable}}
-\newcommand{\executablething}[1] {\textit{executable~thing#1}}
-\newcommand{\excutabletask} {\textit{executable} task}
-
-\newcommand{\execoffer}[1] {\textit{offer#1}}
-\newcommand{\workerjob}[1] {\textit{session#1}}
-\newcommand{\teardown} {tear-down}
 
 \newcommand{\cpu}[1] {CPU#1}
 \newcommand{\gpu}[1] {GPU#1}
@@ -165,7 +175,7 @@
 \begin{abstract}
 \label{abstract}
 
-One of the long term goals of the IVOA has been to enable users to
+One of the long term goals of the \ivoa{} has been to enable users to
 move the code to the data.
 This is becoming more and more important as the size and complexity
 of the \dataset{s} available in the virtual observatory increases.
@@ -215,15 +225,14 @@ infrastructure that enable VO applications.
 \label{introduction}
 
 The \ivoa{} \executionbroker{} specification defines a \datamodel{} for describing executable tasks
-and two \webservice{} interfaces, \execbrokerclass{} and \execworkerclass{}.
+and a \webservice{} interface for managing them.
 Together these provide a common interface for service discovery, resource allocation
 and execution scheduling across a heterogeneous federation of different types of
 execution platform.
 
 \begin{itemize}
     \item \execbrokerclass{} \datamodel{}  – a data model for describing execution sessions and their resource requirements.
-    \item \execbrokerclass{} \webservice{} – a discovery service to find execution platforms, allocate resources and schedule execution sessions.
-    \item \execworkerclass{} \webservice{} – a monitoring service for monitoring and interacting with execution sessions.
+    \item \execbrokerclass{} \webservice{} – a \rest{} based web service to find execution platforms, allocate resources and schedule execution sessions.
 \end{itemize}
 
 \subsection{Role within the VO Architecture}
@@ -241,7 +250,7 @@ execution platform.
 \label{fig:archdiag}
 \end{figure}
 
-The IVOA Architecture\citep{2010ivoa.rept.1123A} provides a high-level view of how IVOA
+The \ivoa{} Architecture\citep{2010ivoa.rept.1123A} provides a high-level view of how \ivoa{}
 standards work together to connect users and applications with providers of data
 and services.
 Fig.~\ref{fig:archdiag} shows the role the \ivoa{} \executionbroker{} plays within this architecture.
@@ -251,13 +260,13 @@ a number of \ivoa{} members are developing intergrated \scienceplatform{s} which
 together the \dataset{s} co-located with the compute resources needed to analyse
 them.\footurl{https://data.lsst.cloud/}\footurl{https://rsp.lsst.io/index.html}
 
-The \scienceplatform{s} make extensive use of the \ivoa{} data models and
+These \scienceplatform{s} make extensive use of the \ivoa{} data models and
 vocabularies to describe their \dataset{s}, and use the \ivoa{} data access
 services to find and access data from other data providers.
 In addition, some of the \scienceplatform{s} use \ivoa{} \vospace{} services to manage
 data transfers to and from local storage co-located with the compute resources.
 
-However, to date the \ivoa{} does not provide any APIs or \webservice{} interfaces that
+However, to date the \ivoa{} does not provide any APIs or services that
 enable \scienceplatform{s} to exchange the software used to analyse the data.
 The \ivoa{} \executionbroker{} provides a step towards making this possible.
 
@@ -267,17 +276,12 @@ providing an infrastructure level service that enables service discovery,
 resource allocation and execution scheduling across a heterogeneous federation
 of execution platforms.
 
-The \ivoa{} \executionbroker{} specification refers to the
+\ivoa{} \executionbroker{} services may use the
 \ivoa{} Single-Sign-On standard \citep{2017ivoa.spec.0524T}
 for authentication (see section xx) %\ref{subsec:authentication}
 and the
 \ivoa{} Credential Delegation Protocol \citep{2010ivoa.spec.0218P}
 for delegating credentials to other services.
-
-The \ivoa{} \executionbroker{} specification also describes how to register
-an \execbrokerclass{} service in the
-\ivoa{} Registry \citep{2009ivoa.spec.1104B},
-making it findable within the wider context of the VO.
 
 \subsection{Executable things}
 \label{executablething}
@@ -299,13 +303,13 @@ We can write a \pythonprogram{} to use this algorithm to calculate the square ro
 This is the first identifiable \executablething{} in our example.
 To be able to use this \executablething{}, you would need a computing resource with the appropriate
 hardware and software environment. In this case, a computing resource with the \python{} interpreter
-installed along with any additional \python{} modules required by the program.
+installed along with the additional \python{} modules required by the program.
 This environment is often referred to as the \python{} runtime.
 
 In the context of \scienceplatform{s} and \datascience{}, a common pattern is to provide this environment
 using a Docker\footurl{https://docs.docker.com/get-started/what-is-a-container/}
 or OCI\footurl{https://opencontainers.org/} container
-to package the \pythonprogram{} and runtime together as a single binary object.
+to package the \pythonprogram{} and \python{} runtime together as a single binary object.
 This package, or container, is itself an \executablething{}. One which requires a different execution
 environment than the original \pythonprogram{}.
 The aim of containerization is to package software components together with all the libraries and dependencies
@@ -342,20 +346,20 @@ The \ivoa{} \executionbroker{} \datamodel{} provides a way to describe what each
 are and what resources are needed to execute them.
 This can include things like number of \cpu{} cores and amount of memory it needs,
 whether it needs a \gpu{}, the location of the input data, the storage space needed to perform
-the calculation and the storage space needed to save the results.
+the calculation, and the storage space needed to save the results.
 
 \section{Service interaction}
 \label{service-interaction}
 
-The interaction between user, client and services can be described as a conversation between the client
-and one or more \execbrokerclass{} services to discover where, how, and when, an \executablething{} can be
-executed.
+The interaction between a user, the client application they are using, and the services available in the \vo{}
+can be described as a conversation between the client and one or more \execbrokerservice{s} to discover
+where, how, and when, an \executablething{} can be executed.
 
 \subsection{Discovery services}
 \label{discovery-services}
 
 The conversation starts at the discovery stage, where the user uses discovery services to
-selects the software and \dataset{s} that they want to work with.
+select the software and \dataset{s} that they want to work with.
 
 \includegraphics[width=0.9\textwidth]{diagrams/data-discovery.pdf}
 
@@ -371,40 +375,222 @@ a particular clustering algorithm, or a \dataset{} that is indexed according to 
 coordinate system.
 The programming language the software is written in and the file format of the \dataset{}
 are at best secondary criteria.
+In our square root example, we would expect our user to use search terms like \textit{'square root'}
+or \textit{'newton raphson'} to find the software they need.
+We wouldn't expect them to start out looking for a \textit{'python'} program or a \textit{'docker'} container.
 Ideally, if the \executionbroker{} services function as intended, a science user should not
-need to know about programming languages or file formats.
+need to know about programming languages, software packaging or file formats.
 The \executionbroker{} services should make all of the technical details invisible,
 enabling the science user to get on with science.
 
-The interfaces for the discovery services should be designed to be domain agnostic.
-Meaning that it should be possible to swap out the astronomy based discovery services
-for the equivalent biochemistry discovery services and although the domain specific
+Another important consideration is these discovery services should be designed to be domain agnostic.
+Meaning that it should be possible to swap out an astronomy based discovery service
+for an equivalent biochemistry discovery service and although the domain specific
 terms and vocabulary will be different, the techical details of the service interfaces
 should be the same.
 
-\subsubsection{Separation of concerns}
-\label{separate-concerns}
 
-Separate who knows what ..
+
+%move this to a different section ...
+\subsection{Metadata roles}
+\label{metadata-roles}
+
+The full description of an \executablething{} consists several layers of metadata,
+each of which may be provided by different actors playing different roles within the community.
+
+For our square root \pythonprogram{} example we can identify a number of roles that each provide
+part of the picture nedeed to fully describe the task.
+
 The players:
 \begin{itemize}
-    \item The researcher who creates the notebook
-    \item The developer who creates the container
-    \item The publisher who publishes the data
-    \item The user who is running the analysis
+    \item The developer - The person who wrote the program
+    \item The packager - The person who packaged it in a container
+    \item The data provider - The data provider who publishes the data
+    \item The user - The person who is running the analysis
 \end{itemize}
 
+\subsubsection{The software developer}
+\label{software-developer}
+
+The first layer of metadata comes from the person who wrote the \pythonprogram{}.
+They have detailed knowledge of what the software does, what execution environment it needs,
+and what the inputs and outputs are.
+
+For the square root example, it is a \pythonprogram{} which needs a platform with the \python{} runtime installed,
+and a list of the \python{} libraries that the program relies on.
+
+\begin{lstlisting}[]
+# ExecutionBroker service response.
+executable:
+  type: uri:python-program
+  requirements:
+  - numpi: ""
+  - astropy: ">= 6.1"
+
+\end{lstlisting}
+
+The developer also understands how much memory their program needs, whether it can make use of multiple cpu cores,
+and whether it can make use of a \gpu accelerator.
+
+So they can provide an initial description of the compute resources
+their program requires.
+
+\begin{lstlisting}[]
+compute:
+- type: uri:generic-compute
+  cores:
+  memory:
+  extras:
+  - type: uri:gpu-accellerator
+    ....
+\end{lstlisting}
+
+They also know what inputs the program expects to receive and how it outputs the result.
+If it is being used to process a list of numbers, the developer knows where their program expects to find the input data,
+what file formats can it accept for the input, where it puts the results, and what output formats can it generate.
+
+\begin{lstlisting}[]
+compute:
+  volumes:
+  - path: /...
+    mode: readonly
+    resource: input data
+\end{lstlisting}
+
+\begin{lstlisting}[]
+data:
+- type: uri:data-descriptor
+  name: input data
+  mode: readonly
+  data-type: List<float>
+  data-formats:
+  - type: uri:dataformat-csv
+    ....
+  - type: uri:dataformat-tsv
+    ....
+  - type: uri:votable
+    ....
+- type: uri:data-descriptor
+  name: output data
+  mode: readwrite
+  data-type: List<float>
+  data-formats:
+  - type: uri:dataformat-csv
+    ....
+  - type: uri:dataformat-tsv
+    ....
+  - type: uri:votable
+    ....
+\end{lstlisting}
+
+ZRQ
+Question - what is the relationship between data-descriptor and data-resource ?
+Are they parts of the same thing, or are they two different things ?
+Do we replace the data-descriptor with a data-resource, or do we just extend it ?
+
+\subsubsection{The software packager}
+\label{software-packager}
+
+Packager changes the type of \executablething{} from a \pythonprogram{}
+to a \dockercontainer{}.
+
+\begin{lstlisting}[]
+executable:
+  type: uri:docker-container
+  ....
+\end{lstlisting}
+
+Depending on how they package the software they will probably need to change the
+description of where the \executablething{} expects to find its
+inputs and outputs.
+
+\begin{lstlisting}[]
+compute:
+  volumes:
+  - ....
+\end{lstlisting}
+
+\subsubsection{The data provider}
+\label{data-provider}
+
+The data provider describes what the data contains and what formats it is available in.
+This can be used to match up data sets with input and outputs of an \executablething{}.
+
+Beyond the scope of this specification, the schemas and vocabularies needed for this
+level of metadata is the domain of the semantics working group.
+
+At this stage it is probably not practical to try to define a universal set of data
+structures for all of the data across all of the \ivoa{}.
+
+However, it may be possible to start with an initial set of data types for
+individual projects and gradually work towards a wider concensus.
+
+Examples
+
+    uri:eMerlin-visibility-data-001
+    uri:lofar-visibility-data-001
+    uri:lofar-visibility-data-001
+    ...
+
+Even just applying a URI to identify the data format will enable
+basic tools to identify which data can be used with which software.
+
+\subsubsection{The user}
+\label{user-input}
+
+The user provides the last step in the metadata.
+By selecting the data they want to use as inouts, and selecting what format they want the output
+to be in, they can refine the links between the
+data resources, data descriptions and volume mounts.
+
+In most cases the user will use the
+compute resource requiremenst set by the software developer,
+but they can provide extra information
+based on their knowledge of what they plan to use the software for.
+
+If the original software was packaged as an example notebook, with
+fairly low requirements for compute resources, but the user intends to use the software
+to analyse a much larger data set they can modify the compute resource requirements
+to match their use case.
+
+\begin{lstlisting}[]
+compute:
+- type: uri:generic-compute
+  cores:
+  memory:
+\end{lstlisting}
+
+
+
 \subsection{Execution broker}
-\label{execution-broker-desc}
+\label{execution-broker-intro}
 
 Once the user has selected the \executablething{} they want to use and the
 data they want to apply it to, the client combines this information to create a
-description of the session the user wants to execute and sends it to one or more
-\execbrokerclass{} services.
-Each \execbrokerclass{} service evaluates the request and responds with a top level
+complete description of the \execsession{} the user wants to execute, including
+details of the executable, the compute, storage, and data resources it needs,
+and a schedule describing when the user wants it to run.
+
+\begin{lstlisting}[]
+executable:
+  ....
+resources:
+  ....
+schedule:
+  ....
+\end{lstlisting}
+
+\subsubsection{Request for offers}
+\label{offers-request}
+
+The client sends the \execsession{} description to one or more \execbrokerclass{}
+services to see if they can meet the requirements.
+
+Each \execbrokerservice{} evaluates the request and responds with a top level
 \codeword{YES|NO} answer, and if
 the answer is \codeword{YES}, a list of one or more \execoffer{s} describing how
-the requested session could be executed on that platform.
+the requested \execsession{} could be executed on the platform(s) represented by
+that \execbrokerservice{}.
 
 %\begin{lstlisting}[]
 %Request  - Can this platform execute <task> ?
@@ -413,58 +599,128 @@ the requested session could be executed on that platform.
 
 \includegraphics[width=0.9\textwidth]{diagrams/request-offers.pdf}
 
-Each \execoffer{} contains some metadata about the \execoffer{} itself,
-including an identifier and an expiry time,
-followed by a description of the \workerjob{} 
-including details of when and how it would be executed.
+\subsubsection{Offerset response}
+\label{offerset-response}
+
+The \execbrokerservice{} will respond to a request for offers with an \execofferset{}
+containing some metadata about the \execofferset{} itself, and a list of \execoffer{}s
+describing how the requested session could be executed.
+
+Each \execoffer{} in the list contains some metadata about the \execoffer{} itself,
+including it's identifier and expiry time, followed by details of how and when the
+\execsession{} would be executed.
 
 \begin{lstlisting}[]
-# ExecutionBroker service response.
-response:
-  result: 'YES'
-  offers:
-  - ident: "f185cd47-db9b-4765-a934-bf81ee9d2d34"
-    status: 'OFFERED'
-    expires: "2023-09-18T07:05:21"
-    body:
-      executable:
-        ....
-      resources:
-        ....
-      datetime:
-        ....
-  - ident: "2c89f536-3fff-48f7-943f-bcc5c3225be7"
-    status: 'OFFERED'
-    expires: "2023-09-18T07:05:21"
-    body:
-      executable:
-        ....
-      resources:
-        ....
-      datetime:
-        ....
+# ExecutionBroker offerset response.
+result: 'YES'
+state: 'OFFERED'
+expires: "2023-09-18T07:05:21"
+....
+offers:
+
+- ident: "2e164a1b-7ff6-11ef-8412-4bc36fe2face"
+  state: 'OFFERED'
+  expires: "2023-09-18T07:05:21"
+  ....
+  executable:
+    ....
+  resources:
+    ....
+  schedule:
+    ....
+
+- ident: "2e16bf4c-7ff6-11ef-8412-4bc36fe2face"
+  status: 'OFFERED'
+  expires: "2023-09-18T07:05:21"
+  ....
+  executable:
+    ....
+  resources:
+    ....
+  schedule:
+    ....
 \end{lstlisting}
 
-The client can then ask its user to choose which of the \execoffer{s} best fits their requirements
-and sends a message to the \execbrokerclass{} accepting that offer.
+The user can choose to accept one of the \execoffer{s} from the list that best
+fits their requirements, or they can reject all of the \execoffer{s} in the
+\execofferset{} and make a new request with different criteria.
 
-In response, the \execbrokerclass{} will update the status of the \execoffer{} to \codeword{ACCEPTED} and return a URL
-pointing to a \workerjob{} in a \execworkerclass{} service, enabling the client to monitor the \workerjob{}
-status while it is executing.
+Each of the \execoffer{s} in the \execofferset{} represent a temporary reservation
+for the resources listed in the \execoffer{}.
+This means these resources will not available to other users while the \execoffer{s}
+are still valid.
 
-%\begin{lstlisting}[]
-%Request  - accept <offer>
-%Response - <job details>
-%\end{lstlisting}
+If the user does nothing, then the \execbrokerservice{} will automatically
+update the \codeword{state} of each of the \execoffer{s} to \codeword{EXPIRED}
+when their expiry time is reached and release the resources associated with them.
 
-\includegraphics[width=0.9\textwidth]{diagrams/accept-offer.pdf}
+If the user accepts one of the \execoffer{s} in the \execofferset{} by updating
+the \codeword{state} to \codeword{ACCEPTED}, the \execbrokerservice{} SHOULD
+update the \codeword{state} of the other \execoffer{s} in the \execofferset{} to
+\codeword{REJECTED} and release the associated resources.
 
-Once the client has accepted an \execoffer{}, the conversation between the client and the \execbrokerclass{}
-is finished. Once one \execoffer{} has been accepted, the \execbrokerclass{} will cancel the other \execoffer{s} and
-release their resources.
-The client does not need to cancel the \execoffer{s} made by the other \execbrokerclass{} services.
-\execoffer{s} are only valid for a limited period of time and they will expire naturally when they reach
-the end of their lifetime.
+[accept/reject/expire state-transition diagram ?]
+
+\subsubsection{Execution state}
+\label{execution-state}
+
+Once the offer of anf \execsession{} has been accepted, the \execbrokerservice{}
+will begin the process of executing it.
+
+Each \execsession{} has a unique URL that the client can use to monitor and update
+its state.
+
+The \execbrokerservice{} response for an \execsession{} includes a list of options
+that the user may to perform on the \execsession{}.
+Which options are available will depend on the current \codeword{state} of the
+\execsession{} and the identity and permissions of the authenticated user.
+
+If the \execoffer{} is still being offered, then the list of available options
+allow the user to accept or reject the offer by updating the \codeword{state} of
+the \execsession{} to \codeword{ACCEPTED} or \codeword{REJECTED}.
+
+\begin{lstlisting}[]
+ident: "2e164a1b-7ff6-11ef-8412-4bc36fe2face"
+state: 'OFFERED'
+expires: "2023-09-18T07:05:21"
+....
+....
+options:
+  - type: "urn:enum-value-option"
+    path: "state"
+    values:
+    - "ACCEPTED"
+    - "REJECTED"
+\end{lstlisting}
+
+Once the \execoffer{} has been accepted and the \execsession{} has started to
+execute, then the list of available options will only allow the user to cancel
+the execution.
+
+\begin{lstlisting}[]
+ident: "2e164a1b-7ff6-11ef-8412-4bc36fe2face"
+state: 'ACCEPTED'
+expires: "2023-09-18T07:05:21"
+....
+....
+options:
+  - type: "urn:enum-value-option"
+    path: "state"
+    values:
+    - "CANCELLED"
+\end{lstlisting}
+
+This pattern of using a dynamic list of options enables an \execbrokerservice{}
+to change what an individual user is able to do and communicate that to the
+client over the lifetime of an \execsession{}.
+
+
+
+
+
+
+
+
 
 How the \execbrokerclass{} and \execworkerclass{} services are linked is up to the implementation architecture.
 One implementation may package both service interfaces into a single web-application.
@@ -487,6 +743,25 @@ the \execworkerclass{} service and track the \workerjob{} status.
 A \workerjob{} in an \execworkerclass{} service goes through the following stages in its lifecycle.
 
 \begin{itemize}
+
+
+                - PROPOSED
+
+                - OFFERED
+                - ACCEPTED
+                - REJECTED
+                - EXPIRED
+
+                - WAITING
+                - PREPARING
+                - READY
+                - RUNNING
+                - FINISHING
+                - COMPLETED
+                - FAILED
+                - CANCELLED
+
+
     \item \codeword{PENDING}   The \workerjob{} has been created, but the resources have not be prepared yet.
     \item \codeword{SETUP}     The \execworkerclass{} service is setting up the resources needed to execute the \workerjob{}.
                                This includes things like staging any \dataset{s} that will be needed locally.
@@ -1124,14 +1399,14 @@ request:
 
 By setting the storage resource type to \codeword{https://.../persistent},
 and setting the \codeword{lifecycle} to \codeword{managed},
-the client is asking the \execbrokerclass{} service to take care of allocating
+the client is asking the \execbrokerservice{} to take care of allocating
 the storage and managing its lifecycle.
-It is up to the \execbrokerclass{} service to decide where to store the data and
+It is up to the \execbrokerservice{} to decide where to store the data and
 how make it accessible after the \workerjob{} has completed.
 
 For example, a science platform may have a \rucio{} storage system co-located
 with the compute platform which it uses to store user generated data.
-In which case the \execbrokerclass{} service would respond with an \execoffer{} that
+In which case the \execbrokerservice{} would respond with an \execoffer{} that
 stores the results in the \rucio{} system and provides details of how the user
 can access it after the \workerjob{} has completed.
 
@@ -1186,7 +1461,7 @@ The client doesn't need to worry about tidying up afterwards.
 
 It is important to note that at this point in time the storage is proposed, but not yet allocated.
 The persistent storage is only allocated if the client accepts this particular \execoffer{}.
-This allows an \execbrokerclass{} service to make multiple \execoffer{s} with different storage options,
+This allows an \execbrokerservice{} to make multiple \execoffer{s} with different storage options,
 allowing the client to select and accept the one that best fits its use case.
 
 The same \datamodel{} can be used the other way around as well.
@@ -1221,7 +1496,7 @@ request:
         lifecycle: "unmanaged"
 \end{lstlisting}
 
-It is up to the \execbrokerclass{} service to work out if it is able to access the
+It is up to the \execbrokerservice{} to work out if it is able to access the
 \vospace{} location and mount it as a volume in the compute resource,
 using either its own authentication, or a delegated form of the authentication
 provided by the client.
@@ -1233,7 +1508,7 @@ reason the \execbrokerclass{} MUST respond with \codeword{NO}.
 Note that in this example, the client has specified the lifecycle as \codeword{unmanaged},
 which means that the \execbrokerclass{} is not involved in managing the creation or deletion
 of the data in \vospace.
-It is also possible for the client to ask the \execbrokerclass{} service to manage
+It is also possible for the client to ask the \execbrokerservice{} to manage
 data in an external resource.
 
 \begin{lstlisting}[]
@@ -1258,164 +1533,27 @@ request:
 \end{lstlisting}
 
 In this example, the client is specifying an external \vospace{} location to store the data,
-but it is asking the \execbrokerclass{} service to manage the lifecycle, creating the location
+but it is asking the \execbrokerservice{} to manage the lifecycle, creating the location
 in \vospace{} at the start of the \workerjob{} and deleting it 2 days after the \workerjob{} completes.
 
 This negotiation of who is responsible for creating and deleting storage resources
 enables a client to put together a workflow of interconnected steps, with the
-\execbrokerclass{} services
+\execbrokerservice{s}
 managing the lifecycle of the resources and releasing them automatically after they
 are no longer needed.
 
 \section{Authentication}
 \label{authentication}
 
-The client may also want to check whether the user account making the request
-has sufficient access rights and resource quota needed to execute it.
+The client / service interactions requires some level of authentication to enable the
+\execbrokerservice{} to control access to the
 
-This is equivalent to asking:
-\textit{"Do I have permission to use these resources to run this \jupyternotebook{}?"}
+The \executionbroker{} standard does not mandate a particular authentication method.
+However, to facilitate interoperability with as wide a community as possible an individual \execbrokerclass{}
+service should follow the guidlines set out in the \ivoa{} SSO standard.
 
-There are two ways for the \execbrokerclass{} service to check the user's identity,
-using implicit and explicit authentication.
 
-The implicit method is for the client to authenticate to the \execbrokerclass{} service
-as normal and the service will use the identity from the request headers to check if the
-user has sufficient access rights and resource quota.
 
-If the \webservice{} call to the \execbrokerclass{} service is authenticated
-using OpenIDConnect
-(OIDC)\footurl{https://auth0.com/docs/authenticate/protocols/openid-connect-protocol},
-then the \execbrokerclass{} MUST include a reference to the implicit
-authentication in its reply, including enough non-secret
-information to identify the authenticated identity.
-
-\begin{lstlisting}[]
-# ExecutionBroker server response.
-response:
-  ....
-  # Details of the authentication offered.
-  authentication:
-  - name: "http-request"
-    type: "https://.../oidc"
-    mode: "implicit"
-    spec:
-      subject: "user@domain"
-\end{lstlisting}
-
-If the client uses an unknown authentication method in the \webservice{} call and
-the \execbrokerclass{} service recognises that an anthentication attempt has been made,
-then it MUST reject the \webservice{} call with a 401 "Unauthenticated" response.
-If the \execbrokerclass{} service does not realise that an anthentication attempt has been made,
-then this MAY result in the request being treated as an anonymous unauthenticated call.
-
-The \datamodel{} also allows for an explicit statement of identity in the request.
-The \datamodel{} for authentication follows the same pattern as previous sections,
-defining a \codeword{type} URI to identify the type of authentication method,
-and a \codeword{spec} section for the type specific details.
-
-For example, to explicitly include a basic authentication with username and password
-in the request:
-\begin{lstlisting}[]
-# ExecutionBroker client request.
-request:
-  # Details of the executable.
-  executable:
-    ....
-  # Additional authentication methods
-  authentication:
-  - name: "basic-auth"
-    type: "https://.../basic"
-    spec:
-      username: "..."
-      password: "..."
-\end{lstlisting}
-
-This pattern allows the client to supply multiple authentication methods
-in the request. The \execbrokerclass{} service can select the authentication
-methods it accepts from those in the request and include the name and
-type of the methods in its \execoffer{} along with enough non-secret
-information to identify the authenticated identity.
-
-For example, if the client supplies both basic and token authentication
-in the request:
-\begin{lstlisting}[]
-# ExecutionBroker client request.
-request:
-  # Details of the executable.
-  executable:
-    ....
-  # Additional authentication methods
-  authentication:
-  - name: "basic-auth"
-    type: "https://.../basic"
-    mode: "explicit"
-    spec:
-      username: "..."
-      password: "..."
-  - name: "token-auth"
-    type: "https://.../token"
-    mode: "explicit"
-    spec:
-      token: "..."
-\end{lstlisting}
-
-If the \execbrokerclass{} service only accepts the token authentication, it should
-skip the basic authentication and only include a reference to the token
-based authentication in its \execoffer{}.
-
-\begin{lstlisting}[]
-# ExecutionBroker server response.
-response:
-  ....
-  # Details of the authentication offered.
-  authentication:
-  - name: "token-auth"
-    type: "https://.../rfc7519"
-    mode: "explicit"
-    spec:
-      ....
-\end{lstlisting}
-
-If the \execbrokerclass{} service does not recognise or support any of the authentication methods
-included in the request, then the service MUST reject the request and reply with \codeword{NO}.
-
-\begin{lstlisting}[]
-Request  - Can I authenticate with <unknown method, unknown method, or unknown method> ?
-Response - NO
-\end{lstlisting}
-
-The result is that an \execoffer{} made by an \execbrokerclass{} service should only include details
-of the authenticated identities that are allowed to use the \execoffer{}.
-
-If the original question is equivalent to:
-\textit{"Do \textbf{these identities} have sufficient access rights and quota to run this \jupyternotebook{}?"}
-
-Then the response from the \execbrokerclass{} service is equivalent to:
-\textit{"This \execoffer{} asserts that \textbf{these identities} have sufficient access rights and quota to run this \jupyternotebook{}?"}
-
-The client MUST use one of the authentication methods listed in the \execoffer{} when
-contacting the \execbrokerclass{} service to accept the \execoffer{} and start the \workerjob{}.
-The client MUST continue to use the same authentication method when making subsequent
-requests to the \execworkerclass{} service to access the \workerjob{} status and results.
-
-The \executionbroker{} specification includes an initial set of authentication methods
-corresponding to the methods defined in the
-\ivoa{} Single-Sign-On standard\citep{2017ivoa.spec.0524T}
-
-\begin{itemize}
-    \item ....
-    \item ....
-\end{itemize}
-
-However, the \datamodel{} also allows an \execbrokerclass{} service to accept authentication
-methods that are not covered by the \ivoa{} SSO standard.
-A client is free to use any authentication method, including ones not covered by the
-\ivoa{} SSO standard. It is up to the \execbrokerclass{} service to decide how it
-handles the authentication infomation it receives.
-
-This means that the \executionbroker{} services can be deployed in other domains outside the \ivoa{},
-without requiring them to adopt the full \ivoa{} SSO standard.
 
 \section{Date and time}
 \label{date-time}
@@ -1426,7 +1564,7 @@ conversation about when a \workerjob{} can be executed.
 The client can specify one or more time periods when it would like to start the \workerjob{},
 and the minimum duration that it thinks would be needed to complete the \workerjob{}.
 
-The \execbrokerclass{} service may respond with one or more \execoffer{s} that specify when the \workerjob{}
+The \execbrokerservice{} may respond with one or more \execoffer{s} that specify when the \workerjob{}
 would start and the maximum duration that the \workerjob{} would be allowed to consume.
 It is then up to the client to select which of the \execoffer{s} best suits its use case.
 
@@ -1468,7 +1606,7 @@ datetime:
 - start: "2023-08-14T11:30Z/PT30M"
 \end{lstlisting}
 
-The \execbrokerclass{} service SHOULD respond with one or more \execoffer{s} that start within
+The \execbrokerservice{} SHOULD respond with one or more \execoffer{s} that start within
 the ranges specified in the request.
 The start times in the \execoffer{s} MAY be more precise than the start times in the request,
 but they MUST all occur within at least one of the ranges specified in the request.
@@ -1488,7 +1626,7 @@ datetime:
     min: "P1H"
 \end{lstlisting}
 
-The \execbrokerclass{} service MAY respond with \execoffer{s} that start at different times and
+The \execbrokerservice{} MAY respond with \execoffer{s} that start at different times and
 set different values for the maximum duration.
 
 It MAY offer a maximum duration of 1 hour in the morning, starting at 11:00.
@@ -1533,7 +1671,7 @@ datetime:
       min: "P1H"
 \end{lstlisting}
 
-The  \execbrokerclass{} service may respond with 2 \execoffer{s},
+The  \execbrokerservice{} may respond with 2 \execoffer{s},
 the minimum 2 cores and 2G of memory for 1 hour starting at 11:30,
 and a larger \execoffer{} of up to 8 cores and 8Gb of memory for up to 4 hours
 starting between 22:00 and 23:00.
@@ -1580,10 +1718,10 @@ It is then up to the client to decide which \execoffer{} better suits their use 
 Accept the limited \execoffer{} in the morning, or accept the more generous \execoffer{} with
 more resources and more time later in the day.
 
-If an \execbrokerclass{} service is offering more than one option for the \codeword{datetime}
+If an \execbrokerservice{} is offering more than one option for the \codeword{datetime}
 section it MUST make separate \execoffer{s} for each different option.
 Even if all of the other parameters are the same, e.g. compute and storage resources, the
-\execbrokerclass{} service MUST NOT include more than one time slot in the same \execoffer{}.
+\execbrokerservice{} MUST NOT include more than one time slot in the same \execoffer{}.
 Technically the \datamodel{} allows an array of values for the \codeword{datetime} section,
 but this would impose unnecessary complexity on the client for no real gain in user experience.
 
@@ -1593,9 +1731,9 @@ but this would impose unnecessary complexity on the client for no real gain in u
 \section{Federated architecture}
 \label{federation}
 
-The \execbrokerclass{} and \execworkerclass{} services are designed to be used at multiple levels within an organization.
+The \execbrokerservice{} is designed to be used at multiple levels within an organization.
 
-At the low level, an \execbrokerclass{} and \execworkerclass{} pair may be implemented as a
+At the low level, an \execbrokerclass{} serice may be implemented as a
 single web-application linked to a simple \docker{} execution service.
 The configuration may be hard coded to only accept a fixed white list of container images
 and a fixed allocation of compute resources for each job{}.
@@ -1612,7 +1750,7 @@ endpoint address.
 This information could come from the \ivoa{} Registry, or it could simply
 be provided as a flat list in a configuration file for the client.
 
-A more flexible architecture could add another \execbrokerclass{} service
+A more flexible architecture could add another \execbrokerservice{}
 a level above the low level task specific services.
 This service would be configured with a list of the local task specific services
 and act as an aggregator service sitting between the client and the low level services.
@@ -1629,29 +1767,27 @@ which low level serviecs to send the requests to.
 The aggregator service may also have an understanding of the location of \dataset{s} within the organization and
 be able to route requests to different low level services depending on which \dataset{s} were required.
 
-The aggregator service may expose the low level \execworkerclass{} endpoints in its responses,
-or it may implement a proxy interface acting as an aggregator for the \execworkerclass{}
-services as well.
+The aggregator service may expose the individual low level \execbrokerclass{} endpoints in its responses,
+or it may implement a proxy interface hiding the individual services.
 
-This configuration could be used to provide \execbrokerclass{} and \execworkerclass{} service interfaces
-that bridged a firewall. Providing a public interface for external clients and forwarding the requests
-to the internal \execbrokerclass{} and \execworkerclass{} services that are not accessible from outside the
+This configuration could be used to provide an \execbrokerservice{} interface
+that bridges a firewall. Providing a public interface for external clients and forwarding the requests
+to internal \execbrokerservice{s} that are not accessible from outside the
 firewall.
 
-A large organization with multiple sites couls also deploy a single high level \execbrokerclass{} and \execworkerclass{}
-interface that handles task execution for the whole organization, forwarding the requests to mid-level
-\execbrokerclass{} and \execworkerclass{} services at each site which in turn forwards the requests to
-individual low-level \execbrokerclass{} and \execworkerclass{} services within the local site networks.
+A large organization with multiple sites could also deploy a single high level \execbrokerclass{}
+interface that handles requests for the whole organization, forwarding individual requests to mid-level
+\execbrokerservice{s} at each site which in turn forwards the requests to
+individual low-level \execbrokerservice{s} for each platform within the local sites.
 
 The implementation at each level may be different, providing different levels of routing
 and aggregation based on internal knowledge of the capabilities of the level below,
-but the \execbrokerclass{} and \execworkerclass{} interfaces would be the same at each level
-in the organization.
+but the \execbrokerclass{} interfaces would all be the same.
 
-This could be expanded to include another level of \execbrokerclass{} and \execworkerclass{} services that
+This could be expanded to include another level of \execbrokerservice{s} that
 cross organization bondaries, providing a gateway that allows users from one project to access services
 from other projects and organizations. This gateway service may also provide an authentication translation
-layer between external public accounts internal project specific identities and authentication methods.
+layer between external public accounts and internal project specific identities and authentication methods.
 
 Federated cloud diagram ....
 
@@ -1847,11 +1983,11 @@ Content-Type: application/json
   }
 \end{lstlisting}
 
-The \execbrokerclass{} service will evaluate the request and respond with either a positive
+The \execbrokerservice{} will evaluate the request and respond with either a positive
 or negative \codeword{response} depending on whether the platform is able to execute the
 task descibed in the \codeword{request}.
 
-An \execbrokerclass{} service MUST be able to provide both \yaml{} and \json{} serializations
+An \execbrokerservice{} MUST be able to provide both \yaml{} and \json{} serializations
 of the \codeword{response}.
 The serialization is determined by the \codeword{Accept} header in the HTTP request.
 \begin{itemize}
@@ -1919,7 +2055,7 @@ http[s]://foo.example.org/offers/{identifier}
 The \datamodel{} for the content of the response is described in section
 \ref{datamodel-offer}.
 
-An \execbrokerclass{} service MUST be able to provide both \yaml{} and \json{} serializations
+An \execbrokerservice{} MUST be able to provide both \yaml{} and \json{} serializations
 of the \codeword{offer}.
 The serialization is determined by the \codeword{Accept} header in the HTTP request.
 \begin{itemize}
@@ -2015,21 +2151,6 @@ offer:
 
 If the update is not successful, the content of the response ... TBD ...
 
-
-\subsection{ExecutionWorker}
-\label{execution-worker-spec}
-
-Accepting an \execoffer{} from an \execbrokerclass{} service creates a \workerjob{} on an associated \execworkerclass{},
-with status \codeword{PENDING} until the \workerjob{} is started automatically by the \execworkerclass{}.
-
-The \execoffer{} from the \execbrokerclass{} will contain the URL \workerjob{} in the \execworkerclass{}.
-
-\begin{itemize}
-    \item \execbrokerclass{} is responsible for creating and starting the \workerjob{}.
-    \item Client can use a HEAD request to check network access at anytime.
-    \item Client can use a GET request to check the status of the \workerjob{} at anytime.
-    \item Client can cancel the \workerjob{} at anytime.
-\end{itemize}
 
 \pagebreak
 
@@ -2217,8 +2338,8 @@ request:
       endpoint: !!str
 \end{lstlisting}
 
-\subsubsection{OCI container}
-\label{datamodel-oci-container}
+\subsubsection{Docker container}
+\label{datamodel-docker-container}
 
 The \datamodel{} extension for an \dockercontainer{} defines the URL
 to identify the \codeword{type}:
@@ -2367,9 +2488,9 @@ https://www.purl.org/ivoa.net/resource-types/generic-compute
 The \codeword{spec} for a generic computing resource may contain the following optional properties:
 \begin{itemize}
     \item The minimum number of cpu cores needed, set by the client in the \execbrokerclass{} \codeword{request}.
-    \item The maximum number of cpu cores available, set by the \execbrokerclass{} service in an \codeword{offer}.
+    \item The maximum number of cpu cores available, set by the \execbrokerservice{} in an \codeword{offer}.
     \item The minimum amount of memory needed (in GiB), set by the client in the \execbrokerclass{} \codeword{request}.
-    \item The maximum amount of memory available (in GiB), set by the \execbrokerclass{} service in an \codeword{offer}.
+    \item The maximum amount of memory available (in GiB), set by the \execbrokerservice{} in an \codeword{offer}.
 \end{itemize}
 
 \begin{lstlisting}[]
@@ -2460,7 +2581,7 @@ request:
 
 \subsubsection{Positive response}
 \label{datamodel-positive-response}
-A positive (yes, this platform can execute the task) \execbrokerclass{} service response contains \codeword{result}
+A positive (yes, this platform can execute the task) \execbrokerservice{} response contains \codeword{result}
 set to \codeword{YES}, and a list of \execoffer{s}.
 
 \subsubsection{Offer}
@@ -2468,7 +2589,7 @@ set to \codeword{YES}, and a list of \execoffer{s}.
 
 Each \execoffer{} contains a unique identifier a status value and an expiry time for the \execoffer{}
 followed by an updated copy of the \codeword{request} with details
-filled in by the \execbrokerclass{} service.
+filled in by the \execbrokerservice{}.
 
 The \codeword{offer} \codeword{status} ....
 
@@ -2497,7 +2618,7 @@ response:
 \subsubsection{Negative response}
 \label{datamodel-negative-response}
 
-A negative (no, this platform cannot execute the task) \execbrokerclass{} service response contains \codeword{result}
+A negative (no, this platform cannot execute the task) \execbrokerservice{} response contains \codeword{result}
 set to \codeword{NO}, followed by an optional list of reasons
 explaining why the request was rejected.
 
