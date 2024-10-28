@@ -9,6 +9,8 @@
 % Using non-breaking space character.
 % https://stackoverflow.com/a/1012891
 
+\usepackage[super]{nth}
+
 \newcommand{\xml} {XML}
 \newcommand{\json} {JSON}
 \newcommand{\yaml} {YAML}
@@ -27,19 +29,21 @@
 \newcommand{\vospace} {VOSpace}
 
 \newcommand{\execworkerclass} {**ExecutionWorker**}
-\newcommand{\execbrokerclass} {ExecutionBroker}
-\newcommand{\execbrokerservice}[1] {ExecutionBroker~service#1}
+\newcommand{\execbrokerclass} {\textit{ExecutionBroker}}
+\newcommand{\execbrokerservice}[1] {\textit{ExecutionBroker~service#1}}
 
 \newcommand{\execoffer}[1] {\textit{ExecutionBroker~offer#1}}
 \newcommand{\execofferset}[1] {\textit{ExecutionBroker~offerset#1}}
 \newcommand{\execsession}[1] {\textit{ExecutionBroker~session#1}}
 
-\newcommand{\executionbroker} {Execution~Broker}
-\newcommand{\executionplanning} {Execution~Planning}
+\newcommand{\executionbroker} {\textit{Execution~Broker}}
+\newcommand{\executionplanning} {\textit{Execution~Planning}}
 
 \newcommand{\executable} {\textit{executable}}
 \newcommand{\executablething}[1] {\textit{executable~thing#1}}
 \newcommand{\excutabletask} {\textit{executable} task}
+
+\newcommand{\metadoc} [1]{\textit{metadata document#1}}
 
 %\newcommand{\execoffer}[1] {\textit{offer#1}}
 \newcommand{\workerjob}[1] {\textit{session#1}}
@@ -84,6 +88,9 @@
 \newcommand{\dataset}[1] {dataset#1}
 \newcommand{\datascience} {data~science}
 \newcommand{\scienceplatform}[1] {science~platform#1}
+
+\newcommand{\science}[1] {science#1}
+\newcommand{\scientist}[1] {scientist#1}
 
 \newcommand{\cpu}[1] {CPU#1}
 \newcommand{\gpu}[1] {GPU#1}
@@ -316,7 +323,8 @@ The aim of containerization is to package software components together with all 
 they need as a single binary object that interfaces with a standard execution environment,
 referred to as the \textit{container runtime}.
 To be able to use this \executablething{}, you would need a computing resource with the appropriate
-hardware and software environment. In this case, a computing resource with the \dockerruntime{} installed.
+hardware and software environment. In this case, a computing resource with the \docker{} or \ocicontainer{}
+runtime installed.
 
 We could also create a \jupyternotebook{} that demonstrates how to use our \pythonprogram{}.
 This is the third \executablething{} in our example.
@@ -340,7 +348,7 @@ If we are running some small experiments to learn how to use the algorithm, then
 resource will probably be sufficient.
 However, if we have a \dataset{} of ten million numbers that we want to process, then we may
 need to consider adding extra storage to handle the input data and the results.
-For a large \dataset{} it may also be worth using a \gpu{} to accelerate the calculation steps.
+For a large \dataset{} it may also be worth using a \gpu{} to accelerate the calculation.
 
 The \ivoa{} \executionbroker{} \datamodel{} provides a way to describe what each of these \executablething{s}
 are and what resources are needed to execute them.
@@ -364,8 +372,7 @@ select the software and \dataset{s} that they want to work with.
 \includegraphics[width=0.9\textwidth]{diagrams/data-discovery.pdf}
 
 The detailed specification for the software and data discovery services are beyond the
-scope of this document.
-However we can outline some general requirements for them.
+scope of this document. However we can outline some general requirements for them.
 
 In both cases, the discovery process should not depend on the technical details
 of the software or the \dataset{s}, but on their science domain functionality and properties.
@@ -377,10 +384,10 @@ The programming language the software is written in and the file format of the \
 are at best secondary criteria.
 In our square root example, we would expect our user to use search terms like \textit{'square root'}
 or \textit{'newton raphson'} to find the software they need.
-We wouldn't expect them to start out looking for a \textit{'python'} program or a \textit{'docker'} container.
-Ideally, if the \executionbroker{} services function as intended, a science user should not
+We wouldn't expect them to start out looking for a \textit{'python'} or \textit{'docker'} as their key search terms.
+Ideally, if the \executionbroker{} service functions as intended, a science user should not
 need to know about programming languages, software packaging or file formats.
-The \executionbroker{} services should make all of the technical details invisible,
+The \executionbroker{} service should hide as much as possible of the technical details,
 enabling the science user to get on with science.
 
 Another important consideration is these discovery services should be designed to be domain agnostic.
@@ -389,24 +396,106 @@ for an equivalent biochemistry discovery service and although the domain specifi
 terms and vocabulary will be different, the techical details of the service interfaces
 should be the same.
 
+\subsubsection{Software discovery}
+\label{software-discovery}
 
+There are three main components involved in software discovery, the metadata schema for
+describing the software, one or more search services, and the
+repositories where the \executablething{s} are stored.
 
-%move this to a different section ...
-\subsection{Metadata roles}
+The vocabularies and schema need to be based on use cases that start by describing what the
+\scientist{} wants to do, and from that derrive what software tools they would need, and what terms
+they would naturally use to describe them.
+
+The \ivoa{} semantics and data modelling working groups have a lot of experience developing
+vocabularies and data models to descibe \science{} data products, and is well placed
+to develop the vocabularies needed to descibe astronomy software.
+
+It is important to keep in mind that the requirement is not to model the technical properties
+of the software itself e.g. what programming language it is written in or who funded the development.
+The important things to model are the search terms that a \scientist{} is most likley to use to try to
+find the software they need.
+
+The second component is a searchable database that acceopts a list of search terms and responds with a
+list of \metadoc{s} that describe \executablething{s} that match the criteria.
+
+Before we look in detail at the content of the \metadoc{s} it is worth looking at where the \metadoc{s} are
+stored in relation to the search service and the repositories where the \executablething{s} are stored.
+
+In one scenario, all of the components can be co-located by the same service.
+The database of search terms, the \metadoc{s}, and the binary files containing the \executablething{s}
+can all be hosted by the same service implementation.
+
+TODO diagram
+
+An alternative implementation could store them at different locations, using
+existing off-the-shelf software and services to host them.
+
+There are a number of widely available content managment systems, both commercial
+and open source, that would be capable of implementing the database of search terms.
+
+If the \metadoc{s} are stored in the same database, then the response from a
+database search could contain the \metadoc{s} themselves.
+
+TODO diagram
+database, results, contain \metadoc{s} from database
+
+Alternatively, the \metadoc{s} could be stored at a separate location,
+in an online git repository for example,
+and the database search response simply contains a list of URLs that
+point to the individual \metadoc{s}.
+
+TODO diagram
+database, results, links to \metadoc{s} in external repositories
+
+The third part of the set is the binary image of the \executablething{}.
+In most cases it would probably make sense for the \metadoc{} to reference
+the \executablething{} as a binary file stored in an external repository
+rather than trying to include the \executablething{} as a binary blob in
+the database.
+
+TODO diagram
+database, results, links to \metadoc{s} with links to images
+
+The system can use standard cryptographic signatures and checksums to ensure the validity
+of the \metadoc{s} and the binary images they refer to even when they are stored and accesed
+via external \nth{3} party services.
+
+In summary, there are two things that need to be standardised for a software discovery service:
+\begin{itemize}
+    \item The inputs to the discovery service, including the metadata vocabularies
+        used to describe the software in terms that make sense to the \scientist{}
+        looking for them. For example what algorithm it implements, the type of input data it
+        operates on, and the type of results it generates.
+    \item The outputs of the discovery service, including the \metadoc{s} defined by this
+        specification, that describe the binary images that package the software
+        as \executablething{s}.
+\end{itemize}
+
+The other components in the software discovery stack, the database of search terms, and
+storage and access services for the \metadoc{s} and binary images, do not need to be
+standardised at this stage.
+
+\subsubsection{Data discovery}
+\label{data-discovery}
+
+TODO : update this with reference to \ivoa{} data product type.
+https://www.ivoa.net/rdf/product-type/2024-05-19/product-type.html
+
+\subsubsection{Metadata roles}
 \label{metadata-roles}
 
-The full description of an \executablething{} consists several layers of metadata,
-each of which may be provided by different actors playing different roles within the community.
+The full description of an \executablething{} may include several layers of metadata
+provided by different actors playing different roles within the publishing process.
 
-For our square root \pythonprogram{} example we can identify a number of roles that each provide
-part of the picture nedeed to fully describe the task.
+For our square root example we can identify a number of roles that would each provide
+layers of the picture nedeed to fully describe an \executablething{}.
 
 The players:
 \begin{itemize}
-    \item The developer - The person who wrote the program
-    \item The packager - The person who packaged it in a container
-    \item The data provider - The data provider who publishes the data
-    \item The user - The person who is running the analysis
+    \item The developer  - The person who wrote the program
+    \item The packager   - The person who packaged it in a container
+    \item The user agent - The person who wants to use the software
 \end{itemize}
 
 \subsubsection{The software developer}
@@ -420,150 +509,190 @@ For the square root example, it is a \pythonprogram{} which needs a platform wit
 and a list of the \python{} libraries that the program relies on.
 
 \begin{lstlisting}[]
-# ExecutionBroker service response.
 executable:
   type: uri:python-program
   requirements:
   - numpi: ""
   - astropy: ">= 6.1"
-
 \end{lstlisting}
 
 The developer also understands how much memory their program needs, whether it can make use of multiple cpu cores,
 and whether it can make use of a \gpu accelerator.
 
-So they can provide an initial description of the compute resources
-their program requires.
-
 \begin{lstlisting}[]
-compute:
-- type: uri:generic-compute
-  cores:
-  memory:
-  extras:
-  - type: uri:gpu-accellerator
+resources:
+  compute:
+  - type: uri:generic-compute
+    cores:
+      requested:
+        min: 4
+    memory:
+      requested:
+        min: 16
+        units: GiB
     ....
 \end{lstlisting}
 
-They also know what inputs the program expects to receive and how it outputs the result.
-If it is being used to process a list of numbers, the developer knows where their program expects to find the input data,
-what file formats can it accept for the input, where it puts the results, and what output formats can it generate.
+The developers also know about what inputs and outputs the program expects and what file
+formats can it can handle.
 
 \begin{lstlisting}[]
-compute:
-  volumes:
-  - path: /...
-    mode: readonly
-    resource: input data
+executable:
+  type: uri:python-program
+  ....
+  parameters:
+    - type: uri:param-file
+      name: "input data"
+      mode: readonly
+      description:
+        A table containing a list of numbers to be processed, formatted as
+        comma separated text (CSV) or an IVOA VOTable.
+      formats:
+        - type: uri:text-csv
+          ....
+        - type: uri:votable
+          ....
+    - type: uri:param-value
+      name: "input column name"
+      type: string
+      description:
+        The column name within the 'input data' to use.
 \end{lstlisting}
-
-\begin{lstlisting}[]
-data:
-- type: uri:data-descriptor
-  name: input data
-  mode: readonly
-  data-type: List<float>
-  data-formats:
-  - type: uri:dataformat-csv
-    ....
-  - type: uri:dataformat-tsv
-    ....
-  - type: uri:votable
-    ....
-- type: uri:data-descriptor
-  name: output data
-  mode: readwrite
-  data-type: List<float>
-  data-formats:
-  - type: uri:dataformat-csv
-    ....
-  - type: uri:dataformat-tsv
-    ....
-  - type: uri:votable
-    ....
-\end{lstlisting}
-
-ZRQ
-Question - what is the relationship between data-descriptor and data-resource ?
-Are they parts of the same thing, or are they two different things ?
-Do we replace the data-descriptor with a data-resource, or do we just extend it ?
 
 \subsubsection{The software packager}
 \label{software-packager}
 
-Packager changes the type of \executablething{} from a \pythonprogram{}
-to a \dockercontainer{}.
+Although it is possible to publish our square root example as a stand alone \pythonprogram{},
+it is not easy to describe the installation process in sufficient detail for it to be
+automatically deployed on a range of different platforms.
+
+A more portable solution would be to package the \pythonprogram{} in a \dockercontainer{},
+installing and configuring the software along with all of its dependencies inside the container.
+
+This is often done as part of the software development process, but it is a separate
+step that could be implemented by a different person.
+To make this distinction clear we can refer to this person, or role, as 'the packager'.
+
+In terms of the \metadoc{}, the packager changes the description of the \executablething{}
+from a \pythonprogram{} to a \dockercontainer{}.
+
+\begin{lstlisting}[]
+executable:
+  type: uri:docker-container
+  repository: ghcr.io
+  image: ivoa/calycopis/java-builder
+  tag: 2024.08.30
+  ....
+\end{lstlisting}
+
+Depending on how the software is packaged in the container they may also need to update
+the description of the inputs and outputs,
+and link them to specific locations in the filesystem.
 
 \begin{lstlisting}[]
 executable:
   type: uri:docker-container
   ....
+  parameters:
+    - type: uri:data-file
+      name: "input data"
+      format:
+        - type: urn:ivoa-votable
+          filename: input-data.vot
+          ....
+
+resources:
+  compute:
+    - type: uri:generic-compute
+      volumes:
+        - type: uri:file-mount
+          parameter: "input data"
+          filepath: /data
+          mode: readonly
+          ....
 \end{lstlisting}
 
-Depending on how they package the software they will probably need to change the
-description of where the \executablething{} expects to find its
-inputs and outputs.
+\subsubsection{The client}
+\label{user-metadata}
+
+The user, or the user's client agent, starts with the initial \metadoc{} from the
+software discovery service, and adds additional information describing how the user
+wants to use the software.
+
+Adding details of the data resources the user wants to use enables the \execbrokerservice{}
+to transfer the data to local storage before the \execsession{} is started.
+
+Including a value for the filesize enables the \execbrokerservice{} to estimate
+how much local storage it will need to allocate
+and how much time will be needed to transfer the data.
+The \execbrokerservice{} takes this into account when calculating the start time of
+the \execoffer{s} it makes, allowing enough time for the data transfers to complete
+before the \execsession{} starts.
 
 \begin{lstlisting}[]
-compute:
-  volumes:
-  - ....
+resources:
+  data:
+  - type: uri:simple-data-resource
+    name: "input data"
+    location: http:data.example.org/....
+    filesize:
+      value: 145
+      units: MiB
+    ....
 \end{lstlisting}
 
-\subsubsection{The data provider}
-\label{data-provider}
-
-The data provider describes what the data contains and what formats it is available in.
-This can be used to match up data sets with input and outputs of an \executablething{}.
-
-Beyond the scope of this specification, the schemas and vocabularies needed for this
-level of metadata is the domain of the semantics working group.
-
-At this stage it is probably not practical to try to define a universal set of data
-structures for all of the data across all of the \ivoa{}.
-
-However, it may be possible to start with an initial set of data types for
-individual projects and gradually work towards a wider concensus.
-
-Examples
-
-    uri:eMerlin-visibility-data-001
-    uri:lofar-visibility-data-001
-    uri:lofar-visibility-data-001
-    ...
-
-Even just applying a URI to identify the data format will enable
-basic tools to identify which data can be used with which software.
-
-\subsubsection{The user}
-\label{user-input}
-
-The user provides the last step in the metadata.
-By selecting the data they want to use as inouts, and selecting what format they want the output
-to be in, they can refine the links between the
-data resources, data descriptions and volume mounts.
-
-In most cases the user will use the
-compute resource requiremenst set by the software developer,
-but they can provide extra information
-based on their knowledge of what they plan to use the software for.
-
-If the original software was packaged as an example notebook, with
-fairly low requirements for compute resources, but the user intends to use the software
-to analyse a much larger data set they can modify the compute resource requirements
-to match their use case.
+Linking the data resources with volumes on the corresponding compute resources enables
+the \execbrokerservice{} to mount the data resources at the correct location in
+the compute resource's filesystem.
 
 \begin{lstlisting}[]
-compute:
-- type: uri:generic-compute
-  cores:
-  memory:
+resources:
+  data:
+  - type: uri:simple-data-resource
+    name: input-data
+    ....
+  compute:
+  - type: uri:generic-compute
+    ....
+    volumes:
+    - resource: input-data
+      path: /data
+      mode: "ro"
+
 \end{lstlisting}
 
+The user can also update the compute resource requirements set by the software developer
+to provide additional details based on how they plan to use the software.
 
+In the case of our square root example, the compute resource requirements set by the
+developers will reflect the original intent of simply demonstrating how to use the
+\pythonprogram{}.
+
+However, if the user intends to use the software to analyse a much larger \dataset{}
+they can update the compute resource requirements to match their use case.
+
+\begin{lstlisting}[]
+resources:
+  compute:
+  - type: uri:generic-compute
+    cores:
+      requested:
+      # min: 4
+        min: 32
+    memory:
+      requested:
+      # min: 16
+        min: 128
+        units: GiB
+\end{lstlisting}
+
+TODO user provides the schedule ... when they want to run it.
 
 \subsection{Execution broker}
 \label{execution-broker-intro}
+
+\subsubsection{OfferSet request}
+\label{offerset-request}
 
 Once the user has selected the \executablething{} they want to use and the
 data they want to apply it to, the client combines this information to create a
@@ -572,6 +701,7 @@ details of the executable, the compute, storage, and data resources it needs,
 and a schedule describing when the user wants it to run.
 
 \begin{lstlisting}[]
+# ExecutionBroker OfferSet request.
 executable:
   ....
 resources:
@@ -580,11 +710,8 @@ schedule:
   ....
 \end{lstlisting}
 
-\subsubsection{Request for offers}
-\label{offers-request}
-
-The client sends the \execsession{} description to one or more \execbrokerclass{}
-services to see if they can meet the requirements.
+The client sends the \metadoc{} description to one or more \execbrokerclass{}
+services to ask if they can meet the requirements and execute the \execsession{}.
 
 Each \execbrokerservice{} evaluates the request and responds with a top level
 \codeword{YES|NO} answer, and if
@@ -602,23 +729,22 @@ that \execbrokerservice{}.
 \subsubsection{Offerset response}
 \label{offerset-response}
 
-The \execbrokerservice{} will respond to a request for offers with an \execofferset{}
+Each \execbrokerservice{} will respond to a request for offers with an \execofferset{}
 containing some metadata about the \execofferset{} itself, and a list of \execoffer{}s
-describing how the requested session could be executed.
+describing how the requested \execsession{} could be executed.
 
 Each \execoffer{} in the list contains some metadata about the \execoffer{} itself,
-including it's identifier and expiry time, followed by details of how and when the
+including its UUID identifier and expiry time, followed by details of how and when the
 \execsession{} would be executed.
 
 \begin{lstlisting}[]
-# ExecutionBroker offerset response.
-result: 'YES'
-state: 'OFFERED'
-expires: "2023-09-18T07:05:21"
+# ExecutionBroker OfferSet response.
+result: YES
 ....
 offers:
 
-- ident: "2e164a1b-7ff6-11ef-8412-4bc36fe2face"
+- uuid: "2e164a1b-7ff6-11ef-8412-4bc36fe2face"
+  href: "http://..../sessions/2e164a1b-7ff6-11ef-8412-4bc36fe2face"
   state: 'OFFERED'
   expires: "2023-09-18T07:05:21"
   ....
@@ -629,7 +755,8 @@ offers:
   schedule:
     ....
 
-- ident: "2e16bf4c-7ff6-11ef-8412-4bc36fe2face"
+- uuid: "2e16bf4c-7ff6-11ef-8412-4bc36fe2face"
+  href: "http://..../sessions/2e16bf4c-7ff6-11ef-8412-4bc36fe2face"
   status: 'OFFERED'
   expires: "2023-09-18T07:05:21"
   ....
@@ -642,36 +769,33 @@ offers:
 \end{lstlisting}
 
 The user can choose to accept one of the \execoffer{s} from the list that best
-fits their requirements, or they can reject all of the \execoffer{s} in the
-\execofferset{} and make a new request with different criteria.
+fits their requirements, or they can reject the \execoffer{s} and make a new
+request with different criteria.
 
 Each of the \execoffer{s} in the \execofferset{} represent a temporary reservation
 for the resources listed in the \execoffer{}.
 This means these resources will not available to other users while the \execoffer{s}
 are still valid.
 
-If the user does nothing, then the \execbrokerservice{} will automatically
-update the \codeword{state} of each of the \execoffer{s} to \codeword{EXPIRED}
-when their expiry time is reached and release the resources associated with them.
+If the user does nothing, then \codeword{state} of each of the \execoffer{s} will
+automatically be updated to \codeword{EXPIRED}, and their associated resources will
+be released, when their expiry time is reached.
 
 If the user accepts one of the \execoffer{s} in the \execofferset{} by updating
 the \codeword{state} to \codeword{ACCEPTED}, the \execbrokerservice{} SHOULD
 update the \codeword{state} of the other \execoffer{s} in the \execofferset{} to
 \codeword{REJECTED} and release the associated resources.
 
-[accept/reject/expire state-transition diagram ?]
+TODO [accept/reject/expire state-transition diagram ]
 
-\subsubsection{Execution state}
-\label{execution-state}
-
-Once the offer of anf \execsession{} has been accepted, the \execbrokerservice{}
-will begin the process of executing it.
+\subsubsection{Update options}
+\label{update-options}
 
 Each \execsession{} has a unique URL that the client can use to monitor and update
 its state.
 
 The \execbrokerservice{} response for an \execsession{} includes a list of options
-that the user may to perform on the \execsession{}.
+that the user may use to update or modify the \execsession{}.
 Which options are available will depend on the current \codeword{state} of the
 \execsession{} and the identity and permissions of the authenticated user.
 
@@ -680,7 +804,8 @@ allow the user to accept or reject the offer by updating the \codeword{state} of
 the \execsession{} to \codeword{ACCEPTED} or \codeword{REJECTED}.
 
 \begin{lstlisting}[]
-ident: "2e164a1b-7ff6-11ef-8412-4bc36fe2face"
+uuid: "2e164a1b-7ff6-11ef-8412-4bc36fe2face"
+href: "http://..../sessions/2e164a1b-7ff6-11ef-8412-4bc36fe2face"
 state: 'OFFERED'
 expires: "2023-09-18T07:05:21"
 ....
@@ -698,7 +823,8 @@ execute, then the list of available options will only allow the user to cancel
 the execution.
 
 \begin{lstlisting}[]
-ident: "2e164a1b-7ff6-11ef-8412-4bc36fe2face"
+uuid: "2e164a1b-7ff6-11ef-8412-4bc36fe2face"
+href: "http://..../sessions/2e164a1b-7ff6-11ef-8412-4bc36fe2face"
 state: 'ACCEPTED'
 expires: "2023-09-18T07:05:21"
 ....
@@ -711,80 +837,43 @@ options:
 \end{lstlisting}
 
 This pattern of using a dynamic list of options enables an \execbrokerservice{}
-to change what an individual user is able to do and communicate that to the
-client over the lifetime of an \execsession{}.
+communicate to the client what operations the user is able to do
+over the lifetime of an \execsession{}.
 
-
-
-
-
-
-
-
-
-How the \execbrokerclass{} and \execworkerclass{} services are linked is up to the implementation architecture.
-One implementation may package both service interfaces into a single web-application.
-
-\includegraphics[width=0.9\textwidth]{diagrams/single-webapp.pdf}
-
-Another implementation may package each of them as separate micro-services, with one \execbrokerclass{}
-service providing the front-end for multiple \execworkerclass{} services.
-
-\includegraphics[width=0.9\textwidth]{diagrams/micro-services.pdf}
-
-\subsection{Execution worker}
-\label{execution-worker-desc}
-
-The client can use the \workerjob{} details in the \execbrokerclass{} response to contact
-the \execworkerclass{} service and track the \workerjob{} status.
-
-\includegraphics[width=0.9\textwidth]{diagrams/job-status.pdf}
+\subsection{Session lifecycle}
+\label{session-lifecycle}
 
 A \workerjob{} in an \execworkerclass{} service goes through the following stages in its lifecycle.
 
 \begin{itemize}
 
+    \item \codeword{PROPOSED}   An internal state .. not published
+    \item \codeword{OFFERED}    The \workerjob{} is being offered.
+    \item \codeword{ACCEPTED}   The \workerjob{} has been accepted.
+    \item \codeword{REJECTED}   The \workerjob{} offer has been rejected.
+    \item \codeword{EXPIRED}    The \workerjob{} offer has expired.
+    \item \codeword{WAITING}    The \workerjob{} is waiting to activate.
+    \item \codeword{PREPARING}  The resources are being prepared.
+    \item \codeword{READY}      The \workerjob{} is ready to execute.
+    \item \codeword{RUNNING}    The \workerjob{} is executing.
+    \item \codeword{RELEASING}  The resources are being released.
+    \item \codeword{COMPLETED}  The \workerjob{} has completed.
+    \item \codeword{FAILED}     The \workerjob{} has failed.
+    \item \codeword{CANCELLED}  The \workerjob{} has been cancelled.
 
-                - PROPOSED
-
-                - OFFERED
-                - ACCEPTED
-                - REJECTED
-                - EXPIRED
-
-                - WAITING
-                - PREPARING
-                - READY
-                - RUNNING
-                - FINISHING
-                - COMPLETED
-                - FAILED
-                - CANCELLED
-
-
-    \item \codeword{PENDING}   The \workerjob{} has been created, but the resources have not be prepared yet.
-    \item \codeword{SETUP}     The \execworkerclass{} service is setting up the resources needed to execute the \workerjob{}.
-                               This includes things like staging any \dataset{s} that will be needed locally.
-    \item \codeword{READY}     The \workerjob{} is ready and waiting to start.
-    \item \codeword{RUNNING}   The \workerjob{} is running.
-    \item \codeword{TEARDOWN}  The execution has finished and the \execworkerclass{} service is clearing up the resources that were used.
-                               This includes things like transferring the results to permanent storage and releasing local resources.
-    \item \codeword{COMPLETED} The \workerjob{} has been completed.
-    \item \codeword{FAILED}    The \workerjob{} failed to complete.
-    \item \codeword{CANCELLED} The \workerjob{} was cancelled.
 \end{itemize}
 
 When a \execbrokerclass{} creates a \workerjob{} in an \execworkerclass{} service the
 \workerjob{} starts with the \codeword{phase} set to \codeword{PENDING}.
 
 It is up to the \execworkerclass{} to select the right time to change the \workerjob{}
-\codeword{phase} to \codeword{SETUP} and start preparing the resources so that
+\codeword{phase} from \codeword{WAITING} to \codeword{PEPARING} and begin preparing the resources so that
 the \workerjob{} is \codeword{READY} in time for the \codeword{starttime} declared
 in the \execoffer{}.
 
-If it will take 2 hours to transfer the input \dataset{}
-from cold storage to live storage co-located with the compute resources,
-then the \execworkerclass{} needs to start the \codeword{SETUP} phase at least 2 hours
+If it will take 2 hours to transfer the data resources
+from archive storage to live storage co-located with the compute resources,
+then the \execworkerclass{} needs to start the \codeword{PREPARING} phase at least 2 hours
 before the \codeword{starttime} declared in the \execoffer{}.
 
 Once all the resources are ready, the \execworkerclass{} changes the \workerjob{}
