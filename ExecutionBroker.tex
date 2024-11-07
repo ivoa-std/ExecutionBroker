@@ -482,212 +482,6 @@ standardised at this stage.
 TODO : update this with reference to \ivoa{} data product type.
 https://www.ivoa.net/rdf/product-type/2024-05-19/product-type.html
 
-\subsubsection{Metadata roles}
-\label{metadata-roles}
-
-The full description of an \executablething{} may include several layers of metadata
-provided by different actors playing different roles within the publishing process.
-
-For our square root example we can identify a number of roles that would each provide
-layers of the picture nedeed to fully describe an \executablething{}.
-
-The players:
-\begin{itemize}
-    \item The developer  - The person who wrote the program
-    \item The packager   - The person who packaged it in a container
-    \item The user agent - The person who wants to use the software
-\end{itemize}
-
-\subsubsection{The software developer}
-\label{software-developer}
-
-The first layer of metadata comes from the person who wrote the \pythonprogram{}.
-They have detailed knowledge of what the software does, what execution environment it needs,
-and what the inputs and outputs are.
-
-For the square root example, it is a \pythonprogram{} which needs a platform with the \python{} runtime installed,
-and a list of the \python{} libraries that the program relies on.
-
-\begin{lstlisting}[]
-executable:
-  type: uri:python-program
-  requirements:
-  - numpi: ""
-  - astropy: ">= 6.1"
-\end{lstlisting}
-
-The developer also understands how much memory their program needs, whether it can make use of multiple cpu cores,
-and whether it can make use of a \gpu accelerator.
-
-\begin{lstlisting}[]
-resources:
-  compute:
-  - type: uri:generic-compute
-    cores:
-      requested:
-        min: 4
-    memory:
-      requested:
-        min: 16
-        units: GiB
-    ....
-\end{lstlisting}
-
-The developers also know about what inputs and outputs the program expects and what file
-formats can it can handle.
-
-\begin{lstlisting}[]
-executable:
-  type: uri:python-program
-  ....
-  parameters:
-    - type: uri:param-file
-      name: "input data"
-      mode: readonly
-      description:
-        A table containing a list of numbers to be processed, formatted as
-        comma separated text (CSV) or an IVOA VOTable.
-      formats:
-        - type: uri:text-csv
-          ....
-        - type: uri:votable
-          ....
-    - type: uri:param-value
-      name: "input column name"
-      type: string
-      description:
-        The column name within the 'input data' to use.
-\end{lstlisting}
-
-\subsubsection{The software packager}
-\label{software-packager}
-
-Although it is possible to publish our square root example as a stand alone \pythonprogram{},
-it is not easy to describe the installation process in sufficient detail for it to be
-automatically deployed on a range of different platforms.
-
-A more portable solution would be to package the \pythonprogram{} in a \dockercontainer{},
-installing and configuring the software along with all of its dependencies inside the container.
-
-This is often done as part of the software development process, but it is a separate
-step that could be implemented by a different person.
-To make this distinction clear we can refer to this person, or role, as 'the packager'.
-
-In terms of the \metadoc{}, the packager changes the description of the \executablething{}
-from a \pythonprogram{} to a \dockercontainer{}.
-
-\begin{lstlisting}[]
-executable:
-  type: uri:docker-container
-  repository: ghcr.io
-  image: ivoa/calycopis/java-builder
-  tag: 2024.08.30
-  ....
-\end{lstlisting}
-
-Depending on how the software is packaged in the container they may also need to update
-the description of the inputs and outputs,
-and link them to specific locations in the filesystem.
-
-\begin{lstlisting}[]
-executable:
-  type: uri:docker-container
-  ....
-  parameters:
-    - type: uri:data-file
-      name: "input data"
-      format:
-        - type: urn:ivoa-votable
-          filename: input-data.vot
-          ....
-
-resources:
-  compute:
-    - type: uri:generic-compute
-      volumes:
-        - type: uri:file-mount
-          parameter: "input data"
-          filepath: /data
-          mode: readonly
-          ....
-\end{lstlisting}
-
-\subsubsection{The client}
-\label{user-metadata}
-
-The user, or the user's client agent, starts with the initial \metadoc{} from the
-software discovery service, and adds additional information describing how the user
-wants to use the software.
-
-Adding details of the data resources the user wants to use enables the \execbrokerservice{}
-to transfer the data to local storage before the \execsession{} is started.
-
-Including a value for the filesize enables the \execbrokerservice{} to estimate
-how much local storage it will need to allocate
-and how much time will be needed to transfer the data.
-The \execbrokerservice{} takes this into account when calculating the start time of
-the \execoffer{s} it makes, allowing enough time for the data transfers to complete
-before the \execsession{} starts.
-
-\begin{lstlisting}[]
-resources:
-  data:
-  - type: uri:simple-data-resource
-    name: "input data"
-    location: http:data.example.org/....
-    filesize:
-      value: 145
-      units: MiB
-    ....
-\end{lstlisting}
-
-Linking the data resources with volumes on the corresponding compute resources enables
-the \execbrokerservice{} to mount the data resources at the correct location in
-the compute resource's filesystem.
-
-\begin{lstlisting}[]
-resources:
-  data:
-  - type: uri:simple-data-resource
-    name: input-data
-    ....
-  compute:
-  - type: uri:generic-compute
-    ....
-    volumes:
-    - resource: input-data
-      path: /data
-      mode: "ro"
-
-\end{lstlisting}
-
-The user can also update the compute resource requirements set by the software developer
-to provide additional details based on how they plan to use the software.
-
-In the case of our square root example, the compute resource requirements set by the
-developers will reflect the original intent of simply demonstrating how to use the
-\pythonprogram{}.
-
-However, if the user intends to use the software to analyse a much larger \dataset{}
-they can update the compute resource requirements to match their use case.
-
-\begin{lstlisting}[]
-resources:
-  compute:
-  - type: uri:generic-compute
-    cores:
-      requested:
-      # min: 4
-        min: 32
-    memory:
-      requested:
-      # min: 16
-        min: 128
-        units: GiB
-\end{lstlisting}
-
-TODO user provides the schedule ... when they want to run it.
-
 \subsection{Execution broker}
 \label{execution-broker-intro}
 
@@ -799,7 +593,7 @@ that the user may use to update or modify the \execsession{}.
 Which options are available will depend on the current \codeword{state} of the
 \execsession{} and the identity and permissions of the authenticated user.
 
-If the \execoffer{} is still being offered, then the list of available options
+If the \execsession{} is still being offered, then the list of available options
 allow the user to accept or reject the offer by updating the \codeword{state} of
 the \execsession{} to \codeword{ACCEPTED} or \codeword{REJECTED}.
 
@@ -836,8 +630,8 @@ options:
     - "CANCELLED"
 \end{lstlisting}
 
-This pattern of using a dynamic list of options enables an \execbrokerservice{}
-communicate to the client what operations the user is able to do
+Using a dynamic list of options in this way enables the \execbrokerservice{}
+to communicate to the client what actions the user is able to take
 over the lifetime of an \execsession{}.
 
 \subsection{Session lifecycle}
@@ -847,7 +641,6 @@ A \workerjob{} in an \execworkerclass{} service goes through the following stage
 
 \begin{itemize}
 
-    \item \codeword{PROPOSED}   An internal state .. not published
     \item \codeword{OFFERED}    The \workerjob{} is being offered.
     \item \codeword{ACCEPTED}   The \workerjob{} has been accepted.
     \item \codeword{REJECTED}   The \workerjob{} offer has been rejected.
@@ -858,8 +651,8 @@ A \workerjob{} in an \execworkerclass{} service goes through the following stage
     \item \codeword{RUNNING}    The \workerjob{} is executing.
     \item \codeword{RELEASING}  The resources are being released.
     \item \codeword{COMPLETED}  The \workerjob{} has completed.
-    \item \codeword{FAILED}     The \workerjob{} has failed.
     \item \codeword{CANCELLED}  The \workerjob{} has been cancelled.
+    \item \codeword{FAILED}     The \workerjob{} has failed.
 
 \end{itemize}
 
@@ -904,7 +697,238 @@ This is because any workflow steps that follow after this step, will depend not 
 completed, but they also need the \teardown{} data transfers to complete so that the results from this step
 are in the right place for the next step to be able to access them.
 
-\section{The \executable{}}
+\section{The data model}
+\label{data-model}
+
+\subsection{Data curation roles}
+\label{metadata-roles}
+
+The full description of an \executablething{} will include several layers of metadata
+provided by different actors playing different roles within the publishing process.
+
+For our square root example we can identify a number of roles that would each provide
+layers of the picture nedeed to fully describe an \executablething{}.
+
+The players:
+\begin{itemize}
+    \item The developer  - The person who wrote the \pythonprogram{}
+    \item The packager   - The person who packaged it in a \dockercontainer{}
+    \item The publisher  - The person who published it in a discovery service
+    \item The user agent - The person who wants to use the software
+\end{itemize}
+
+\subsubsection{The developer}
+\label{software-developer}
+
+The first layer of metadata comes from the person who wrote the \pythonprogram{}.
+They have detailed knowledge of what the software does, what execution environment it needs,
+and what the inputs and outputs are.
+
+For the square root example, it is a \pythonprogram{} which needs a platform with the \python{} runtime installed,
+and a list of the \python{} libraries that the program relies on.
+
+\begin{lstlisting}[]
+executable:
+  type: uri:python-program
+  requirements:
+  - numpi: ""
+  - astropy: ">= 6.1"
+\end{lstlisting}
+
+The developer also understands how much memory their program needs, whether it can make use of multiple cpu cores,
+and whether it can make use of a \gpu accelerator.
+
+\begin{lstlisting}[]
+resources:
+  compute:
+  - type: uri:generic-compute
+    cores:
+      requested:
+        min: 4
+    memory:
+      requested:
+        min: 16
+        units: GiB
+    ....
+\end{lstlisting}
+
+The developers also know about what inputs and outputs the program expects and what file
+formats can it can handle.
+
+\begin{lstlisting}[]
+executable:
+  type: uri:python-program
+  ....
+  parameters:
+    - type: uri:param-file
+      name: "input data"
+      mode: readonly
+      description:
+        A table containing a list of numbers to be processed, formatted as
+        comma separated text (CSV) or an IVOA VOTable.
+      formats:
+        - type: uri:text-csv
+          ....
+        - type: uri:votable
+          ....
+    - type: uri:param-value
+      name: "input column name"
+      type: string
+      description:
+        The column name within the 'input data' to use.
+\end{lstlisting}
+
+\subsubsection{The packager}
+\label{software-packager}
+
+Although it is possible to publish our square root example as a stand alone \pythonprogram{},
+it is not easy to describe the installation process in sufficient detail for it to be
+automatically deployed on a range of different platforms.
+
+A more portable solution would be to package the \pythonprogram{} in a \dockercontainer{},
+installing and configuring the software along with all of its dependencies inside the container.
+
+This is often done as part of the software development process, but it is a separate
+step that could be implemented by a different person.
+To make this distinction clear we can refer to this person, or role, as 'the packager'.
+
+In terms of the \metadoc{}, the packager changes the description of the \executablething{}
+from a \pythonprogram{} to a \dockercontainer{}.
+
+\begin{lstlisting}[]
+executable:
+  type: uri:docker-container
+  repository: ghcr.io
+  image: ivoa/calycopis/java-builder
+  tag: 2024.08.30
+  ....
+\end{lstlisting}
+
+Depending on how the software is packaged in the container they may also need to update
+the description of the inputs and outputs,
+and link them to specific locations in the filesystem.
+
+\begin{lstlisting}[]
+executable:
+  type: uri:docker-container
+  ....
+  parameters:
+    - type: uri:data-file
+      name: "input data"
+      format:
+        - type: urn:ivoa-votable
+          filename: input-data.vot
+          ....
+
+resources:
+  compute:
+    - type: uri:generic-compute
+      volumes:
+        - type: uri:file-mount
+          parameter: "input data"
+          filepath: /data
+          mode: readonly
+          ....
+\end{lstlisting}
+
+\subsubsection{The publisher}
+\label{metadata-publisher}
+
+This role represents the person who publishes metadata about the software in a discovery service.
+
+Typically changes made at this level would include adding to the description
+of what the software does, placing it in a particular context to aid discovery,
+or modifying the execution environment to configure the softweare for a particular domain.
+
+For example, this might include:
+
+\begin{itemize}
+    \item A project specific discovery service that only includes software vetted by the project.
+          Execution platforms within the project would only accept curated \metadoc{s}
+          from that discovery service.
+    \item A domain specific discovery service that modifies the execution environment, optimising
+          the software for analysing a particular type of data.
+    \item A catalog of \metadoc{s} maintained as part of a university teaching course, modifying the
+          execution environment to integrate the software into the university system and setting
+          parameters to configure the software to match the course notes.
+\end{itemize}
+
+\subsubsection{The user}
+\label{software-user}
+
+The user, or the user's client agent, starts with an initial \metadoc{} from the
+software discovery service and adds additional information describing how the user
+wants to use the software.
+
+Adding details of the data resources the user wants to use enables the \execbrokerservice{}
+to transfer the data to local storage before the \execsession{} is started.
+
+Including a value for the filesize enables the \execbrokerservice{} to estimate
+how much local storage it will need to allocate
+and how much time will be needed to transfer the data.
+The \execbrokerservice{} can take this into account when calculating the start time of
+the \execoffer{s} it makes, allowing enough time for the data transfers to complete
+before the \execsession{} starts.
+
+\begin{lstlisting}[]
+resources:
+  data:
+  - type: uri:simple-data-resource
+    name: "input data"
+    location: http:data.example.org/....
+    filesize:
+      value: 145
+      units: MiB
+    ....
+\end{lstlisting}
+
+Linking the data resources with volumes on the corresponding compute resources enables
+the \execbrokerservice{} to mount the data resources at the correct location in
+the compute resource's filesystem.
+
+\begin{lstlisting}[]
+resources:
+  data:
+  - type: uri:simple-data-resource
+    name: input-data
+    ....
+  compute:
+  - type: uri:generic-compute
+    ....
+    volumes:
+    - resource: input-data
+      path: /data
+      mode: "ro"
+
+\end{lstlisting}
+
+The user can also update the compute resource requirements to reflect how they plan
+to use the software.
+In the case of our square root example, the compute resource requirements set by the
+developers will reflect the original intent of simply demonstrating how to use the
+\pythonprogram{}.
+
+However, if the user intends to use the software to analyse a much larger \dataset{}
+they can update the compute resource requirements to match their use case.
+
+\begin{lstlisting}[]
+resources:
+  compute:
+  - type: uri:generic-compute
+    cores:
+      requested:
+      # min: 4
+        min: 32
+    memory:
+      requested:
+      # min: 16
+        min: 128
+        units: GiB
+\end{lstlisting}
+
+TODO user provides the schedule ... when they want to run it.
+
+\subsection{The \executable{}}
 \label{executable}
 
 At the simplest level the client just needs to check whether a platform is able to execute a particular
@@ -940,7 +964,7 @@ request:
     spec: {}
 \end{lstlisting}
 
-\subsection{\jupyternotebook{}}
+\subsubsection{\jupyternotebook{}}
 \label{jupyternotebook}
 The \datamodel{} for each type of \executable{} defines the metadata needed to
 describe that particular type.
@@ -979,7 +1003,7 @@ request:
       requirements: "https://.../requirements.txt"
 \end{lstlisting}
 
-\subsection{\dockercontainer{}}
+\subsubsection{\dockercontainer{}}
 \label{dockercontainer}
 The \datamodel{} for an \dockercontainer{} describes the image name and version
 along with the hostname of the repository to fetch it from.
@@ -1021,7 +1045,7 @@ Request  - Can this platform execute <unkown-type> ?
 Response - NO
 \end{lstlisting}
 
-\section{Resources}
+\subsection{Resources}
 \label{resources}
 
 At the next level the client may need to check whether a platform has sufficient compute resources
@@ -1032,7 +1056,7 @@ In order to do this the request would not only need to describe the \executable{
 but also the minimum level of compute resources needed in terms of \cpu{} cores, memory, \gpu{s}
 and disc space needed to execute it.
 
-\subsection{Compute resources}
+\subsubsection{Compute resources}
 \label{compute-resources}
 
 The \datamodel{} for describing compute resources is, in most cases, common to all types of \executable{},
@@ -1215,119 +1239,7 @@ FPGA and the tools needed to use it.
       \codeword{[https://github.com/..../resource-types/xilinx-vu19p.md]}
 \end{itemize}
 
-\subsection{Minimum and maximum}
-\label{minandmax}
-
-The \datamodel{} for describing compute resources includes elements for specifying the numeric size
-and number of resources such as \cpu{} cores, memory and storage.
-
-If the \jupyternotebook{} in our example needs a minimum of 8 \cpu{} cores and 16G of memory
-to be able to perform its calculations, then this can be specified in the compute resource.
-
-\begin{lstlisting}[]
-# ExecutionBroker client request.
-request:
-  # Details of the executable.
-  executable:
-    ....
-  # Details of the resources needed.
-  resources:
-    compute:
-    - name: "compute-001"
-      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
-      spec:
-        cores:
-          min: 8
-        memory:
-          min: 16
-\end{lstlisting}
-
-All of the \datamodel{} elements for specifying the size or number of resources are defined
-as pairs of minimum and maximum values.
-This allows a conversation between the \execbrokerclass{} client and services
-to discover the best platform to execute the task.
-
-The client requests the minimun resources it needs,
-and each service responds with a set of \execoffer{s} which specify the maximum
-level of resources they are able to provide.
-
-For example, if a platform is able to provide double the compute resources,
-16 \cpu{} cores and 32G of memory,
-then it can indicate this by specifying higher maximum values in its response.
-
-\begin{lstlisting}[]
-# ExecutionBroker service response.
-response:
-  # Details of the executable.
-  executable:
-    ....
-  # Details of the resources offered.
-  resources:
-    compute:
-    - name: "compute-001"
-      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
-      spec:
-        cores:
-          min:  8
-          max: 16
-        memory:
-          min: 16
-          max: 32
-\end{lstlisting}
-
-This response represents an \execoffer{} to start with a minimum of 8 \cpu{} cores and 16G of memory
-as requested, with the option to use a maximum of 16 \cpu{} cores and 32G of memory if needed.
-
-The client may receive different \execoffer{s} from different platforms and can pass this information
-on the user to allow them to choose the \execoffer{} that best fits their use case.
-The notebook they have chose may specify a minimum of 8 \cpu{} cores and 16G of memory,
-but an \execoffer{} of twice the resources allows the user more scope for experimenting with
-more data or more complex algorithms.
-
-This \scalable{} compute resource represents something like a \kubernetes{} platform where the
-execution can start with a minimum configuration and scale on demand up to a maximum limit.
-
-This is slightly different to a platform like \openstack{} which allocates resources
-in specific blocks, defined by the set of \textit{'flavors'} available on that particular platform.
-If the smallest flavor of virtual machine available on the platform has 16 \cpu{} cores and 24G of memory,
-then the service can represent that by setting the minimum values in its \execoffer{} to match available resources.
-
-\begin{lstlisting}[]
-# ExecutionBroker service response.
-response:
-  # Details of the executable.
-  executable:
-    ....
-  # Details of the resources offered.
-  resources:
-    compute:
-    - name: "compute-001"
-      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
-      spec:
-        cores:
-          min: 16
-          max: 16
-        memory:
-          min: 24
-          max: 24
-\end{lstlisting}
-
-This response represents an \execoffer{} to start with a fixed allocation of 16 \cpu{} cores and 24G of memory.
-
-An \execbrokerclass{} MAY NOT make an \execoffer{} with less than the minimum resources requested.
-For example, if an \openstack{} platform only has a virtual machine flavor with 1 \cpu{} core and 2G of memory,
-then it MAY NOT offer this resource as it is less than the requested minimum.
-
-Note that the term \textit{'compute resource'} specifically avoids stating whether the
-notebook will be run in an \openstack{} virtual machine or a \kubernetes{} cluster.
-As far as the user is concerned, it should not matter. As long as the compute resource provides
-sufficient \cpu{} cores and memory for the notebook to execute, the technical details of how the
-platform implements this should not be relevant at this level of abstraction.
-
-The user just wants their notebook to run. The technical details of what technologies are used
-under the hood to make it happen should be someone else's problem.
-
-\subsection{Storage resources}
+\subsubsection{Storage resources}
 \label{storage-resources}
 
 The resources section of the request can also be used to specify storage resources.
@@ -1631,20 +1543,7 @@ enables a client to put together a workflow of interconnected steps, with the
 managing the lifecycle of the resources and releasing them automatically after they
 are no longer needed.
 
-\section{Authentication}
-\label{authentication}
-
-The client / service interactions requires some level of authentication to enable the
-\execbrokerservice{} to control access to the
-
-The \executionbroker{} standard does not mandate a particular authentication method.
-However, to facilitate interoperability with as wide a community as possible an individual \execbrokerclass{}
-service should follow the guidlines set out in the \ivoa{} SSO standard.
-
-
-
-
-\section{Date and time}
+\subsection{Date and time}
 \label{date-time}
 
 The \codeword{datetime} part of the \datamodel{} enables the client and server to have a
@@ -1813,7 +1712,6 @@ Even if all of the other parameters are the same, e.g. compute and storage resou
 \execbrokerservice{} MUST NOT include more than one time slot in the same \execoffer{}.
 Technically the \datamodel{} allows an array of values for the \codeword{datetime} section,
 but this would impose unnecessary complexity on the client for no real gain in user experience.
-
 
 \pagebreak
 
