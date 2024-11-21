@@ -1,0 +1,95 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2024, Manchester University (http://www.manchester.ac.uk/)
+#
+#     This work is made available under the Creative Commons
+#     Attribution-ShareAlike 4.0 International licence.
+#
+#     For details of the licence terms see:
+#     https://creativecommons.org/licenses/by-sa/4.0/
+#   </meta:licence>
+# </meta:header>
+#
+# AIMetrics: [
+#     {
+#     "name": "ChatGPT",
+#     "contribution": {
+#       "value": 5,
+#       "units": "%"
+#       }
+#     }
+#   ]
+#
+
+openapi: 3.1.0
+info:
+  title: IVOA ExecutionBroker log messages
+  version: "1.0"
+  summary: IVOA ExecutionBroker log messages
+  description: >
+    Log messages used in IVOA ExecutionBroker responses
+  contact:
+    name: Zarquan
+    url: https://github.com/Zarquan
+
+components:
+  schemas:
+
+    MessageItem:
+      description: >
+        A log message based on the Message Templates standard.
+        https://messagetemplates.org/
+      type: object
+      title: MessageItem
+      xml:
+        name: message
+      properties:
+        type:
+          description: >
+            The message type identifier.
+            Typically a URL pointing to a human readable description of the message.
+          type: string
+        time:
+          description: >
+            The date and time of the message.
+          type: string
+          format: date-time
+        level:
+          description: >
+            The message level.
+          type: string
+          enum:
+            - "DEBUG"
+            - "WARN"
+            - "ERROR"
+            - "INFO"
+            - "OTHER"
+        template:
+          description: >
+            The message template.
+          type: string
+        values:
+          description: >
+            A map of name->value properties.
+          xml:
+            name: values
+          $ref: './utils.yaml#/components/schemas/NameValueMap'
+        message:
+          description: >
+            The resulting message.
+          type: string
+
+    MessageList:
+      description: >
+        A list of log messages.
+      xml:
+        name: messages
+      type: array
+      title: MessageList
+      items:
+        $ref: '#/components/schemas/MessageItem'
+        xml:
+          name: message
+
+

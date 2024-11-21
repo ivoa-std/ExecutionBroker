@@ -1,0 +1,39 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2024, Manchester University (http://www.manchester.ac.uk/)
+#
+#     This work is made available under the Creative Commons
+#     Attribution-ShareAlike 4.0 International licence.
+#
+#     For details of the licence terms see:
+#     https://creativecommons.org/licenses/by-sa/4.0/
+#   </meta:licence>
+# </meta:header>
+#
+# AIMetrics: [
+#     {
+#     "name": "ChatGPT",
+#     "contribution": {
+#       "value": 5,
+#       "units": "%"
+#       }
+#     }
+#   ]
+#
+
+openapi: 3.1.0
+info:
+  title: IVOA ExecutionBroker abstract components
+  version: "0.8"
+  summary: IVOA ExecutionBroker abstract components
+  description: >
+    Abstract components used in the IVOA ExecutionBroker data model
+  contact:
+    name: Zarquan
+    url: https://github.com/Zarquan
+
+components:
+  schemas:
+
+
