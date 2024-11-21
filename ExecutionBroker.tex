@@ -17,6 +17,7 @@
 \newcommand{\http} {HTTP}
 \newcommand{\rest} {REST}
 
+\newcommand{\openapi} {OpenAPI}
 \newcommand{\datamodel} {data~model}
 \newcommand{\webservice} {web service}
 \newcommand{\webbrowser} {web browser}
@@ -265,7 +266,7 @@ Fig.~\ref{fig:archdiag} shows the role the \ivoa{} \executionbroker{} plays with
 In response to the increasing size and complexity of the next generation of science \dataset{s}
 a number of \ivoa{} members are developing intergrated \scienceplatform{s} which bring
 together the \dataset{s} co-located with the compute resources needed to analyse
-them.\footurl{https://data.lsst.cloud/}\footurl{https://rsp.lsst.io/index.html}
+them.\footurl{https://data.lsst.cloud/}\footurl{https://rsp.lsst.io/}
 
 These \scienceplatform{s} make extensive use of the \ivoa{} data models and
 vocabularies to describe their \dataset{s}, and use the \ivoa{} data access
@@ -283,10 +284,79 @@ providing an infrastructure level service that enables service discovery,
 resource allocation and execution scheduling across a heterogeneous federation
 of execution platforms.
 
-\ivoa{} \executionbroker{} services may use the
-\ivoa{} Single-Sign-On standard \citep{2017ivoa.spec.0524T}
-for authentication (see section xx) %\ref{subsec:authentication}
-and the
+\subsection{Supplementary documents}
+\label{supplementary-documents}
+
+\subsubsection{\openapi{} specification}
+\label{openapi-specification}
+
+This document is designed to read in combination with the \openapi{}
+\footurl{https://www.openapis.org/} \footurl{https://swagger.io/specification/}
+specification published alongside this document.
+
+The \openapi{} specification defines the technical details of the
+\executionbroker{} \webservice{} interface and the schema for the
+\executionbroker{} \datamodel{}.
+This document compliments the technical specification by using use cases
+and specific examples to describe the intended service behaviour and
+explain the reasoning behind some of the design choices.
+
+The two documents are intended to be read together.
+The machine-readable \openapi{} spcification defining the \textit{what},
+and the human-readable text document describing the \textit{why}.
+
+The \openapi{} specification associated with this document is
+published in the following files:
+\begin{itemize}
+    \item \codeword{openapi.yaml} - The main service specification, including
+    the \executionbroker{} service API and the core data model.
+    \item \codeword{messages.yaml} - a supplimentary data model for INFO, WARN,
+    and DEBUG messages embedded in the service responses.
+    \item \codeword{utils.yaml} - a supplimentary data model for re-usable
+    components such as ISO date formats, min/max pairs, and name-value maps.
+\end{itemize}
+
+This text document may include small examples of \openapi{} schema to
+explain specific points, but these are for information only. Unless otherwise
+specified, the \openapi{} specification itself should be assumed to be the
+definitive source and this text document should be considered as secondary.
+
+\subsubsection{IVOA profiles}
+\label{ivoa-profiles}
+
+This specification refers to the following documents
+to cover the details of how an \executionbroker{} \webservice{}
+should use the following protocols and data formats:
+\begin{itemize}
+    \item The \ivoa{} \rest{} profile, describing a common pattern
+    for \ivoa{} \webservice{s} that implement
+    \rest{}\footurl{https://en.wikipedia.org/wiki/REST}
+    webservices.
+    \item The \ivoa{} \http{} profile, describing how \ivoa{} \webservice{s}
+    should use aspects of the \http{} protocol, including \http{} parameters,
+    message content, content negotiation, and \http{} return codes.
+    \item The \ivoa{} error messages profile, describing a common format
+    for \ivoa{} \webservice{s} to format error messages.
+    \item The \ivoa{} \json{} profile, describing how \ivoa{} \webservice{s}
+    should serialize message content using the
+    \json{}\footurl{https://www.json.org/json-en.html} data format.
+    \item The \ivoa{} \yaml{} profile, describing how \ivoa{} \webservice{s}
+    should serialize message content using the
+    \yaml{}\footurl{https://yaml.org/} data format.
+    \item The \ivoa{} \xml{} profile, describing how \ivoa{} \webservice{s}
+    should serialize message content using the
+    \xml{}\footurl{https://www.w3.org/XML/} data format.
+\end{itemize}
+
+Unless otherwise specified, an \executionbroker{} \webservice{} implementation
+should follow the guidelines outined in these documents.
+
+\subsubsection{IVOA Single-Sign-On}
+\label{ivoa-sso}
+
+In addition, an \ivoa{} \executionbroker{} service may use parts of the
+\ivoa{} Single-Sign-On standard\citep{2017ivoa.spec.0524T}
+for authentication, and the
 \ivoa{} Credential Delegation Protocol \citep{2010ivoa.spec.0218P}
 for delegating credentials to other services.
 

@@ -1,0 +1,210 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2024, Manchester University (http://www.manchester.ac.uk/)
+#
+#     This work is made available under the Creative Commons
+#     Attribution-ShareAlike 4.0 International licence.
+#
+#     For details of the licence terms see:
+#     https://creativecommons.org/licenses/by-sa/4.0/
+#   </meta:licence>
+# </meta:header>
+#
+# AIMetrics: [
+#     {
+#     "name": "ChatGPT",
+#     "contribution": {
+#       "value": 5,
+#       "units": "%"
+#       }
+#     }
+#   ]
+#
+
+openapi: 3.1.0
+info:
+  title: IVOA ExecutionBroker utility classes
+  version: "0.8"
+  summary: IVOA ExecutionBroker utility classes
+  description: >
+    Utility classes used in the IVOA ExecutionBroker data model
+  contact:
+    name: Dave Morris
+    url: https://github.com/Zarquan
+
+components:
+  schemas:
+
+    NameValueMap:
+      description: >
+        A map of name->value properties.
+        See https://swagger.io/docs/specification/data-models/dictionaries/
+      type: object
+      title: NameValueMap
+      additionalProperties:
+        type: string
+
+    ISO8601Duration:
+      description: >
+        A regular expression filter for an ISO 8601 duration.
+      type: string
+      title: ISO8601Duration
+      pattern: '^(-?)P(?=\d|T\d)(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)([DW]))?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$'
+
+    ISO8601Interval:
+      description: >
+        A regular expression filter for an ISO 8601 interval.
+      type: string
+      title: ISO8601Interval
+      pattern: '^(\d{4}(?:-\d{2}){2}T\d{2}(?::\d{2}){2}(?>[^\/]+))\/(P(?=.)(?:\d+Y)?(?:\d+M)?(?:\d+D)?(?:T(?=.)(?:\d+H)?(?:\d+M)?(?:\d+S)?)?)$'
+
+    MinMaxInteger:
+      description: >
+        A minimum and maximum pair for a 32bit integer value.
+      type: object
+      title: MinMaxInteger
+      properties:
+        min:
+          type: integer
+          format: int32
+        max:
+          type: integer
+          format: int32
+
+    MinMaxIntegerUnits:
+      description: >
+        A minimum and maximum pair with units for a 32bit integer value.
+      type: object
+      title: MinMaxIntegerUnits
+      allOf:
+        - $ref: 'MinMaxInteger'
+        - type: object
+          properties:
+            units:
+              type: string
+
+    MinMaxLong:
+      description: >
+        A minimum and maximum pair for a 64bit integer value.
+      type: object
+      title: MinMaxLong
+      properties:
+        min:
+          type: integer
+          format: int64
+        max:
+          type: integer
+          format: int64
+
+    MinMaxLongUnits:
+      description: >
+        A minimum and maximum pair with units for a 64bit integer value.
+      type: object
+      title: MinMaxLongUnits
+      allOf:
+        - $ref: 'MinMaxLong'
+        - type: object
+          properties:
+            units:
+              type: string
+
+    MinMaxFloat:
+      description: >
+        A minimum and maximum pair with units for a floating point value.
+      type: object
+      title: MinMaxFloat
+      properties:
+        min:
+          type: number
+          format: float
+        max:
+          type: number
+          format: float
+
+    MinMaxFloatUnits:
+      description: >
+        A minimum and maximum pair with units for a floating point value.
+      type: object
+      title: MinMaxFloatUnits
+      allOf:
+        - $ref: 'MinMaxFloat'
+        - type: object
+          properties:
+            units:
+              type: string
+
+    MinMaxString:
+      description: >
+        A minimum and maximum pair for a string value.
+      type: object
+      title: MinMaxString
+      properties:
+        min:
+          type: string
+        max:
+          type: string
+
+    MinMaxStringUnits:
+      description: >
+        A minimum and maximum pair with units for a string value.
+      type: object
+      title: MinMaxStringUnits
+      allOf:
+        - $ref: 'MinMaxFloat'
+        - type: object
+          properties:
+            units:
+              type: string
+
+    ComputeUnitsEnum:
+      description: >
+        Units for the size of computing resources, multiples of 1000^n and 1024^n.
+        https://github.com/metio/storage-units.java/
+        https://en.wikipedia.org/wiki/Byte#Multiple-byte_units
+      type: string
+      title: ComputeSizeUnitsEnum
+      enum:
+        - kB
+        - kiB
+        - MB
+        - MiB
+        - GB
+        - GiB
+        - TB
+        - TiB
+        - PB
+        - PiB
+        - EB
+        - EiB
+        - ZB
+        - ZiB
+        - YB
+        - YiB
+
+    MinMaxComputeInteger:
+      description: >
+        A minimum and maximum 32bit integer with computing units.
+      type: object
+      title: MinMaxComputeInteger
+      allOf:
+        - $ref: 'MinMaxInteger'
+        - type: object
+          properties:
+            units:
+              $ref: 'ComputeUnitsEnum'
+
+    MinMaxComputeLong:
+      description: >
+        A minimum and maximum 64bit integer with computing units.
+      type: object
+      title: MinMaxComputeLong
+      allOf:
+        - $ref: 'MinMaxLong'
+        - type: object
+          properties:
+            units:
+              $ref: 'ComputeUnitsEnum'
+
+
+
