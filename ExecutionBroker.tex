@@ -62,6 +62,7 @@
 
 \newcommand{\python} {Python}
 \newcommand{\pythonprogram} {Python program}
+\newcommand{\pythonruntime} {Python runtime}
 
 \newcommand{\apache} {Apache}
 \newcommand{\spark} {Spark}
@@ -675,7 +676,7 @@ expires: "2023-09-18T07:05:21"
 ....
 ....
 options:
-  - type: "urn:enum-value-option"
+  - type: "uri:enum-value-option"
     path: "state"
     values:
     - "ACCEPTED"
@@ -694,7 +695,7 @@ expires: "2023-09-18T07:05:21"
 ....
 ....
 options:
-  - type: "urn:enum-value-option"
+  - type: "uri:enum-value-option"
     path: "state"
     values:
     - "CANCELLED"
@@ -770,7 +771,7 @@ are in the right place for the next step to be able to access them.
 \section{The data model}
 \label{data-model}
 
-\subsection{Data curation roles}
+\subsection{Metadata roles}
 \label{metadata-roles}
 
 The full description of an \executablething{} will include several layers of metadata
@@ -790,15 +791,16 @@ The players:
 \subsubsection{The developer}
 \label{software-developer}
 
-The first layer of metadata comes from the person who wrote the \pythonprogram{}.
+The first layer of metadata comes from the person who wrote the software.
 They have detailed knowledge of what the software does, what execution environment it needs,
 and what the inputs and outputs are.
 
-For the square root example, it is a \pythonprogram{} which needs a platform with the \python{} runtime installed,
+For our square root example, it is a \pythonprogram{} which needs a platform with the \python{} runtime installed,
 and a list of the \python{} libraries that the program relies on.
 
 \begin{lstlisting}[]
 executable:
+  name: Newton-Raphson example
   type: uri:python-program
   requirements:
   - numpi: ""
@@ -811,27 +813,30 @@ and whether it can make use of a \gpu accelerator.
 \begin{lstlisting}[]
 resources:
   compute:
-  - type: uri:generic-compute
-    cores:
-      requested:
-        min: 4
-    memory:
-      requested:
-        min: 16
-        units: GiB
-    ....
+    - type: uri:generic-compute
+      cores:
+        requested:
+          min: 4
+      memory:
+        requested:
+          min: 16
+          units: GiB
+      ....
 \end{lstlisting}
 
 The developers also know about what inputs and outputs the program expects and what file
 formats can it can handle.
+% needs work
+%https://github.com/ivoa-std/ExecutionBroker/issues/89
 
 \begin{lstlisting}[]
 executable:
+  name: Newton-Raphson example
   type: uri:python-program
   ....
   parameters:
-    - type: uri:param-file
-      name: "input data"
+    - name: input data
+      type: uri:param-file
       mode: readonly
       description:
         A table containing a list of numbers to be processed, formatted as
@@ -841,9 +846,8 @@ executable:
           ....
         - type: uri:votable
           ....
-    - type: uri:param-value
-      name: "input column name"
-      type: string
+    - name: input column
+      type: uri:param-value
       description:
         The column name within the 'input data' to use.
 \end{lstlisting}
@@ -862,31 +866,40 @@ This is often done as part of the software development process, but it is a sepa
 step that could be implemented by a different person.
 To make this distinction clear we can refer to this person, or role, as 'the packager'.
 
-In terms of the \metadoc{}, the packager changes the description of the \executablething{}
-from a \pythonprogram{} to a \dockercontainer{}.
+This step packages the \pythonprogram{} along with any \python{} modules it requires,
+the \pythonruntime{}, and any operating system components it requires, into a single
+standard format binary file, making it much easier to deploy.
+
+To represent the new type of \executablething{} in the \metadoc{}, the packager
+would change the description of the \executablething{} from a \pythonprogram{}
+to a \dockercontainer{}.
 
 \begin{lstlisting}[]
 executable:
-  type: uri:docker-container
+  name: Newton-Raphson example
+  type: uri:docker-container-1.0
   repository: ghcr.io
-  image: ivoa/calycopis/java-builder
+  image: ivoa/analytics/Newton-Raphson-albert
   tag: 2024.08.30
   ....
 \end{lstlisting}
 
 Depending on how the software is packaged in the container they may also need to update
-the description of the inputs and outputs,
-and link them to specific locations in the filesystem.
+the description of the inputs and outputs, and link them to specific locations in the
+filesystem.
+% needs work
+%https://github.com/ivoa-std/ExecutionBroker/issues/89
 
 \begin{lstlisting}[]
 executable:
-  type: uri:docker-container
+  name: Newton-Raphson example
+  type: uri:docker-container-1.0
   ....
   parameters:
-    - type: uri:data-file
-      name: "input data"
+    - name: input-data
+      type: uri:data-file
       format:
-        - type: urn:ivoa-votable
+        - type: uri:ivoa-votable
           filename: input-data.vot
           ....
 
@@ -895,7 +908,7 @@ resources:
     - type: uri:generic-compute
       volumes:
         - type: uri:file-mount
-          parameter: "input data"
+          parameter: input-data
           filepath: /data
           mode: readonly
           ....
@@ -916,41 +929,52 @@ For example, this might include:
     \item A project specific discovery service that only includes software vetted by the project.
           Execution platforms within the project would only accept curated \metadoc{s}
           from that discovery service.
-    \item A domain specific discovery service that modifies the execution environment, optimising
-          the software for analysing a particular type of data.
+    \item A domain specific discovery service that modifies the execution environment, configuring
+          the software to analyse a particular type of data.
     \item A catalog of \metadoc{s} maintained as part of a university teaching course, modifying the
           execution environment to integrate the software into the university system and setting
-          parameters to configure the software to match the course notes.
+          parameters to configure it to match the course notes.
 \end{itemize}
 
 \subsubsection{The user}
 \label{software-user}
 
-The user, or the user's client agent, starts with an initial \metadoc{} from the
-software discovery service and adds additional information describing how the user
-wants to use the software.
+The user starts with an initial \metadoc{} from the
+software discovery service and adds additional information describing how they
+want to use the software.
 
-Adding details of the data resources the user wants to use enables the \execbrokerservice{}
-to transfer the data to local storage before the \execsession{} is started.
-
-Including a value for the filesize enables the \execbrokerservice{} to estimate
-how much local storage it will need to allocate
-and how much time will be needed to transfer the data.
-The \execbrokerservice{} can take this into account when calculating the start time of
-the \execoffer{s} it makes, allowing enough time for the data transfers to complete
-before the \execsession{} starts.
+This would include selecting the data resources that they want to use
+and adding them to the metadata.
 
 \begin{lstlisting}[]
+executable:
+  ....
+
 resources:
+
   data:
-  - type: uri:simple-data-resource
-    name: "input data"
+  - name: input data
+    type: uri:simple-data-resource
     location: http:data.example.org/....
     filesize:
       value: 145
       units: MiB
     ....
+
+  compute:
+    ....
 \end{lstlisting}
+
+Including details of the data resources in the \metadoc{} means the \execbrokerservice{}
+will include the time needed to transfer the data to local storage before the
+\execsession{} is begins.
+
+Including a value for the data size enables the \execbrokerservice{} to estimate
+how much local storage it will need to allocate
+and how much time will be needed to transfer the data.
+The \execbrokerservice{} can take this into account when calculating the start time of
+the \execoffer{s} it makes, allowing enough time for the data transfers to complete
+before the \execsession{} starts.
 
 Linking the data resources with volumes on the corresponding compute resources enables
 the \execbrokerservice{} to mount the data resources at the correct location in
@@ -958,10 +982,13 @@ the compute resource's filesystem.
 
 \begin{lstlisting}[]
 resources:
+
   data:
-  - type: uri:simple-data-resource
-    name: input-data
+  - name: input-data
+    type: uri:simple-data-resource
+    location: http:data.example.org/....
     ....
+
   compute:
   - type: uri:generic-compute
     ....
@@ -996,7 +1023,7 @@ resources:
         units: GiB
 \end{lstlisting}
 
-TODO user provides the schedule ... when they want to run it.
+TODO user provides the schedule to describe when they want to run it.
 
 \subsection{The \executable{}}
 \label{executable}
@@ -1012,26 +1039,89 @@ The information in this part of the \datamodel{} will be different for each type
 Rather than try to model every possible type of \executable{} in one large \datamodel{},
 the \datamodel{} for each type is described in an extension to the core \datamodel{}.
 
-To support this, the core \datamodel{} defines two fields:
-\begin{itemize}
-  \item \codeword{type} - a URI identifying the type of \executable{}.
-  \item \codeword{spec} - a place holder for type specific details.
-\end{itemize}
+The \datamodel{} uses a common pattern for polymorphic types based on a discriminator
+value to indicate the type of thing it is describing, followed by the specific
+details for that type.
 
-% Type URLs
-% https://www.purl.org/ivoa.net/executable-types/example
-% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/executable-types/example-executable.md
+This is implemented in the \openapi{} specification as an abstract base class
+containing common fields like a name and uuid identifier, followed by a list
+of derived types and their type identifiers.
+
 \begin{lstlisting}[]
-# ExecutionBroker client request.
+    AbstractExecutable:
+      type: object
+      discriminator:
+        propertyName: type
+        mapping:
+          "uri:docker-container-1.0":   'DockerContainer'
+          "uri:jupyter-notebook-1.0":   'JupyterNotebook'
+          ....
+      properties:
+        name:
+          description: >
+            A human readable name, assigned by the client.
+          type: string
+        uuid:
+          description: >
+            A machine readable UUID, assigned by the server.
+          type: string
+          format: uuid
+        type:
+          description: >
+            The type identifier.
+          type: string
+\end{lstlisting}
+
+The derived types extend this abstract base class to include the details needed to
+describe this type of \executablething{}.
+For example, the derived type for a \dockercontainer{} includes properties
+to describe where to get the \docker image from, including the repository endpoint URL,
+and the name and version tag of the \docker{} image to download.
+
+\begin{lstlisting}[]
+    DockerContainer:
+      description: |
+        A Docker or OCI container.
+        See https://opencontainers.org/
+      type: object
+      title: DockerContainer
+      allOf:
+        - $ref: 'AbstractExecutable'
+        - type: object
+          properties:
+            repository:
+              type: string
+              description: >
+                The image respository URL.
+            image:
+              type: string
+              description: >
+                The image name within the repository.
+            tag:
+              type: string
+              description: The image tag.
+            ....
+\end{lstlisting}
+
+This results in the following message being sent to request the execution
+of a \dockercontainer{}.
+
+\begin{lstlisting}[]
+# ExecutionBroker request.
 request:
+
   # Details of the executable.
   executable:
 
-    # A URI identifying the type of executable.
-    type: "https://www.purl.org/ivoa.net/executable-types/example"
+    # Common fields from the AbstractExecutable
+    name: Experiment one
+    type: uri:docker-container-1.0
 
-    # The details, specific to the type of executable.
-    spec: {}
+    # The details, specific to a Docker container executable.
+    repository: ghcr.io
+    image: ivoa/analytics/Newton-Rahpson-example
+    tag: 2024.08.30
+
 \end{lstlisting}
 
 \subsubsection{\jupyternotebook{}}
