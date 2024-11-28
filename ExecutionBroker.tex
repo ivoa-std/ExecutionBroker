@@ -163,6 +163,15 @@
 
 \hyphenation{Exe-cut-able-Thing}
 
+% Enable [*bold*] inside listings
+% https://stackoverflow.com/a/24838471
+% https://www.mrunix.de/forums/archive/index.php/t-42976.html
+% https://en.wikibooks.org/wiki/LaTeX/Source_Code_Listings
+% https://mirror.ox.ac.uk/sites/ctan.org/macros/latex/contrib/listings/listings.pdf#subsection.3.3
+\renewcommand{\ttdefault}{pcr}
+\lstset{moredelim=[is][\bfseries]{[*}{*]}}
+
+
 \title{IVOA Execution Broker}
 
 % see ivoatexDoc for what group names to use here; use \ivoagroup[IG] for
@@ -727,6 +736,7 @@ A \workerjob{} in an \execworkerclass{} service goes through the following stage
 
 \end{itemize}
 
+%ZRQ - urgh
 When a \execbrokerclass{} creates a \workerjob{} in an \execworkerclass{} service the
 \workerjob{} starts with the \codeword{phase} set to \codeword{PENDING}.
 
@@ -877,7 +887,7 @@ to a \dockercontainer{}.
 \begin{lstlisting}[]
 executable:
   name: Newton-Raphson example
-  type: uri:docker-container-1.0
+  [*type: uri:docker-container-1.0*]
   repository: ghcr.io
   image: ivoa/analytics/Newton-Raphson-albert
   tag: 2024.08.30
@@ -896,19 +906,19 @@ executable:
   type: uri:docker-container-1.0
   ....
   parameters:
-    - name: input-data
-      type: uri:data-file
-      format:
-        - type: uri:ivoa-votable
-          filename: input-data.vot
-          ....
-
-resources:
-  compute:
-    - type: uri:generic-compute
-      volumes:
-        - type: uri:file-mount
-          parameter: input-data
+    - [*name: input-data*]            <----\
+      type: uri:data-file              |
+      format:                          |
+        - type: uri:ivoa-votable       |
+          filename: input-data.vot     |
+          ....                         |
+                                       |
+resources:                             |
+  compute:                             |
+    - type: uri:generic-compute        |
+      volumes:                         |
+        - type: uri:file-mount         |
+          [*parameter: input-data*]     ---/
           filepath: /data
           mode: readonly
           ....
