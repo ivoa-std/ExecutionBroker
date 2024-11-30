@@ -64,43 +64,35 @@
             git remote add origin 'git@github.com:Zarquan/ExecPlannerNote2.git'
             git push --set-upstream origin main
 
---START--
-Initialized empty Git repository in /var/local/projects/IVOA/EP-TDL/ExecPlannerNote2/github-zrq/.git/
---END--
+    >   Initialized empty Git repository in /var/local/projects/IVOA/EP-TDL/ExecPlannerNote2/github-zrq/.git/
 
---START--
-Cloning into '/var/local/projects/IVOA/EP-TDL/ExecPlannerNote2/github-zrq/ivoatex'...
-remote: Enumerating objects: 1422, done.
-remote: Counting objects: 100% (171/171), done.
-remote: Compressing objects: 100% (42/42), done.
-remote: Total 1422 (delta 134), reused 137 (delta 129), pack-reused 1251
-Receiving objects: 100% (1422/1422), 2.15 MiB | 6.73 MiB/s, done.
-Resolving deltas: 100% (920/920), done.
---END--
+    >   Cloning into '/var/local/projects/IVOA/EP-TDL/ExecPlannerNote2/github-zrq/ivoatex'...
+    >   remote: Enumerating objects: 1422, done.
+    >   remote: Counting objects: 100% (171/171), done.
+    >   remote: Compressing objects: 100% (42/42), done.
+    >   remote: Total 1422 (delta 134), reused 137 (delta 129), pack-reused 1251
+    >   Receiving objects: 100% (1422/1422), 2.15 MiB | 6.73 MiB/s, done.
+    >   Resolving deltas: 100% (920/920), done.
 
---START--
-[main (root-commit) 0195ac2] Creating initial templates for ExecPlannerNote2
- 7 files changed, 588 insertions(+)
- create mode 100644 .gitignore
- create mode 100644 .gitmodules
- create mode 100644 ExecPlannerNote2.tex
- create mode 100644 LICENSE
- create mode 100644 Makefile
- create mode 100644 README.md
- create mode 160000 ivoatex
---END--
+    >   [main (root-commit) 0195ac2] Creating initial templates for ExecPlannerNote2
+    >    7 files changed, 588 insertions(+)
+    >    create mode 100644 .gitignore
+    >    create mode 100644 .gitmodules
+    >    create mode 100644 ExecPlannerNote2.tex
+    >    create mode 100644 LICENSE
+    >    create mode 100644 Makefile
+    >    create mode 100644 README.md
+    >    create mode 160000 ivoatex
 
---START--
-Enumerating objects: 8, done.
-Counting objects: 100% (8/8), done.
-Delta compression using up to 4 threads
-Compressing objects: 100% (8/8), done.
-Writing objects: 100% (8/8), 8.95 KiB | 2.24 MiB/s, done.
-Total 8 (delta 0), reused 0 (delta 0), pack-reused 0
-To github.com:Zarquan/ExecPlannerNote2.git
- * [new branch]      main -> main
-branch 'main' set up to track 'origin/main'.
---END--
+    >   Enumerating objects: 8, done.
+    >   Counting objects: 100% (8/8), done.
+    >   Delta compression using up to 4 threads
+    >   Compressing objects: 100% (8/8), done.
+    >   Writing objects: 100% (8/8), 8.95 KiB | 2.24 MiB/s, done.
+    >   Total 8 (delta 0), reused 0 (delta 0), pack-reused 0
+    >   To github.com:Zarquan/ExecPlannerNote2.git
+    >    * [new branch]      main -> main
+    >   branch 'main' set up to track 'origin/main'.
 
 
 
