@@ -17,6 +17,8 @@
 \newcommand{\http} {HTTP}
 \newcommand{\rest} {REST}
 
+\newcommand{\uuid} {UUID}
+
 \newcommand{\openapi} {OpenAPI}
 \newcommand{\datamodel} {data~model}
 \newcommand{\webservice} {web service}
@@ -78,6 +80,7 @@
 \newcommand{\ocicontainer} {OCI container}
 \newcommand{\docker} {Docker}
 \newcommand{\dockercompose} {Docker compose}
+\newcommand{\dockerimage} {Docker image}
 \newcommand{\dockerruntime} {Docker runtime}
 \newcommand{\dockercontainer} {Docker container}
 
@@ -312,7 +315,7 @@ The \openapi{} specification defines the technical details of the
 \executionbroker{} \webservice{} interface and the schema for the
 \executionbroker{} \datamodel{}.
 This document compliments the technical specification by using use cases
-and specific examples to describe the intended service behaviour and
+and examples to describe the intended service behaviour and
 explain the reasoning behind some of the design choices.
 
 The two documents are intended to be read together.
@@ -563,7 +566,8 @@ standardised at this stage.
 \subsubsection{Data discovery}
 \label{subsub-data-discovery}
 
-TODO : update this with reference to \ivoa{} data product type.
+TODO - update this with reference to \ivoa{} data product type and how this links on the
+executable parameters.
 https://www.ivoa.net/rdf/product-type/2024-05-19/product-type.html
 
 \subsection{Execution Broker}
@@ -694,7 +698,7 @@ that may influence how an \execbrokerservice{} allocates resources.
 \subsubsection{Execution scheduling}
 \label{subsub-execution-scheduling}
 
-
+This is already covered in a differnt section ..
 
 \subsubsection{Offerset response}
 \label{subsub-offerset-response}
@@ -849,13 +853,6 @@ completed, but they also need the \teardown{} data transfers to complete so that
 are in the right place for the next step to be able to access them.
 
 
-
-
-
-
-
-
-
 \subsubsection{Update options}
 \label{subsub-update-options}
 
@@ -911,261 +908,17 @@ over the lifetime of an \execsession{}.
 \section{The data model}
 \label{sect-data-model}
 
-\subsection{Metadata roles}
-\label{sub-metadata-roles}
+As outlined in section \ref{subsub-openapi-specification}, this section of the document is
+intended to compliment the \openapi{} specificaton published alongside this document.
 
-The full description of an \executablething{} will include several layers of metadata
-provided by different actors playing different roles within the publishing process.
+The \openapi{} specification defines the technical details of the
+\executionbroker{} \datamodel{}.
+This document uses use cases and examples to describe the reasoning
+behind some of the design choices.
 
-For our square root example we can identify a number of roles that would each provide
-layers of the picture nedeed to fully describe an \executablething{}.
-
-The players:
-\begin{itemize}
-    \item The developer  - The person who wrote the \pythonprogram{}
-    \item The packager   - The person who packaged it in a \dockercontainer{}
-    \item The publisher  - The person who published it in a discovery service
-    \item The user agent - The person who wants to use the software
-\end{itemize}
-
-\subsubsection{The developer}
-\label{subsub-software-developer}
-
-The first layer of metadata comes from the person who wrote the software.
-They have detailed knowledge of what the software does, what execution environment it needs,
-and what the inputs and outputs are.
-
-For our square root example, it is a \pythonprogram{} which needs a platform with the \python{} runtime installed,
-and a list of the \python{} libraries that the program relies on.
-
-\begin{lstlisting}[]
-executable:
-  name: Newton-Raphson example
-  type: uri:python-program
-  requirements:
-  - numpi: ""
-  - astropy: ">= 6.1"
-\end{lstlisting}
-
-The developer also understands how much memory their program needs, whether it can make use of multiple cpu cores,
-and whether it can make use of a \gpu accelerator.
-
-\begin{lstlisting}[]
-resources:
-  compute:
-    - type: uri:generic-compute
-      cores:
-        requested:
-          min: 4
-      memory:
-        requested:
-          min: 16
-          units: GiB
-      ....
-\end{lstlisting}
-
-The developers also know about what inputs and outputs the program expects and what file
-formats can it can handle.
-% needs work
-%https://github.com/ivoa-std/ExecutionBroker/issues/89
-
-\begin{lstlisting}[]
-executable:
-  name: Newton-Raphson example
-  type: uri:python-program
-  ....
-  parameters:
-    - name: input data
-      type: uri:param-file
-      mode: readonly
-      description:
-        A table containing a list of numbers to be processed, formatted as
-        comma separated text (CSV) or an IVOA VOTable.
-      formats:
-        - type: uri:text-csv
-          ....
-        - type: uri:votable
-          ....
-    - name: input column
-      type: uri:param-value
-      description:
-        The column name within the 'input data' to use.
-\end{lstlisting}
-
-\subsubsection{The packager}
-\label{subsub-software-packager}
-
-Although it is possible to publish our square root example as a stand alone \pythonprogram{},
-it is not easy to describe the installation process in sufficient detail for it to be
-automatically deployed on a range of different platforms.
-
-A more portable solution would be to package the \pythonprogram{} in a \dockercontainer{},
-installing and configuring the software along with all of its dependencies inside the container.
-
-This is often done as part of the software development process, but it is a separate
-step that could be implemented by a different person.
-To make this distinction clear we can refer to this person, or role, as 'the packager'.
-
-This step packages the \pythonprogram{} along with any \python{} modules it requires,
-the \pythonruntime{}, and any operating system components it requires, into a single
-standard format binary file, making it much easier to deploy.
-
-To represent the new type of \executablething{} in the \metadoc{}, the packager
-would change the description of the \executablething{} from a \pythonprogram{}
-to a \dockercontainer{}.
-
-\begin{lstlisting}[]
-[+# Executable metadata+]
-executable:
-  name: Newton-Raphson example
-  [*type: uri:docker-container-1.0*]
-  repository: ghcr.io
-  image: ivoa/analytics/Newton-Raphson-albert
-  tag: 2024.08.30
-  ....
-\end{lstlisting}
-
-Depending on how the software is packaged in the container they may also need to update
-the description of the inputs and outputs, and link them to specific locations in the
-filesystem.
-% needs work
-%https://github.com/ivoa-std/ExecutionBroker/issues/89
-
-\begin{lstlisting}[]
-[+# Executable metadata+]
-executable:
-  name: Newton-Raphson example
-  type: uri:docker-container-1.0
-  ....
-  parameters:
-    - [*name: input-data*]            <----\
-      type: uri:data-file              |
-      format:                          |
-        - type: uri:ivoa-votable       |
-          filename: input-data.vot     |
-          ....                         |
-                                       |
-resources:                             |
-  compute:                             |
-    - type: uri:generic-compute        |
-      volumes:                         |
-        - type: uri:file-mount         |
-          [*parameter: input-data*]     ---/
-          filepath: /data
-          mode: readonly
-          ....
-\end{lstlisting}
-
-\subsubsection{The publisher}
-\label{subsub-metadata-publisher}
-
-This role represents the person who publishes metadata about the software in a discovery service.
-
-Typically changes made at this level would include adding to the description
-of what the software does, placing it in a particular context to aid discovery,
-or modifying the execution environment to configure the softweare for a particular domain.
-
-For example, this might include:
-
-\begin{itemize}
-    \item A project specific discovery service that only includes software vetted by the project.
-          Execution platforms within the project would only accept curated \metadoc{s}
-          from that discovery service.
-    \item A domain specific discovery service that modifies the execution environment, configuring
-          the software to analyse a particular type of data.
-    \item A catalog of \metadoc{s} maintained as part of a university teaching course, modifying the
-          execution environment to integrate the software into the university system and setting
-          parameters to configure it to match the course notes.
-\end{itemize}
-
-\subsubsection{The user}
-\label{subsub-software-user}
-
-The user starts with an initial \metadoc{} from the
-software discovery service and adds additional information describing how they
-want to use the software.
-
-This would include selecting the data resources that they want to use
-and adding them to the metadata.
-
-\begin{lstlisting}[]
-executable:
-  ....
-
-resources:
-
-  data:
-  - name: input data
-    type: uri:simple-data-resource
-    location: http:data.example.org/....
-    filesize:
-      value: 145
-      units: MiB
-    ....
-
-  compute:
-    ....
-\end{lstlisting}
-
-Including details of the data resources in the \metadoc{} means the \execbrokerservice{}
-will include the time needed to transfer the data to local storage before the
-\execsession{} is begins.
-
-Including a value for the data size enables the \execbrokerservice{} to estimate
-how much local storage it will need to allocate
-and how much time will be needed to transfer the data.
-The \execbrokerservice{} can take this into account when calculating the start time of
-the \execoffer{s} it makes, allowing enough time for the data transfers to complete
-before the \execsession{} starts.
-
-Linking the data resources with volumes on the corresponding compute resources enables
-the \execbrokerservice{} to mount the data resources at the correct location in
-the compute resource's filesystem.
-
-\begin{lstlisting}[]
-resources:
-
-  data:
-  - name: input-data
-    type: uri:simple-data-resource
-    location: http:data.example.org/....
-    ....
-
-  compute:
-  - type: uri:generic-compute
-    ....
-    volumes:
-    - resource: input-data
-      path: /data
-      mode: "ro"
-
-\end{lstlisting}
-
-The user can also update the compute resource requirements to reflect how they plan
-to use the software.
-In the case of our square root example, the compute resource requirements set by the
-developers will reflect the original intent of simply demonstrating how to use the
-\pythonprogram{}.
-
-However, if the user intends to use the software to analyse a much larger \dataset{}
-they can update the compute resource requirements to match their use case.
-
-\begin{lstlisting}[]
-resources:
-  compute:
-  - type: uri:generic-compute
-    cores:
-      requested:
-      # min: 4
-        min: 32
-    memory:
-      requested:
-      # min: 16
-        min: 128
-        units: GiB
-\end{lstlisting}
-
-TODO user provides the schedule to describe when they want to run it.
+The two documents are intended to be read together.
+The machine-readable \openapi{} spcification defining the \textit{what},
+and the human-readable text document describing the \textit{why}.
 
 \subsection{The \executable{}}
 \label{sub-executable}
@@ -1181,156 +934,52 @@ The information in this part of the \datamodel{} will be different for each type
 Rather than try to model every possible type of \executable{} in one large \datamodel{},
 the \datamodel{} for each type is described in an extension to the core \datamodel{}.
 
-The \datamodel{} uses a common pattern for polymorphic types based on a discriminator
+The \datamodel{} uses a common pattern for polymorphic
+\footurl{https://swagger.io/docs/specification/v3_0/data-models/inheritance-and-polymorphism/\#polymorphism}
+types based on a discriminator
+\footurl{https://swagger.io/docs/specification/v3_0/data-models/inheritance-and-polymorphism/\#discriminator}
 value to indicate the type of thing it is describing, followed by the specific
 details for that type.
 
 This is implemented in the \openapi{} specification as an abstract base class
-containing common fields like a name and uuid identifier, followed by a list
+containing common fields like a name and \uuid{} identifier, followed by a list
 of derived types and their type identifiers.
 
 \begin{lstlisting}[]
-    AbstractExecutable:
-      type: object
-      discriminator:
-        propertyName: type
-        mapping:
-          "uri:docker-container-1.0":   'DockerContainer'
-          "uri:jupyter-notebook-1.0":   'JupyterNotebook'
-          ....
-      properties:
-        name:
-          description: >
-            A human readable name, assigned by the client.
-          type: string
-        uuid:
-          description: >
-            A machine readable UUID, assigned by the server.
-          type: string
-          format: uuid
-        type:
-          description: >
-            The type identifier.
-          type: string
+[+# OpenAPI schema+]
+AbstractExecutable:
+  type: object
+  discriminator:
+    propertyName: type
+    mapping:
+      "uri:java-program-1.0":       'JavaProgram'
+      "uri:python-program-1.0":     'PythonProgram'
+      "uri:docker-container-1.0":   'DockerContainer'
+      "uri:singular-container-1.0": 'SingularContainer'
+      "uri:jupyter-notebook-1.0":   'JupyterNotebook'
+      ....
+  properties:
+    name:
+      description: >
+        A human readable name, assigned by the client.
+      type: string
+    uuid:
+      description: >
+        A machine readable UUID, assigned by the server.
+      type: string
+      format: uuid
+    type:
+      description: >
+        The type discriminator.
+      type: string
+      format: uri
 \end{lstlisting}
 
 The derived types extend this abstract base class to include the details needed to
-describe this type of \executablething{}.
-For example, the derived type for a \dockercontainer{} includes properties
-to describe where to get the \docker image from, including the repository endpoint URL,
-and the name and version tag of the \docker{} image to download.
+describe their particular type of \executablething{}.
 
-\begin{lstlisting}[]
-    DockerContainer:
-      description: |
-        A Docker or OCI container.
-        See https://opencontainers.org/
-      type: object
-      title: DockerContainer
-      allOf:
-        - $ref: 'AbstractExecutable'
-        - type: object
-          properties:
-            repository:
-              type: string
-              description: >
-                The image respository URL.
-            image:
-              type: string
-              description: >
-                The image name within the repository.
-            tag:
-              type: string
-              description: The image tag.
-            ....
-\end{lstlisting}
-
-This results in the following message being sent to request the execution
-of a \dockercontainer{}.
-
-\begin{lstlisting}[]
-# ExecutionBroker request.
-request:
-
-  # Details of the executable.
-  executable:
-
-    # Common fields from the AbstractExecutable
-    name: Experiment one
-    type: uri:docker-container-1.0
-
-    # The details, specific to a Docker container executable.
-    repository: ghcr.io
-    image: ivoa/analytics/Newton-Rahpson-example
-    tag: 2024.08.30
-
-\end{lstlisting}
-
-\subsubsection{\jupyternotebook{}}
-\label{subsub-jupyternotebook}
-The \datamodel{} for each type of \executable{} defines the metadata needed to
-describe that particular type.
-For example, the \datamodel{} for a \jupyternotebook{} needs to describe where
-to fetch the source code for the notebook from.
-
-% Type URLs
-% https://www.purl.org/ivoa.net/executable-types/jupyter-notebook
-% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/executable-types/jupyter-notebook.md
-\begin{lstlisting}[]
-# ExecutionBroker client request.
-request:
-  # Details of the executable.
-  executable:
-    # A URI identifying the type of executable.
-    type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
-
-    # The details, specific to a Jupyter notebook.
-    spec:
-      notebook: "https://.../example.jpnb"
-\end{lstlisting}
-
-It may also include a reference to a \codeword{requirements.txt} file that describes any additional \python{}
-libraries needed to run the notebook.
-\begin{lstlisting}[]
-# ExecutionBroker client request.
-request:
-  # Details of the executable.
-  executable:
-    # A URI identifying the type of executable.
-    type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
-
-    # The details, specific to a Jupyter notebook.
-    spec:
-      notebook: "https://.../example.jpnb"
-      requirements: "https://.../requirements.txt"
-\end{lstlisting}
-
-\subsubsection{\dockercontainer{}}
-\label{subsub-dockercontainer}
-The \datamodel{} for an \dockercontainer{} describes the image name and version
-along with the hostname of the repository to fetch it from.
-
-% Type URLs
-% https://www.purl.org/ivoa.net/executable-types/oci-container
-% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/executable-types/oci-container.md
-\begin{lstlisting}[]
-# ExecutionBroker client request.
-request:
-  # Details of the executable.
-  executable:
-    # A URI identifying the type of executable.
-    type: "https://www.purl.org/ivoa.net/executable-types/docker-container"
-
-    # The details, specific to a Docker container.
-    spec:
-      repo:  "ghcr.io"
-      image: "ivoa/oligia-webtop"
-      version: "ubuntu-2022.01.13"
-\end{lstlisting}
-
-This pattern of using a \codeword{type} URI to identify the type of thing, and then a
-\codeword{spec} block to add the type specific details is used in several places in the
-\executionbroker{} \datamodel{}.
+This pattern of using a \codeword{type} discriminator to identify the type of thing, followed
+by the type specific details is used in several places in the \executionbroker{} \datamodel{}.
 This enables us to keep the core \datamodel{} relatively small, defining the common aspects
 needed to describe an \executablething{} and the resources it needs while allowing the
 \datamodel{} to be extended to describe a wide range of different types of things.
@@ -1338,8 +987,7 @@ needed to describe an \executablething{} and the resources it needs while allowi
 This pattern makes it easy for projects outside the core \ivoa{} community to add new
 types of \executablething{s} and resources appropriate for their science domain.
 
-Using a URI to identify the task type means that implementations do not need to understand
-all of the different possible types of \executable{}.
+Implementations do not need to understand all of the different possible types of \executable{}.
 If a service doesn’t recognize a particular type, it can simply reply \codeword{NO}.
 
 \begin{lstlisting}[]
@@ -1347,16 +995,104 @@ Request  - Can this platform execute <unkown-type> ?
 Response - NO
 \end{lstlisting}
 
+\subsubsection{\dockercontainer{}}
+\label{subsub-dockercontainer}
+
+The derived type for a \dockercontainer{} includes properties
+to describe where to get the \dockerimage{} from, including the repository endpoint URL,
+the name and version tag of the \dockerimage{} to download, and a digest checksum for
+verification.
+
+\begin{lstlisting}[]
+[+# OpenAPI schema+]
+DockerContainer:
+  description: |
+    A Docker or OCI container.
+    See https://opencontainers.org/
+  type: object
+  title: DockerContainer
+  allOf:
+    - $ref: 'AbstractExecutable'
+    - type: object
+      properties:
+        repository:
+          description: >
+            The image respository URL.
+          type: string
+        image:
+          description: >
+            The image name within the repository.
+          type: string
+        tag:
+          type: string
+          description: >
+            The image version tag.
+        digest:
+          description: >
+            The image digest checksum, used for verification.
+          type: string
+        ....
+\end{lstlisting}
+
+This results in the following message being sent to request the execution
+of a \dockercontainer{}.
+\begin{lstlisting}[]
+[+# ExecutionBroker offerset request.+]
+executable:
+  [+# Common fields from AbstractExecutable+]
+  name: Experiment one
+  type: uri:docker-container-1.0
+
+  [+# The type specific details for a Docker container.+]
+  repository: ghcr.io
+  image: ivoa/analytics/Newton-Rahpson-example
+  tag: 2024.08.30
+  digest: sha256:ac1b....fc70
+\end{lstlisting}
+
+\subsubsection{\jupyternotebook{}}
+\label{subsub-jupyternotebook}
+The \datamodel{} for a \jupyternotebook{} needs to describe where to fetch the
+the notebook from.
+
+\begin{lstlisting}[]
+[+# ExecutionBroker offerset request.+]
+executable:
+  [+# Common fields from AbstractExecutable+]
+  name: Experiment two
+  type: uri:jupyter-notebook-1.0
+
+  [+# The type specific details for a Jupyter notebook.+]
+  notebook:
+    file: https://.../example.jpnb
+\end{lstlisting}
+
+It may also include a reference to a \codeword{requirements.txt} file that describes the
+additional \python{} modules needed to run the notebook.
+\begin{lstlisting}[]
+[+# ExecutionBroker offerset request.+]
+executable:
+  [+# Common fields from AbstractExecutable+]
+  name: Experiment two
+  type: uri:jupyter-notebook-1.0
+
+  [+# The type specific details for a Jupyter notebook.+]
+  notebook:
+    file: https://.../example.jpnb
+  requirements:
+    file: https://.../requirements.txt
+\end{lstlisting}
+
 \subsection{Resources}
 \label{sub-resources}
 
-At the next level the client may need to check whether a platform has sufficient compute resources
-needed to execute a particular task.
+At the next level the client may want to check whether a platform has sufficient compute resources
+to execute a particular task.
 For example, \textit{"Can this platform provide enough resources to run this \jupyternotebook{}?"}
 
 In order to do this the request would not only need to describe the \executable{} itself,
-but also the minimum level of compute resources needed in terms of \cpu{} cores, memory, \gpu{s}
-and disc space needed to execute it.
+but also the minimum level of compute resources needed in terms of \cpu{} cores, memory,
+and the local storage space needed to execute it.
 
 \subsubsection{Compute resources}
 \label{subsub-compute-resources}
@@ -1365,259 +1101,154 @@ The \datamodel{} for describing compute resources is, in most cases, common to a
 so the \datamodel{} for these requirements are defined as part of the core \executionbroker{} \datamodel{}.
 
 It is important to note that all of the resource requirements are optional.
-As in the example from the previous section, a request to execute a simple \jupyternotebook{}
-does not need to include any resource details.
+A request to execute a simple \jupyternotebook{} does not need to include any resource details.
 
 \begin{lstlisting}[]
-# ExecutionBroker client request.
-request:
-  # Details of the executable.
-  executable:
-    # A URI identifying the type of executable.
-    type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
-
-    # The details, specific to a Jupyter notebook.
-    spec:
-      notebook: "https://.../example.jpnb"
+[+# ExecutionBroker offerset request.+]
+executable:
+  type: uri:jupyter-notebook-1.0
+  notebook:
+    file: https://.../example.jpnb
 \end{lstlisting}
 
-As long as this \jupyternotebook{} only needs a minimal set of resources to run, e.g.
-2 \cpu{} cores, 2G of memory and 20G of disc space, then this task probably doesn't need
-any additional resources.
+As long as the \jupyternotebook{} only needs a minimal set of resources to run,
+then this is all you need to request an \execsession{} to execute it.
 
-However, if this \jupyternotebook{} needs a specific type of \gpu{} to function properly,
-then it can be added to the request by specifying a compute resource with the specific type
-of \gpu{}.
-
-% Type URLs
-% https://www.purl.org/ivoa.net/resource-types/generic-compute
-% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/generic-compute.md
-% Type URLs
-% https://tinyurl.com/nvidia-ad104
-% https://www.purl.org/ivoa.net/resource-types/nvidia-ad104
-% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/nvidia-ad104.md
-\begin{lstlisting}[]
-# ExecutionBroker client request.
-request:
-  # Details of the executable.
-  executable:
-    # A URI identifying the type of executable.
-    type: "https://www.purl.org/ivoa.net/executable-types/jupyter-notebook"
-    # The details, specific to a Jupyter notebook.
-    spec:
-      notebook: "https://.../example.jpnb"
-
-  # Details of the resources needed.
-  resources:
-    compute:
-    - name: "compute-001"
-      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
-      spec:
-        extras:
-        - name: "nvidia-gpu"
-          # A URI identifying the type of GPU.
-          type: "https://tinyurl.com/nvidia-ad104"
-\end{lstlisting}
-
-With this detail added to the request, platforms that are not able to provide this kind of \gpu{}
-would simply reply \codeword{NO}.
+However, if the \jupyternotebook{} needs a minimum amount of computing resources
+to function properly, then the request may include details of a compute resource
+with the required minimum values.
 
 \begin{lstlisting}[]
-Request  - Can this platform provide 'NVIDIA AD104 GPU' ?
-Response - NO
+[+# ExecutionBroker offerset request.+]
+executable:
+  type: uri:jupyter-notebook-1.0
+  notebook:
+    file: https://.../example.jpnb
+
+resources:
+  compute:
+    - type: uri:generic-compute
+  [*    cores:                    *]
+  [*      requested:              *]
+  [*        min: 4                *]
+  [*    memory:                   *]
+  [*      requested:              *]
+  [*        min: 16               *]
 \end{lstlisting}
 
-Note that a platform does not need to know what a  "\nvidiagpu{}" is to be able to reply with a sensible aswer.
-If a platform receives a request for a resource that it doesn't understand, it MAY simply reply \codeword{NO}.
+When the \execbrokerservice{} reponds with a set of offers, it may offer more
+resources than the minimum specified in the original request.
+The most common scenario for this is where something like an \openstack{}
+\execplatform{} can only allocate compute resources from a fixed set of templates
+or `flavors` that provide specific amounts of \cpu{} cores, memory, and local storage.
+In which case, the \execbrokerservice{} will select the closest match that meets
+the requested criteria.
+To support this, the \datamodel{} includes two sets of values, one for the request
+and one for the response. This enables a client to clearly display the differences
+between the request and the offer to the user.
 
 \begin{lstlisting}[]
-Request  - Can this platform provide <unknown extra> ?
-Response - NO
+[+# ExecutionBroker offerset response.+]
+executable:
+  type: uri:jupyter-notebook-1.0
+  notebook:
+    file: https://.../example.jpnb
+resources:
+  compute:
+   - type: uri:generic-compute
+      cores:
+  [*      requested: *]
+  [*        min: 4   *]
+  [*      offered:   *]
+  [*        min: 8   *]
+      memory:
+  [*      requested: *]
+  [*        min: 16  *]
+  [*      offered:   *]
+  [*        min: 32  *]
 \end{lstlisting}
-
-The only platforms that will reply \codeword{YES} are ones that understand what a "\nvidiagpu{}"
-is and are able to provide access to one.
-
-The \datamodel{} for the \gpu{} resource follows the same extendable pattern as the \datamodel{} for
-the \executable{}. A \codeword{type} URI to identify the type of \gpu{},
-and a \codeword{spec} section for type specific details,
-e.g. the minimum amount of memory and number of shaders.
-
-% Type URLs
-% https://tinyurl.com/nvidia-ad104
-% https://www.purl.org/ivoa.net/resource-types/nvidia-ad104
-% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/nvidia-ad104.md
-\begin{lstlisting}[]
-# ExecutionBroker client request.
-request:
-  # Details of the executable.
-  executable:
-    ....
-  # Details of the resources needed.
-  resources:
-    compute:
-    - name: "compute-001"
-      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
-      spec:
-        extras:
-        - name: "nvidia-gpu"
-          # A URI identifying the type.
-          type: "https://tinyurl.com/nvidia-ad104"
-          # The details, specific to a 'NVIDIA AD104 GPU'.
-          spec:
-            memory:
-              min: 20
-            shaders:
-              min: 6144
-\end{lstlisting}
-
-This pattern make it easy for projects to add new types of compute resources to their
-platforms. All they need to do is to choose a URL to identify the \codeword{type}
-and they can add their own type specific details to the \codeword{spec} section.
-
-% Type URLs
-% https://tinyurl.com/xilinx-vu19p
-% https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p
-% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/xilinx-vu19p.md
-\begin{lstlisting}[]
-# ExecutionBroker client request.
-request:
-  # Details of the executable.
-  executable:
-    ....
-  # Details of the resources needed.
-  resources:
-    compute:
-    - name: "compute-001"
-      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
-      spec:
-        extras:
-        - name: "Xilinx FPGA"
-          # A URI identifying the type.
-          type: "https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p"
-          # The details, specific to a 'Xilinx FPGA'.
-          spec:
-            logicCells: 8938
-            DSPslices:  3840
-\end{lstlisting}
-
-Note that in both these examples, the URL used to identify the \codeword{type}
-uses some level of indirection to make the URL more robust.
-
-At the time of writing, the best resource we could find to describe NVIDIA's AD104 GPU
-is an entry in a database curated by the TECHPOWERUP
-website\footurl{https://www.techpowerup.com/gpu-specs/nvidia-ad104.g1013}.
-While this page provides a lot of useful techical detail about the component,
-the URL itself is vulnerable to changes in the design of the TECHPOWERUP website.
-
-To make this more robust we can use a URL redirect service to create a more permanent
-URL that we have control over\footurl{https://tinyurl.com/nvidia-ad104}.
-If the TECHPOWERUP website is redesigned, we can update
-our redirect to match.
-
-There are several options to choose from:
-\begin{itemize}
-\item A URL shortening service.\\
-      \codeword{[https://tinyurl.com/nvidia-ad104]}
-\item The PURL service\footurl{https://purl.archive.org/} provided by the internet archive\footurl{http://www.archive.org/}.\\
-      \codeword{[https://www.purl.org/ivoa.net/resource-types/nvidia-ad104]}.
-\item A page in our GitHub repository that directs the reader to more resources\footurl{https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/nvidia-ad104.md}.\\
-      \codeword{[https://github.com/..../resource-types/nvidia-ad104.md]}.
-\end{itemize}
-
-Similarly, the best resource we could find to decribe the Xilinx FPGA provided by Amazon AWS
-F1\footurl{https://aws.amazon.com/ec2/instance-types/f1/} instances is the product details
-page on the Xilinx website\footurl{https://www.xilinx.com/products/silicon-devices/fpga/virtex-ultrascale-plus-vu19p.html}.
-Both of these URLs are informative, but are vulnerable to changes in their websites.
-
-To make this more robust, our example uses a PURL redirect to a page in our GitHub repository that describes
-the type of FPGA that our project requires. The page in our GitHub repository can point to additional details about the
-FPGA and the tools needed to use it.
-\begin{itemize}
-%\item A URL shortening service \codeword{[https://tinyurl.com/xilinx-vu19p]}.
-\item A PURL redirect to provide a long lasting URL.\\
-      \codeword{[https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p]}
-\item A page in our GitHub repository describing the FPGA and the tools needed to use it\footurl{https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/xilinx-vu19p.md}.\\
-      \codeword{[https://github.com/..../resource-types/xilinx-vu19p.md]}
-\end{itemize}
 
 \subsubsection{Storage resources}
 \label{subsub-storage-resources}
 
-The resources section of the request can also be used to specify storage resources.
+The resources section of the \datamodel{}can also be used to specify a range
+of different storage resources.
 
 There are two main types of storage resources:
 \begin{itemize}
-    \item Internal storage resources that are provided by the platform.
     \item External storage resources that are provided by an external source.
+    \item Internal storage resources that are provided by the platform.
 \end{itemize}
 
-There are two types of internal storage resources:
+Within the internal storage group there are two types of resources:
 \begin{itemize}
-    \item Ephemeral storage available for the duration of the \workerjob{}, created when the \workerjob{} starts and released when the \workerjob{} is completed.
-    \item Persistent storage that exists beyond the lifetime of the \workerjob{}, created before the \workerjob{} starts and remaining after the \workerjob{} has completed.
+    \item Ephemeral storage available for the duration of the \workerjob{}.
+    Created when the \workerjob{} starts and released when the \workerjob{} is completed.
+    \item Persistent storage that exists beyond the lifetime of the \workerjob{}.
+    Created before the \workerjob{} starts and remaining after the \workerjob{} has completed.
 \end{itemize}
 
-There are two levels of persistent storage:
+Within the persistent storage group there are another two levels of resources:
 \begin{itemize}
     \item Managed resources that are created and deleted by the platform.
     \item Unmanaged resources that are created and deleted by an external entity.
 \end{itemize}
 
 The simplest of these are ephemeral storage resources managed by the execution platform.
-For example, if the \jupyternotebook{} in our example requires 1024GiB of space to perform its calculations,
-then this can be specified in the request by defining an ephemeral storage resource.
+For example, if the \jupyternotebook{} in our example requires 1024GiB of space to
+perform its calculations, then this can be specified in the request by defining a
+simple ephemeral storage resource.
 
-% Type URLs
-% https://www.purl.org/ivoa.net/storage-types/ephemeral-storage
-% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/ephemeral-storage.md
 \begin{lstlisting}[]
-# ExecutionBroker client request.
+[+# ExecutionBroker offerset request.+]
 request:
-  # Details of the executable.
+  [+# Details of the executable.+]
   executable:
     ....
-  # Details of the resources needed.
+  [+# Details of the resources needed.+]
   resources:
     ....
     storage:
-    - name: "scratch-space"
-      type: "https://www.purl.org/ivoa.net/storage-types/ephemeral-storage"
-      spec:
-        size: 1024
+    [*  - name: scratch-space          *]
+    [*    type: uri:ephemeral-storage  *]
+    [*    size:                        *]
+    [*      requested:                 *]
+    [*        min: 1024                *]
 \end{lstlisting}
 
 To enable the \jupyternotebook{} to access this storage, we need to add a
 corresponding \codeword{volume} element to the compute resource that describes
 where to mount the storage resource.
 
-For example, the following request asks for 1024GiB of ephemeral storage
+The following request asks for 1024GiB of ephemeral storage
 that is mounted at \codeword{/temp} in the filesystem of the compute resource.
 The compute volume is linked to the storage resource by the name of the
 storage resource.
 
 \begin{lstlisting}[]
-# ExecutionBroker client request.
+[+# ExecutionBroker offerset request.+]
 request:
-  # Details of the executable.
+  [+# Details of the executable.+]
   executable:
     ....
-  # Details of the resources needed.
+  [+# Details of the resources needed.+]
   resources:
-    ....
+
     compute:
-    - name: "compute-001"
-      ....
-      volumes:
-      - name: "temp-volume"
-        resource: "scratch-space"
-        path: "/temp"
-        mode: "rw"
-    storage:
-    - name: "scratch-space"
-      type: "https://www.purl.org/ivoa.net/storage-types/ephemeral-storage"
-      spec:
-        size: 1024
+      - name: compute-001
+        ....
+        volumes:
+          - name: temp-volume
+            [*resource: scratch-space*]  ----\
+            path: /temp                  |
+            mode: rw                     |
+                                         |
+    storage:                             |
+      - [*name: scratch-space*]         <----/
+        type: uri:ephemeral-storage
+        size:
+          requested:
+            min: 1024
 \end{lstlisting}
 
 This pattern of separating the details of how a storage resource is implemented
@@ -1632,36 +1263,45 @@ in an external S3 system, this can be done by defining an external storage resou
 that describes where the data is,
 and a corresponding volume mount inside the compute resource.
 
-% Type URLs
-% https://www.purl.org/ivoa.net/storage-types/amazon-s3
-% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/amazon-s3.md
 \begin{lstlisting}[]
-# ExecutionBroker client request.
+[+# ExecutionBroker offerset request.+]
 request:
-  # Details of the executable.
+  [+# Details of the executable.+]
   executable:
     ....
-  # Details of the resources needed.
+  [+# Details of the resources needed.+]
   resources:
-    ....
+
     compute:
-    - name: "compute-001"
-      ....
-      volumes:
-      - name: "data-volume"
-        resource: "source-data"
-        path: "/data"
-        mode: "r"
-    storage:
-    - name: "source-data"
-      type: "https://www.purl.org/ivoa.net/storage-types/amazon-s3"
-      spec:
-        endpoint: "https://.../echo"
-        bucket: "example-data"
+      - name: compute-001
+        ....
+        volumes:
+          - name: data-volume
+            resource: source-data  ----\
+            path: /data                |
+            mode: r                    |
+                                       |
+    storage:                           |
+    - name: source-data           <----/
+      type: uri:amazon-s3-storage
+      endpoint: https://.../echo
+      bucket: example-data
 \end{lstlisting}
 
-Again, this pattern of separating how the data is stored outside the system
-and how it appears inside the compute resource borrows heavily from the
+Note that this request is defining the result the user wants to see;
+namely the contents of the remote S3 bucket accessible as read-only files
+in the \jupyternotebook{'s} filesystem.
+It is not defining how the underlying \execplatform{} should go about making
+it happen.
+
+The \execplatform{} could use something like
+s3fs-fuse\footurl{https://github.com/s3fs-fuse/s3fs-fuse} to mount the remote
+S3 bucket as a directory in the \jupyternotebook{'s} filesystem,
+or it could transfer a copy of the data from the S3 bucket in to local storage.
+All we are defining here is the result we want to see.
+
+This pattern of separating how data is stored outside the system
+and how it appears inside a compute resource borrows heavily from the
 pattern used by \kubernetes{} to describe persistent
 volumes\footurl{https://kubernetes.io/docs/concepts/storage/persistent-volumes/}.
 
@@ -1669,96 +1309,99 @@ The same pattern can be used to describe a storage resource that can be used
 to save the analysis results, by defining a persistent storage resource
 allocated by the system, and a corresponding volume mount inside the compute resource.
 
-% Type URLs
-% https://www.purl.org/ivoa.net/storage-types/persistent-storage
-% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/persistent-storage.md
 \begin{lstlisting}[]
-# ExecutionBroker client request.
+[+# ExecutionBroker offerset request.+]
 request:
-  # Details of the executable.
+  [+# Details of the executable.+]
   executable:
     ....
-  # Details of the resources needed.
+  [+# Details of the resources needed.+]
   resources:
-    ....
+
     compute:
-    - name: "compute-001"
-      ....
-      volumes:
-      - name: "results-volume"
-        resource: "results-storage"
-        path: "/results"
-        mode: "rw"
-    storage:
-    - name: "results-storage"
-      type: "https://www.purl.org/ivoa.net/storage-types/persistent-storage"
-      spec:
-        lifecycle: "managed"
-        lifetime:
-          min: "P1D"
-        size:
-          min: 100
+      - name: compute-001
+        ....
+        volumes:
+          - name: results-volume
+            resource: results-storage ----\
+            path: /results                |
+            mode: rw                      |
+                                          |
+    storage:                              |
+    - name: results-storage          <----/
+      type: [*uri:persistent-storage*]
+      [*lifecycle: managed*]
+      lifetime:
+        requested:
+          min: P1D
+      size:
+        requested:
+          min: 10
+          units: TiB
 \end{lstlisting}
 
-By setting the storage resource type to \codeword{https://.../persistent},
+By setting the storage resource type to \codeword{uri:persistent-storage},
 and setting the \codeword{lifecycle} to \codeword{managed},
 the client is asking the \execbrokerservice{} to take care of allocating
 the storage and managing its lifecycle.
 It is up to the \execbrokerservice{} to decide where to store the data and
 how make it accessible after the \workerjob{} has completed.
 
-For example, a science platform may have a \rucio{} storage system co-located
-with the compute platform which it uses to store user generated data.
+For example, a \scienceplatform{} may have a \rucio{} storage system co-located
+with the \execplatform{} which it uses to store user generated data.
 In which case the \execbrokerservice{} would respond with an \execoffer{} that
 stores the results in the \rucio{} system and provides details of how the user
 can access it after the \workerjob{} has completed.
 
-% Type URLs
-% https://www.purl.org/ivoa.net/storage-types/rucio-storage
-% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/rucio-storage.md
 \begin{lstlisting}[]
-# ExecutionBroker service response.
-response:
-  # Details of the executable.
+[+# ExecutionBroker offerset request.+]
+request:
+  [+# Details of the executable.+]
   executable:
     ....
-  # Details of the resources offered.
+  [+# Details of the resources needed.+]
   resources:
-    ....
+
     compute:
-    - name: "compute-001"
-      ....
-      volumes:
-      - name: "results-volume"
-        resource: "results-storage"
-        path: "/results"
-        mode: "rw"
-    storage:
-    - name: "results-storage"
-      type: "https://www.purl.org/ivoa.net/storage-types/rucio-storage"
-      spec:
-        lifecycle: "managed"
+      - name: compute-001
+        ....
+        volumes:
+          - name: results-volume
+            resource: results-storage ----\
+            path: /results                |
+            mode: rw                      |
+                                          |
+    storage:                              |
+      - name: results-storage        <----/
+        type: [*uri:rucio-storage*]
+        [*lifecycle: managed*]
         lifetime:
-          min: "P1D"
-          max: "P5D"
+          requested:
+            min: P1D
+          offered:
+            min: P5D
+            max: P5D
         size:
-          min: 100
-          max: 200
-        endpoint: "http://...."
-        domain: "Project 51"
-        objectid: "cdc78e7d-8032-497e-9a5b-01c720ea2223"
+          requested:
+            min: 22
+            max: 22
+            units: TiB
+        endpoint: http://....
+        domain: Project 51
+        objectid: cdc78e7d-8032-497e-9a5b-01c720ea2223
 \end{lstlisting}
 
-In this example, the client requested at least 100G of storage available for 1 day
-and in response the service is offering up to 220G available for 5 days stored in a
+
+In this example the client requested at least 10TiB of storage available for 1 day
+and in response the service is offering up to 22TiB available for 5 days stored in a
 \rucio{} system co-located close to the compute platform.
 It is up to the client to check if it can access the particular \rucio{} system
 described in the response before it accepts the \execoffer{}.
 
-Making an \execoffer{} with the \codeword{lifecycle} set to \codeword{managed} and the
+Offering an \execoffer{} with the \codeword{lifecycle} set to \codeword{managed} and the
 \codeword{lifetime.max} set to \codeword{P5D}
-means that the service will manage the lifecycle.
-The storage will be available for 5 days after the \workerjob{} completes and then it
+means that the \execbrokerservice{} is offering to manage the lifecycle of the storage.
+The storage will be available until 5 days after the \workerjob{} completes and then it
 will be deleted automatically.
 The client doesn't need to worry about tidying up afterwards.
 
@@ -1771,9 +1414,9 @@ The same \datamodel{} can be used the other way around as well.
 If the client already knows where it wants the data to be stored, for example at a specific
 \vospace{} location, then it can specify this in the request.
 
-% Type URLs
-% https://www.purl.org/ivoa.net/storage-types/vospace-storage
-% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/storage-types/vospace-storage.md
+
+
+
 \begin{lstlisting}[]
 # ExecutionBroker client request.
 request:
@@ -2015,6 +1658,252 @@ Even if all of the other parameters are the same, e.g. compute and storage resou
 Technically the \datamodel{} allows an array of values for the \codeword{datetime} section,
 but this would impose unnecessary complexity on the client for no real gain in user experience.
 
+
+
+
+\subsection{Metadata roles}
+\label{sub-metadata-roles}
+
+The full description of an \executablething{} will include several layers of metadata
+provided by different actors playing different roles within the publishing process.
+
+For our square root example we can identify a number of roles that would each provide
+layers of the picture nedeed to fully describe an \executablething{}.
+
+The players:
+\begin{itemize}
+    \item The developer  - The person who wrote the \pythonprogram{}
+    \item The packager   - The person who packaged it in a \dockercontainer{}
+    \item The publisher  - The person who published it in a discovery service
+    \item The user agent - The person who wants to use the software
+\end{itemize}
+
+\subsubsection{The developer}
+\label{subsub-software-developer}
+
+The first layer of metadata comes from the person who wrote the software.
+They have detailed knowledge of what the software does, what execution environment it needs,
+and what the inputs and outputs are.
+
+For our square root example, it is a \pythonprogram{} which needs a platform with the \python{} runtime installed,
+and a list of the \python{} libraries that the program relies on.
+
+\begin{lstlisting}[]
+executable:
+  name: Newton-Raphson example
+  type: uri:python-program-1.0
+  requirements:
+  - numpi: ""
+  - astropy: ">= 6.1"
+\end{lstlisting}
+
+The developer also understands how much memory their program needs, whether it can make use of multiple cpu cores,
+and whether it can make use of a \gpu{} accelerator.
+
+\begin{lstlisting}[]
+resources:
+  compute:
+    - type: uri:generic-compute
+      cores:
+        requested:
+          min: 4
+      memory:
+        requested:
+          min: 16
+      ....
+\end{lstlisting}
+
+The developer also knows about what inputs and outputs the program expects and what file
+formats can it can handle.
+% needs work
+%https://github.com/ivoa-std/ExecutionBroker/issues/89
+
+\begin{lstlisting}[]
+executable:
+  name: Newton-Raphson example
+  type: uri:python-program-1.0
+  ....
+  parameters:
+    - name: INPUT_FILE
+      type: uri:filesystem-file
+      mode: readonly
+      description:
+        A table containing a list of numbers to be processed,
+        formatted as comma separated text (CSV) or an IVOA
+        VOTable.
+      formats:
+        - type: uri:filetype-text-csv
+          ....
+        - type: uri:filetype-ivoa-votable
+          ....
+    - name: INPUT_COLUMN
+      type: uri:environment-variable
+      description:
+        The column name within the 'INPUT_FILE' to use.
+\end{lstlisting}
+
+\subsubsection{The packager}
+\label{subsub-software-packager}
+
+Although it is possible to publish our square root example as a stand alone \pythonprogram{},
+it is not easy to describe the installation process in sufficient detail for it to be
+automatically deployed on a range of different platforms.
+
+A more portable solution would be to package the \pythonprogram{} in a \dockercontainer{},
+installing and configuring the software along with all of its dependencies inside the container.
+
+This is often done as part of the software development process, but it is a separate
+step that could be implemented by a different person.
+To make this distinction clear we can refer to this person or role as \textit{'the packager'}.
+
+This step packages the \pythonprogram{} along with any \python{} modules it requires,
+the \pythonruntime{}, and any operating system components it requires, into a single
+standard format binary file, making it much easier to deploy.
+
+The packager would then create a new \metadoc{} that describes the \executablething{}
+as a \dockercontainer{} rather than a \pythonprogram{}, with details of where to
+find the \dockerimage{}, including the image name, the version tag and an optional
+checksum.
+
+\begin{lstlisting}[]
+[+# Executable metadata+]
+executable:
+  name: Newton-Raphson example
+  [*type: uri:docker-container-1.0*]
+  [*repository: ghcr.io*]
+  [*image: ivoa/analytics/Newton-Raphson-albert*]
+  [*tag: 2024.08.30*]
+  [*digest: sha256:ac1b........fc70*]
+  ....
+\end{lstlisting}
+
+Depending on how the software is packaged in the container the
+new \metadoc{} may update the description of the inputs and outputs,
+and link them to specific locations in the filesystem of a compute
+resource.
+% needs work
+%https://github.com/ivoa-std/ExecutionBroker/issues/89
+
+\begin{lstlisting}[]
+[+# Executable metadata+]
+executable:
+  name: Newton-Raphson example
+  type: uri:docker-container-1.0
+  ....
+  parameters:
+    - [*name: INPUT_FILE*]            <----\
+      type: uri:filesystem-file        |
+      format:                          |
+        - type: uri:ivoa-votable       |
+          ....                         |
+                                       |
+resources:                             |
+  compute:                             |
+    - type: uri:generic-compute        |
+      volumes:                         |
+        - type: uri:filesystem-mount   |
+          [*parameter: INPUT_FILE*]     ---/
+          [*filepath: /data/input-data.vot*]
+          [*mode: readonly*]
+          ....
+\end{lstlisting}
+
+\subsubsection{The publisher}
+\label{subsub-metadata-publisher}
+
+This role represents the person who publishes metadata about the software in a discovery service.
+
+Typically changes made at this level would include adding to the description
+of what the software does, placing it in a particular context to aid discovery,
+or modifying the execution environment to configure the softweare for a particular domain.
+This might include things like:
+
+\begin{itemize}
+    \item A project specific discovery service that only includes software vetted by the project.
+          Execution platforms within the project would only accept curated \metadoc{s}
+          from that discovery service.
+    \item A domain specific discovery service that modifies the execution environment, configuring
+          the software to analyse a particular type of data.
+    \item A catalog of \metadoc{s} maintained as part of a teaching course, modifying the
+          execution environment to integrate the software into the local IT system and setting
+          parameters to configure it to match the course notes.
+\end{itemize}
+
+\subsubsection{The end user}
+\label{subsub-software-user}
+
+The user starts with \metadoc{} from the software discovery service and adds
+some information describing how they want to use the software.
+
+This may include selecting the data resources that they want to use
+and adding them to the \metadoc{} as data resources.
+This means the \execbrokerservice{}
+can include the time needed to transfer the data to local storage before the
+\execsession{} is started.
+
+\begin{lstlisting}[]
+executable:
+  ....
+resources:
+  ....
+  data:
+    - [*name: input data*]
+      [*type: uri:simple-data-resource*]
+      [*location: http:data.example.org/....*]
+      ....
+\end{lstlisting}
+
+
+Linking the data resources with volumes on the corresponding compute resources enables
+the \execbrokerservice{} to mount the data resources at the correct location in
+the compute resource's filesystem.
+
+\begin{lstlisting}[]
+resources:
+  compute:
+    - type: uri:generic-compute
+      volumes:
+        - type: uri:filesystem-mount
+          parameter: INPUT_FILE
+          [*resource: input-data*]          ----\
+          filepath: /data/input-data.vot    |
+          mode: readonly                    |
+          ....                              |
+  data:                                     |
+    - [*name: input-data*]                  <---/
+      type: uri:simple-data-resource
+      location: http:data.example.org/....
+      ....
+\end{lstlisting}
+
+The user can also update the compute resource requirements to reflect how they plan
+to use the software.
+In the case of our square root example, the compute resource requirements set by the
+developers will reflect the original intent of simply demonstrating how to use the
+\pythonprogram{}.
+
+However, if the user intends to use the software to analyse a much larger \dataset{}
+they can update the compute resource requirements from 4 cores and 16 GiB of memory
+to 32 cores and 128 GiB of memory to match their new requirements.
+
+\begin{lstlisting}[]
+resources:
+  compute:
+  - type: uri:generic-compute
+    cores:
+      requested:
+        [*min: 32*]
+    memory:
+      requested:
+        [*min: 128*]
+\end{lstlisting}
+
+The user can use the \codeword{schedule} section of the \metadoc{}
+to describe when they want the \execsession{} to start.
+
+This is covered in more detail in section \ref{sub-date-time} of this document.
+TODO - add more detail here
+
 \pagebreak
 
 \section{Federated architecture}
@@ -2078,133 +1967,6 @@ cross organization bondaries, providing a gateway that allows users from one pro
 from other projects and organizations. This gateway service may also provide an authentication translation
 layer between external public accounts and internal project specific identities and authentication methods.
 
-Federated cloud diagram ....
-
-\begin{itemize}
-    \item Project - SKA
-    \begin{itemize}
-        \item Project gateway
-        \item Regional centres
-        \item Local data centres
-        \item Low level services
-        \begin{itemize}
-            \item Slurm batch services
-            \item Docker container services
-            \item Jupter notebook services
-        \end{itemize}
-    \end{itemize}
-\end{itemize}
-
-\begin{itemize}
-    \item Project - LSST
-    \begin{itemize}
-        \item Project gateway
-        \item Regional centres
-        \item Local data centres
-        \item Low level services
-        \begin{itemize}
-            \item Slurm batch services
-            \item Docker container services
-            \item Jupter notebook services
-        \end{itemize}
-    \end{itemize}
-\end{itemize}
-
-\begin{itemize}
-    \item Project - CTA
-    \begin{itemize}
-        \item Project gateway
-        \item Regional centres
-        \item Local data centres
-        \item Low level services
-        \begin{itemize}
-            \item Slurm batch services
-            \item Docker container services
-            \item Jupter notebook services
-        \end{itemize}
-    \end{itemize}
-\end{itemize}
-
-\begin{itemize}
-    \item Project - CERN
-    \begin{itemize}
-        \item Project gateway
-        \item Regional centres
-        \item Local data centres
-        \item Low level services
-        \begin{itemize}
-            \item Slurm batch services
-            \item Docker container services
-            \item Jupter notebook services
-        \end{itemize}
-    \end{itemize}
-\end{itemize}
-
-\section{Example use cases}
-\label{sect-example-usecases}
-
-This section contains a set of examples ranging from very simple to complex, with a complete
-listing of the \datamodel{} used to describe each case.
-
-Before we get into some of the more complex examples it is worth re-iterating that all of the
-elements in the \datamodel{} are optional, so it is perfectly legitimate for a simple
-implementation to only accept one of the simplest examples with no extras, and answer
-\codeword{NO} to everything else.
-
-\subsection{Simple notebook}
-\label{sub-simple-notebook}
-
-Just a simple \jupyternotebook{}.
-...
-
-\subsection{Notebook with dates}
-\label{sub-notebook-with-dates}
-
-A \jupyter{} notebook with specific date ranges for start time.
-...
-
-\subsection{Notebook with data}
-\label{sub-notebook-with-data}
-
-A \jupyternotebook{} with specific input data.
-...
-
-\subsection{Notebook with compute}
-\label{sub-notebook-with-compute}
-
-A \jupyternotebook{} with specific input data and compute resources.
-...
-
-\subsection{Simple container}
-\label{sub-simple-container}
-
-A simple \dockercontainer{}.
-...
-
-\subsection{Container with data}
-\label{sub-container-with-data}
-
-An \dockercontainer{} with specific input data.
-...
-
-\subsection{Container with compute}
-\label{sub-container-with-compute}
-
-An \dockercontainer{} with specific input and output data, and compute resources.
-...
-
-\subsection{Kubernetes Helm chart}
-\label{sub-kubernetes-helm}
-
-A complex Helm chart with multiple elements launched as a single task.
-...
-
-\subsection{Spark cluster}
-\label{sub-spark-cluster}
-
-A complex Spark cluster analysis launched as a single task.
-...
-
 \pagebreak
 
 \section{Service specification}
@@ -2233,7 +1995,7 @@ interface for accessing \execoffer{s} and updating their status.
 \label{subsub-execution-planner-request}
 
 The main \execbrokerclass{} \webservice{} method is a \codeword{POST} \webservice{} that accepts
-a \codeword{request} as defined in section \ref{datamodel-request} of the \datamodel{}.
+a \codeword{request} as defined in section \ref{sub-datamodel-request} of the \datamodel{}.
 
 An \execbrokerclass{} \webservice{} MUST be able to accept both \yaml{} or \json{} serializations
 of the \codeword{request}.
@@ -2288,7 +2050,7 @@ The serialization is determined by the \codeword{Accept} header in the HTTP requ
 
 If the platform IS able to execute the task, then the \webservice{} will respond with a
 HTTP response code \codeword{200} and a positive \codeword{response} content as defined
-in section \ref{datamodel-positive-response}.
+in section \ref{subsub-datamodel-positive-response}.
 
 \begin{lstlisting}[]
 HTTP/1.1 200 OK
@@ -2302,7 +2064,7 @@ response:
 
 If the platform IS NOT able to execute the task, then the \webservice{} will respond with a
 HTTP response code \codeword{200} and a negative \codeword{response} content as defined
-in section \ref{datamodel-negative-response}.
+in section \ref{subsub-datamodel-negative-response}.
 
 \begin{lstlisting}[]
 HTTP/1.1 200 OK
@@ -2342,7 +2104,7 @@ http[s]://foo.example.org/offers/{identifier}
 \end{lstlisting}
 
 The \datamodel{} for the content of the response is described in section
-\ref{datamodel-offer}.
+\ref{subsub-datamodel-offer}.
 
 An \execbrokerservice{} MUST be able to provide both \yaml{} and \json{} serializations
 of the \codeword{offer}.
@@ -2449,7 +2211,7 @@ If the update is not successful, the content of the response ... TBD ...
 The following section describes the core \datamodel{} using a YAML syntax
 to define the structure with comments to describe the elements.
 
-Note that this does not tie the \execbrokerclass specification to a YAML representation.
+Note that this does not tie the \execbrokerclass{} specification to a YAML representation.
 The intention is to define a portable \datamodel{} that can be serialised
 into a number of different formats, including YAML, JSON and XML.
 
