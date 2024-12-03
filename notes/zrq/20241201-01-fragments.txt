@@ -1,0 +1,358 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2024, Manchester (http://www.manchester.ac.uk/)
+#
+#     This information is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This information is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#   </meta:licence>
+# </meta:header>
+#
+#zrq-notes-indent
+#
+# AIMetrics: []
+#
+
+    Target:
+
+        A place to store fragments that I've removed ..
+
+    Result:
+
+        Work in progress ...
+
+# -----------------------------------------------------
+
+\subsubsection{The end user}
+\label{subsub-software-user}
+
+Including a value for the data size enables the \execbrokerservice{} to estimate
+how much local storage it will need to allocate and how much time will be needed
+to transfer the data.
+The \execbrokerservice{} can take this into account when calculating the start time of
+the \execoffer{s} it makes, allowing enough time for the data transfers to complete
+before the \execsession{} starts.
+
+# -----------------------------------------------------
+
+\subsubsection{Compute resources}
+\label{subsub-compute-resources}
+
+However, if this \jupyternotebook{} needs a specific type of \gpu{} to function properly,
+then it can be added to the request by specifying a compute resource with the specific type
+of \gpu{}.
+
+% Type URLs
+% https://www.purl.org/ivoa.net/resource-types/generic-compute
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/generic-compute.md
+% Type URLs
+% https://tinyurl.com/nvidia-ad104
+% https://www.purl.org/ivoa.net/resource-types/nvidia-ad104
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/nvidia-ad104.md
+\begin{lstlisting}[]
+[+# ExecutionBroker offerset request.+]
+executable:
+  name: Experiment two
+  type: uri:jupyter-notebook-1.0
+  notebook:
+    file: https://.../example.jpnb
+
+[+# Details of the resources needed.+]
+resources:
+    compute:
+    - name: "compute-001"
+      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
+      spec:
+        extras:
+        - name: "nvidia-gpu"
+          # A URI identifying the type of GPU.
+          type: "https://tinyurl.com/nvidia-ad104"
+\end{lstlisting}
+
+With this detail added to the request, platforms that are not able to provide this kind of \gpu{}
+would simply reply \codeword{NO}.
+
+\begin{lstlisting}[]
+Request  - Can this platform provide 'NVIDIA AD104 GPU' ?
+Response - NO
+\end{lstlisting}
+
+Note that a platform does not need to know what a  "\nvidiagpu{}" is to be able to reply with a sensible aswer.
+If a platform receives a request for a resource that it doesn't understand, it MAY simply reply \codeword{NO}.
+
+\begin{lstlisting}[]
+Request  - Can this platform provide <unknown extra> ?
+Response - NO
+\end{lstlisting}
+
+The only platforms that will reply \codeword{YES} are ones that understand what a "\nvidiagpu{}"
+is and are able to provide access to one.
+
+The \datamodel{} for the \gpu{} resource follows the same extendable pattern as the \datamodel{} for
+the \executable{}. A \codeword{type} URI to identify the type of \gpu{},
+and a \codeword{spec} section for type specific details,
+e.g. the minimum amount of memory and number of shaders.
+
+% Type URLs
+% https://tinyurl.com/nvidia-ad104
+% https://www.purl.org/ivoa.net/resource-types/nvidia-ad104
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/nvidia-ad104.md
+\begin{lstlisting}[]
+# ExecutionBroker client request.
+request:
+  # Details of the executable.
+  executable:
+    ....
+  # Details of the resources needed.
+  resources:
+    compute:
+    - name: "compute-001"
+      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
+      spec:
+        extras:
+        - name: "nvidia-gpu"
+          # A URI identifying the type.
+          type: "https://tinyurl.com/nvidia-ad104"
+          # The details, specific to a 'NVIDIA AD104 GPU'.
+          spec:
+            memory:
+              min: 20
+            shaders:
+              min: 6144
+\end{lstlisting}
+
+This pattern make it easy for projects to add new types of compute resources to their
+platforms. All they need to do is to choose a URL to identify the \codeword{type}
+and they can add their own type specific details to the \codeword{spec} section.
+
+% Type URLs
+% https://tinyurl.com/xilinx-vu19p
+% https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p
+% https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/xilinx-vu19p.md
+\begin{lstlisting}[]
+# ExecutionBroker client request.
+request:
+  # Details of the executable.
+  executable:
+    ....
+  # Details of the resources needed.
+  resources:
+    compute:
+    - name: "compute-001"
+      type: "https://www.purl.org/ivoa.net/resource-types/generic-compute"
+      spec:
+        extras:
+        - name: "Xilinx FPGA"
+          # A URI identifying the type.
+          type: "https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p"
+          # The details, specific to a 'Xilinx FPGA'.
+          spec:
+            logicCells: 8938
+            DSPslices:  3840
+\end{lstlisting}
+
+Note that in both these examples, the URL used to identify the \codeword{type}
+uses some level of indirection to make the URL more robust.
+
+At the time of writing, the best resource we could find to describe NVIDIA's AD104 GPU
+is an entry in a database curated by the TECHPOWERUP
+website\footurl{https://www.techpowerup.com/gpu-specs/nvidia-ad104.g1013}.
+While this page provides a lot of useful techical detail about the component,
+the URL itself is vulnerable to changes in the design of the TECHPOWERUP website.
+
+To make this more robust we can use a URL redirect service to create a more permanent
+URL that we have control over\footurl{https://tinyurl.com/nvidia-ad104}.
+If the TECHPOWERUP website is redesigned, we can update
+our redirect to match.
+
+There are several options to choose from:
+\begin{itemize}
+\item A URL shortening service.\\
+      \codeword{[https://tinyurl.com/nvidia-ad104]}
+\item The PURL service\footurl{https://purl.archive.org/} provided by the internet archive\footurl{http://www.archive.org/}.\\
+      \codeword{[https://www.purl.org/ivoa.net/resource-types/nvidia-ad104]}.
+\item A page in our GitHub repository that directs the reader to more resources\footurl{https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/nvidia-ad104.md}.\\
+      \codeword{[https://github.com/..../resource-types/nvidia-ad104.md]}.
+\end{itemize}
+
+Similarly, the best resource we could find to decribe the Xilinx FPGA provided by Amazon AWS
+F1\footurl{https://aws.amazon.com/ec2/instance-types/f1/} instances is the product details
+page on the Xilinx website\footurl{https://www.xilinx.com/products/silicon-devices/fpga/virtex-ultrascale-plus-vu19p.html}.
+Both of these URLs are informative, but are vulnerable to changes in their websites.
+
+To make this more robust, our example uses a PURL redirect to a page in our GitHub repository that describes
+the type of FPGA that our project requires. The page in our GitHub repository can point to additional details about the
+FPGA and the tools needed to use it.
+\begin{itemize}
+%\item A URL shortening service \codeword{[https://tinyurl.com/xilinx-vu19p]}.
+\item A PURL redirect to provide a long lasting URL.\\
+      \codeword{[https://www.purl.org/ivoa.net/resource-types/xilinx-vu19p]}
+\item A page in our GitHub repository describing the FPGA and the tools needed to use it\footurl{https://github.com/ivoa-std/ExecutionBroker/blob/main/types/resource-types/xilinx-vu19p.md}.\\
+      \codeword{[https://github.com/..../resource-types/xilinx-vu19p.md]}
+\end{itemize}
+
+# -----------------------------------------------------
+
+\section{Federated architecture}
+\label{sect-sect-federation}
+
+....
+....
+
+Federated cloud diagram ....
+
+\begin{itemize}
+    \item Project - SKA
+    \begin{itemize}
+        \item Project gateway
+        \item Regional centres
+        \item Local data centres
+        \item Low level services
+        \begin{itemize}
+            \item Slurm batch services
+            \item Docker container services
+            \item Jupter notebook services
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\begin{itemize}
+    \item Project - LSST
+    \begin{itemize}
+        \item Project gateway
+        \item Regional centres
+        \item Local data centres
+        \item Low level services
+        \begin{itemize}
+            \item Slurm batch services
+            \item Docker container services
+            \item Jupter notebook services
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\begin{itemize}
+    \item Project - CTA
+    \begin{itemize}
+        \item Project gateway
+        \item Regional centres
+        \item Local data centres
+        \item Low level services
+        \begin{itemize}
+            \item Slurm batch services
+            \item Docker container services
+            \item Jupter notebook services
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\begin{itemize}
+    \item Project - CERN
+    \begin{itemize}
+        \item Project gateway
+        \item Regional centres
+        \item Local data centres
+        \item Low level services
+        \begin{itemize}
+            \item Slurm batch services
+            \item Docker container services
+            \item Jupter notebook services
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+# -----------------------------------------------------
+
+
+\section{Example use cases}
+\label{sect-example-usecases}
+
+This section contains a set of examples ranging from very simple to complex, with a complete
+listing of the \datamodel{} used to describe each case.
+
+Before we get into some of the more complex examples it is worth re-iterating that all of the
+elements in the \datamodel{} are optional, so it is perfectly legitimate for a simple
+implementation to only accept one of the simplest examples with no extras, and answer
+\codeword{NO} to everything else.
+
+\subsection{Simple notebook}
+\label{sub-simple-notebook}
+
+Just a simple \jupyternotebook{}.
+...
+
+\subsection{Notebook with dates}
+\label{sub-notebook-with-dates}
+
+A \jupyter{} notebook with specific date ranges for start time.
+...
+
+\subsection{Notebook with data}
+\label{sub-notebook-with-data}
+
+A \jupyternotebook{} with specific input data.
+...
+
+\subsection{Notebook with compute}
+\label{sub-notebook-with-compute}
+
+A \jupyternotebook{} with specific input data and compute resources.
+...
+
+\subsection{Simple container}
+\label{sub-simple-container}
+
+A simple \dockercontainer{}.
+...
+
+\subsection{Container with data}
+\label{sub-container-with-data}
+
+An \dockercontainer{} with specific input data.
+...
+
+\subsection{Container with compute}
+\label{sub-container-with-compute}
+
+An \dockercontainer{} with specific input and output data, and compute resources.
+...
+
+\subsection{Kubernetes Helm chart}
+\label{sub-kubernetes-helm}
+
+A complex Helm chart with multiple elements launched as a single task.
+...
+
+\subsection{Spark cluster}
+\label{sub-spark-cluster}
+
+A complex Spark cluster analysis launched as a single task.
+...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
