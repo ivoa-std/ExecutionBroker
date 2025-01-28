@@ -61,7 +61,7 @@ components:
 
     MinMaxInteger:
       description: >
-        A minimum and maximum pair for a 32bit integer value.
+        A 32bit integer minimum and maximum pair.
       type: object
       title: MinMaxInteger
       properties:
@@ -74,7 +74,7 @@ components:
 
     MinMaxIntegerUnits:
       description: >
-        A minimum and maximum pair with units for a 32bit integer value.
+        A 32bit integer minimum and maximum pair, with a units string.
       type: object
       title: MinMaxIntegerUnits
       allOf:
@@ -86,7 +86,7 @@ components:
 
     MinMaxLong:
       description: >
-        A minimum and maximum pair for a 64bit integer value.
+        A 64bit integer minimum and maximum pair.
       type: object
       title: MinMaxLong
       properties:
@@ -99,7 +99,7 @@ components:
 
     MinMaxLongUnits:
       description: >
-        A minimum and maximum pair with units for a 64bit integer value.
+        A 64bit integer minimum and maximum pair, with a units string.
       type: object
       title: MinMaxLongUnits
       allOf:
@@ -111,7 +111,7 @@ components:
 
     MinMaxFloat:
       description: >
-        A minimum and maximum pair with units for a floating point value.
+        A floating point minimum and maximum pair.
       type: object
       title: MinMaxFloat
       properties:
@@ -124,7 +124,7 @@ components:
 
     MinMaxFloatUnits:
       description: >
-        A minimum and maximum pair with units for a floating point value.
+        A floating point minimum and maximum pair, with a units string.
       type: object
       title: MinMaxFloatUnits
       allOf:
@@ -147,7 +147,7 @@ components:
 
     MinMaxStringUnits:
       description: >
-        A minimum and maximum pair with units for a string value.
+        A minimum and maximum pair for a string value, with a units string.
       type: object
       title: MinMaxStringUnits
       allOf:

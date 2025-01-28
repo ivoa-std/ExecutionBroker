@@ -30,8 +30,11 @@ info:
   description: >
     Abstract components used in the IVOA ExecutionBroker data model
   contact:
-    name: Zarquan
+    name: Dave Morris
     url: https://github.com/Zarquan
+  license:
+    name: Creative Commons Attribution Share Alike 4.0 International
+    identifier: CC-BY-SA-4.0
 
 components:
   schemas:

@@ -1,0 +1,56 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2024, Manchester University (http://www.manchester.ac.uk/)
+#
+#     This work is made available under the Creative Commons
+#     Attribution-ShareAlike 4.0 International licence.
+#
+#     For details of the licence terms see:
+#     https://creativecommons.org/licenses/by-sa/4.0/
+#   </meta:licence>
+# </meta:header>
+#
+# AIMetrics: [
+#     {
+#     "name": "ChatGPT",
+#     "contribution": {
+#       "value": 5,
+#       "units": "%"
+#       }
+#     }
+#   ]
+#
+
+openapi: 3.1.0
+info:
+  title: IVOA ExecutionBroker log messages
+  version: "1.0"
+  summary: IVOA ExecutionBroker SingularityContainer
+  description: |
+    OpenAPI schema for a Singularity container in IVOA ExecutionBroker
+  contact:
+    name: Dave Morris
+    url: https://github.com/Zarquan
+  license:
+    name: Creative Commons Attribution Share Alike 4.0 International
+    identifier: CC-BY-SA-4.0
+
+components:
+  schemas:
+
+    SingularityContainer:
+      description: |
+        A Singularity container executable.
+        See https://docs.sylabs.io/guides/latest/user-guide/
+      type: object
+      title: SingularContainer
+      allOf:
+        - $ref: '../../openapi.yaml#/components/schemas/AbstractExecutable'
+        - type: object
+          properties:
+            location:
+              type: string
+              description: |
+                The URL to download the container image from.
+
