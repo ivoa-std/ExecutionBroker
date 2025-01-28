@@ -30,8 +30,11 @@ info:
   description: >
     Log messages used in IVOA ExecutionBroker responses
   contact:
-    name: Zarquan
+    name: Dave Morris
     url: https://github.com/Zarquan
+  license:
+    name: Creative Commons Attribution Share Alike 4.0 International
+    identifier: CC-BY-SA-4.0
 
 components:
   schemas:
@@ -88,7 +91,8 @@ components:
       type: array
       title: MessageList
       items:
-        $ref: '#/components/schemas/MessageItem'
+#       $ref: '#/components/schemas/MessageItem'
+        $ref: 'MessageItem'
         xml:
           name: message
 

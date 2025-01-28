@@ -303,70 +303,97 @@ components:
         - type: object
           properties:
             cores:
-              $ref: '#/components/schemas/ComputeResourceCores'
+              $ref: 'SimpleComputeCores'
             memory:
-              $ref: '#/components/schemas/ComputeResourceMemory'
+              $ref: 'SimpleComputeMemory'
             volumes:
               description: >
                 A list of filesystem volumes.
               type: array
               items:
-                $ref: '#/components/schemas/ComputeResourceVolume'
+                $ref: '#/components/schemas/SimpleComputeVolume'
 
-# Replaced by an enum in utils.yaml
-#   ComputeResourceSizeUnit:
-#     description: >
-#       A size unit for compute resources.
-#       Specified in multiples of 1000^n and 1024^n, default units are GiB.
-#       https://github.com/metio/storage-units.java/
-#       https://en.wikipedia.org/wiki/Byte#Multiple-byte_units
-#     type: string
-#     title: ComputeResourceSizeUnit
-#     pattern: '/^([0-9]+(\.[0-9]+){0,1})(kB|KiB|MB|MiB|GB|GiB|TB|TiB|PB|PiB){0,1}$/gm'
-
-    ComputeResourceCores:
+    SimpleComputeCores:
       description: >
         The number of CPU cores requested and offered.
       type: object
-      title: ComputeResourceCores
+      title: SimpleComputeCores
       properties:
         requested:
-          description: >
-            The number of cpu cores requested by the user.
-            The min value specifies the minimum that required for the session.
-            The max value limits the extra the server is allowed to offer.
-          $ref: './components/utils.yaml#/components/schemas/MinMaxLong'
+          $ref: 'SimpleComputeCoresRequested'
         offered:
-          description: >
-            The number of cpu cores offered by the server.
-            The min value specifies the initial resources available for the session.
-            The max value specifies the maximun resources available for the session.
-          $ref: './components/utils.yaml#/components/schemas/MinMaxLong'
+          $ref: 'SimpleComputeCoresOffered'
 
-    ComputeResourceMemory:
+    SimpleComputeCoresRequested:
       description: >
-        The amount memory requested and offered.
+        The number of CPU cores requested by the user.
+        The minimum represents the lower limit that the excution requires.
+        The maximum represents the highest number of cores that the excution can use.
+        The minimal flag indicates that the service should offer the minimum resources it can to match the criteria.
       type: object
-      title: ComputeResourceMemory
+      title: SimpleComputeCoresRequested
+      allOf:
+        - $ref: './components/utils.yaml#/components/schemas/MinMaxLong'
+        - type: object
+          properties:
+            minimal:
+              type: boolean
+              default: false
+
+    SimpleComputeCoresOffered:
+      description: >
+        The number of CPU cores offered by the service.
+        The minimum represents the number of cores that the sessions starts with.
+        The maximum represents the number of cores that the session is able to expand to.
+      type: object
+      title: SimpleComputeCoresOffered
+      allOf:
+        - $ref: './components/utils.yaml#/components/schemas/MinMaxLong'
+
+    SimpleComputeMemory:
+      description: >
+        The amount of memory requested and offered.
+      type: object
+      title: SimpleComputeMemory
       properties:
         requested:
-          description: >
-            The amount memory requested by the user.
-            The min value specifies the minimum that required for the session.
-            The max value limits the extra the server is allowed to offer.
-          $ref: './components/utils.yaml#/components/schemas/MinMaxComputeLong'
+          $ref: 'SimpleComputeMemoryRequested'
         offered:
-          description: >
-            The amount memory offered byt the server.
-            The min value specifies the initial resources available for the session.
-            The max value specifies the maximun resources available for the session.
-          $ref: './components/utils.yaml#/components/schemas/MinMaxComputeLong'
+          $ref: 'SimpleComputeMemoryOffered'
 
-    ComputeResourceVolume:
+    SimpleComputeMemoryRequested:
+      description: >
+        The amount of memory requested by the user.
+        The minimum represents the lower limit that the excution requires.
+        The maximum represents the highest amount of memory that the excution can use.
+        The minimal flag indicates that the service should offer the minimum resources it can to match the criteria.
+        The default units are 'GiB'.
+      type: object
+      title: SimpleComputeMemoryRequested
+      allOf:
+        - $ref: './components/utils.yaml#/components/schemas/MinMaxComputeLong'
+        - type: object
+          properties:
+            minimal:
+              type: boolean
+              default: false
+
+    SimpleComputeMemoryOffered:
+      description: >
+        The amount of memory offered by the service.
+        The minimum represents the amount of memory that the sessions starts with.
+        The maximum represents the amount of memory that the session is able to expand to.
+        The default units are 'GiB'.
+      type: object
+      title: SimpleComputeMemoryOffered
+      allOf:
+        - $ref: './components/utils.yaml#/components/schemas/MinMaxComputeLong'
+
+    SimpleComputeVolume:
       description: >
         A class to represent a ComputeResource volume mount.
       type: object
-      title: ComputeResourceVolume
+      title: SimpleComputeVolume
       allOf:
 #       - $ref: './components/components.yaml#/components/schemas/AbstractComponent'
 #       - $ref: '#/components/schemas/AbstractComponent'
@@ -429,27 +456,56 @@ components:
       description: >
         A simple storage resource.
       type: object
-      name: SimpleStorageResource
+      name:  SimpleStorageResource
       title: SimpleStorageResource
       allOf:
         - $ref: '#/components/schemas/AbstractStorageResource'
         - type: object
           properties:
             size:
-              type: object
-              properties:
-                requested:
-                  description: >
-                    The storage size requested by the user.
-                    The min value specifies the minimum that required for the session.
-                    The max value limits the extra the server is allowed to offer.
-                  $ref: './components/utils.yaml#/components/schemas/MinMaxComputeLong'
-                offered:
-                  description: >
-                    The storage size offered byt the server.
-                    The min value specifies the initial resources available for the session.
-                    The max value specifies the maximun resources available for the session.
-                  $ref: './components/utils.yaml#/components/schemas/MinMaxComputeLong'
+              $ref: 'SimpleStorageSize'
+
+    SimpleStorageSize:
+      description: >
+        The size of storage requested and offered.
+      type: object
+      name:  SimpleStorageSize
+      title: SimpleStorageSize
+      properties:
+        requested:
+          $ref: 'SimpleStorageSizeRequested'
+        offered:
+          $ref: 'SimpleStorageSizeOffered'
+
+    SimpleStorageSizeRequested:
+      description: >
+        The size of storage requested by the user.
+        The minimum represents the lower limit that the excution requires.
+        The maximum represents the largest size that the excution can use.
+        The minimal flag indicates that the service should offer the minimum resources it can to match the criteria.
+        The default units are 'GiB'.
+      type: object
+      name:  SimpleStorageSizeRequested
+      title: SimpleStorageSizeRequested
+      allOf:
+        - $ref: './components/utils.yaml#/components/schemas/MinMaxComputeLong'
+        - type: object
+          properties:
+            minimal:
+              type: boolean
+              default: false
+
+    SimpleStorageSizeOffered:
+      description: >
+        The size of storage offerd by the service.
+        The minimum represents the size that the storage is allocated.
+        The maximum represents the size that the storage is able to expand to.
+        The default units are 'GiB'.
+      type: object
+      name:  SimpleStorageSizeOffered
+      title: SimpleStorageSizeOffered
+      allOf:
+        - $ref: './components/utils.yaml#/components/schemas/MinMaxComputeLong'
 
 # data-resources.yaml
 # Tried moving this to a separate file, but had issues with generating the polymorphic classes.
@@ -582,7 +638,7 @@ components:
 #         "uri:repo2docker-0.1":        '#/components/schemas/Repo2DockerContainer'
 #         "uri:binder-notebook-0.1":    '#/components/schemas/BinderNotebook'
           "uri:docker-container-0.1":   'DockerContainer'
-          "uri:singular-container-0.1": 'SingularContainer'
+          "uri:singular-container-0.1": 'SingularityContainer'
           "uri:jupyter-notebook-0.1":   'JupyterNotebook'
           "uri:repo2docker-0.1":        'Repo2DockerContainer'
           "uri:binder-notebook-0.1":    'BinderNotebook'
@@ -601,48 +657,69 @@ components:
 
     DockerContainer:
       description: |
-        A Docker or OCI container.
+        A Docker or OCI container executable.
         See https://opencontainers.org/
       type: object
       title: DockerContainer
       allOf:
-        - $ref: '#/components/schemas/AbstractExecutable'
+        - $ref: '../../openapi.yaml#/components/schemas/AbstractExecutable'
         - type: object
           properties:
             image:
-              type: string
-              description: >
-                The full image identifier, with or without the repository, namespace or tag.
-            namespace:
-              type: string
-              description: >
-                The namespace within the repository, if not already specified in the image name.
-            tag:
-              type: string
-              description: The image tag, if not already specified in the image name.
-            repository:
-              type: string
-              description: The respository tag, if not already specified in the image name.
-            platform:
-              type: string
-              description: >
-                The target CPU architecture the container is built for.
-                The default is `linux/amd64`.
+              ident:
+                type: string
+                description: |
+                  The full image identifier, including repository, namespace and tag.
+              name:
+                type: string
+                description: |
+                  The full image name.
+              namespace:
+                type: string
+                description: |
+                  The namespace within the repository.
+              tag:
+                type: string
+                description: |
+                  The image tag.
+              repository:
+                type: string
+                description: |
+                  The respository hostname.
+              platform:
+                architecture:
+                  type: string
+                  description: |
+                    The CPU architecture the image is built for.
+                    The default is `amd64`.
+                os:
+                  type: string
+                  description: |
+                    The operating system the image is built for.
+                    The default is `linux`.
+              digest:
+                type: string
+                description: |
+                  The image digest, generated as a as sha256 checksum when the image is built.
+                  The unique digest can be used to verify the contents of a downloaded image.
             privileged:
               type: boolean
               default: false
-              description: >
+              description: |
                 Set the privileged flag on execution.
                 The default is `false`.
                 See https://docs.docker.com/reference/cli/docker/container/run/#privileged.
             entrypoint:
               type: string
-              description: Overwrite the default ENTRYPOINT of the image.
+              description: |
+                Overwrite the default ENTRYPOINT of the image.
             environment:
-              description: A name=>value map of environment variables to pass to the container.
-              $ref: './components/utils.yaml#/components/schemas/NameValueMap'
+              description: |
+                A name => value map of environment variables to pass to the container.
+              $ref: '../../components/utils.yaml#/components/schemas/NameValueMap'
             network:
-              description: Details of the network access available to the container.
+              description: |
+                Details of the network access available to the container.
               $ref: '#/components/schemas/DockerNetworkSpec'
 
     DockerNetworkSpec:
@@ -652,7 +729,7 @@ components:
       title: DockerNetworkSpec
       properties:
         ports:
-          description: >
+          description: |
             An array of network ports to publish.
           type: array
           items:
@@ -666,19 +743,20 @@ components:
       properties:
         address:
           type: string
-          description: >
+          description: |
             The IP address of the external network interface.
             The client should not set this value.
             The service will update this with a publicly accessible interface address when it sets up the execution.
         external:
           type: string
-          description: >
+          description: |
             The host machine's external port number to connect.
             The client should not set this value.
             The service will update this with the corrent port number when it sets up the execution.
         internal:
           type: string
-          description: The port number on the container to publish.
+          description: |
+            The port number on the container to publish.
         protocol:
           type: string
           enum:
@@ -686,28 +764,28 @@ components:
             - TCP
             - HTTP
             - HTTPS
-          description: >
+          description: |
             The network protocol to use, default is `TCP`.
             The `HTTP` and `HTTPS` values further specify the Protocol to use on top of `TCP`.
             Specifying `HTTPS` may help to meet firewall restrictions at some sites.
 
-    SingularContainer:
-      description: >
+    SingularityContainer:
+      description: |
         A Singularity container executable.
         See https://docs.sylabs.io/guides/latest/user-guide/
       type: object
       title: SingularContainer
       allOf:
-        - $ref: '#/components/schemas/AbstractExecutable'
+        - $ref: '../../openapi.yaml#/components/schemas/AbstractExecutable'
         - type: object
           properties:
-            image:
+            location:
               type: string
-              description: >
+              description: |
                 The URL to download the container image from.
 
     Repo2DockerContainer:
-      description: >
+      description: |
         A Repo2Docker executable.
         See https://repo2docker.readthedocs.io/en/latest/
       type: object
@@ -716,9 +794,9 @@ components:
         - $ref: '#/components/schemas/AbstractExecutable'
         - type: object
           properties:
-            source:
+            location:
               type: string
-              description: >
+              description: |
                 The URL of the source repository.
 
     JupyterNotebook:
@@ -731,9 +809,9 @@ components:
         - $ref: '#/components/schemas/AbstractExecutable'
         - type: object
           properties:
-            notebook:
+            location:
               type: string
-              description: >
+              description: |
                 The URL of the notebook.
                 TODO - This needs to take into account different ways of referring to a notebook.
 
