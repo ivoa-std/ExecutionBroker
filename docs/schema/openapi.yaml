@@ -278,9 +278,7 @@ components:
       discriminator:
         propertyName: type
         mapping:
-#         "uri:simple-compute-resource-0.1": '#/components/schemas/SimpleComputeResource'
-#         "uri:simple-compute-resource-0.1": './components/compute-resources.yaml#/components/schemas/SimpleComputeResource'
-          "uri:simple-compute-resource-0.1": 'SimpleComputeResource'
+          "https://www.purl.org/ivoa.net/EB/schema/types/resources/compute/simple-compute-1.0.yaml": '#/components/schemas/SimpleComputeResource'
       allOf:
 #       - $ref: './components/components.yaml#/components/schemas/AbstractComponent'
 #       - $ref: '#/components/schemas/AbstractComponent'
@@ -439,8 +437,7 @@ components:
       discriminator:
         propertyName: type
         mapping:
-#         "uri:simple-storage-resource-0.1": '#/components/schemas/SimpleStorageResource'
-          "uri:simple-storage-resource-0.1": 'SimpleStorageResource'
+          "https://www.purl.org/ivoa.net/EB/schema/types/resources/storage/simple-storage-1.0.yaml": '#/components/schemas/SimpleStorageResource'
       allOf:
 #       - $ref: './components/components.yaml#/components/schemas/AbstractComponent'
 #       - $ref: '#/components/schemas/AbstractComponent'
@@ -632,16 +629,11 @@ components:
       discriminator:
         propertyName: type
         mapping:
-#         "uri:docker-container-0.1":   '#/components/schemas/DockerContainer'
-#         "uri:singular-container-0.1": '#/components/schemas/SingularContainer'
-#         "uri:jupyter-notebook-0.1":   '#/components/schemas/JupyterNotebook'
-#         "uri:repo2docker-0.1":        '#/components/schemas/Repo2DockerContainer'
-#         "uri:binder-notebook-0.1":    '#/components/schemas/BinderNotebook'
-          "https://www.purl.org/ivoa.net/EB/schema/types/executables/docker-container-1.0.yaml":      'DockerContainer'
-          "https://www.purl.org/ivoa.net/EB/schema/types/executables/singularity-container-1.0.yaml": 'SingularityContainer'
-          "uri:jupyter-notebook-0.1":   'JupyterNotebook'
-          "uri:repo2docker-0.1":        'Repo2DockerContainer'
-          "uri:binder-notebook-0.1":    'BinderNotebook'
+          "https://www.purl.org/ivoa.net/EB/schema/types/executables/docker-container-1.0.yaml":      '#/components/schemas/DockerContainer'
+          "https://www.purl.org/ivoa.net/EB/schema/types/executables/singularity-container-1.0.yaml": '#/components/schemas/SingularityContainer'
+          "https://www.purl.org/ivoa.net/EB/schema/types/executables/jupyter-notebook-1.0.yaml":      '#/components/schemas/JupyterNotebook'
+          "uri:repo2docker-0.1":     'Repo2DockerContainer'
+          "uri:binder-notebook-0.1": 'BinderNotebook'
       allOf:
 #       - $ref: './components/components.yaml#/components/schemas/AbstractComponent'
 #       - $ref: '#/components/schemas/AbstractComponent'
