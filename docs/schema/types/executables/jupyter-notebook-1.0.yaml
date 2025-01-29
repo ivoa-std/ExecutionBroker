@@ -26,9 +26,9 @@ openapi: 3.1.0
 info:
   title: IVOA ExecutionBroker log messages
   version: "1.0"
-  summary: IVOA ExecutionBroker SingularityContainer
+  summary: IVOA ExecutionBroker JupyterNotebook
   description: |
-    OpenAPI schema for a Singularity container in IVOA ExecutionBroker
+    OpenAPI schema for a Jupyter notebook in IVOA ExecutionBroker
   contact:
     name: Dave Morris
     url: https://github.com/Zarquan
@@ -39,12 +39,12 @@ info:
 components:
   schemas:
 
-    SingularityContainer:
+    JupyterNotebook:
       description: |
-        A Singularity container executable.
-        See https://docs.sylabs.io/guides/latest/user-guide/
+        A Jupyter notebook executable.
+        See https://jupyter.org/
       type: object
-      title: SingularContainer
+      title: JupyterNotebook
       allOf:
         - $ref: '../../openapi.yaml#/components/schemas/AbstractExecutable'
         - type: object
@@ -52,5 +52,6 @@ components:
             location:
               type: string
               description: |
-                The URL to download the container image from.
+                The URL of the notebook.
+                TODO - This needs to take into account different ways of referring to a notebook.
 

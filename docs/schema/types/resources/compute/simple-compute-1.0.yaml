@@ -1,0 +1,164 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2025, Manchester University (http://www.manchester.ac.uk/)
+#
+#     This work is made available under the Creative Commons
+#     Attribution-ShareAlike 4.0 International licence.
+#
+#     For details of the licence terms see:
+#     https://creativecommons.org/licenses/by-sa/4.0/
+#   </meta:licence>
+# </meta:header>
+#
+# AIMetrics: [
+#     {
+#     "name": "ChatGPT",
+#     "contribution": {
+#       "value": 5,
+#       "units": "%"
+#       }
+#     }
+#   ]
+#
+
+openapi: 3.1.0
+info:
+  title: IVOA ExecutionBroker log messages
+  version: "1.0"
+  summary: IVOA ExecutionBroker SimpleComputeResource
+  description: |
+    OpenAPI schema for a simple compute resource in IVOA ExecutionBroker
+  contact:
+    name: Dave Morris
+    url: https://github.com/Zarquan
+  license:
+    name: Creative Commons Attribution Share Alike 4.0 International
+    identifier: CC-BY-SA-4.0
+
+components:
+  schemas:
+
+    SimpleComputeResource:
+      description: |
+        A simple compute resource.
+      type: object
+      title: SimpleComputeResource
+      allOf:
+        - $ref: '../../openapi.yaml#/components/schemas/AbstractComputeResource'
+        - type: object
+          properties:
+            cores:
+              $ref: '#/components/schemas/SimpleComputeCores'
+            memory:
+              $ref: '#/components/schemas/SimpleComputeMemory'
+            volumes:
+              description: >
+                A list of filesystem volumes.
+              type: array
+              items:
+                $ref: '#/components/schemas/SimpleComputeVolume'
+
+    SimpleComputeCores:
+      description: |
+        The number of CPU cores requested and offered.
+      type: object
+      title: SimpleComputeCores
+      properties:
+        requested:
+          $ref: '#/components/schemas/SimpleComputeCoresRequested'
+        offered:
+          $ref: '#/components/schemas/SimpleComputeCoresOffered'
+
+    SimpleComputeCoresRequested:
+      description: |
+        The number of CPU cores requested by the user.
+        The minimum represents the lower limit that the excution requires.
+        The maximum represents the highest number of cores that the excution can use.
+        The minimal flag indicates that the service should offer the minimum resources it can to match the criteria.
+      type: object
+      title: SimpleComputeCoresRequested
+      allOf:
+        - $ref: '../../components/utils.yaml#/components/schemas/MinMaxLong'
+        - type: object
+          properties:
+            minimal:
+              type: boolean
+              default: false
+
+    SimpleComputeCoresOffered:
+      description: |
+        The number of CPU cores offered by the service.
+        The minimum represents the number of cores that the sessions starts with.
+        The maximum represents the number of cores that the session is able to expand to.
+      type: object
+      title: SimpleComputeCoresOffered
+      allOf:
+        - $ref: '../../components/utils.yaml#/components/schemas/MinMaxLong'
+
+    SimpleComputeMemory:
+      description: |
+        The amount of memory requested and offered.
+      type: object
+      title: SimpleComputeMemory
+      properties:
+        requested:
+          $ref: '#/components/schemas/SimpleComputeMemoryRequested'
+        offered:
+          $ref: '#/components/schemas/SimpleComputeMemoryOffered'
+
+    SimpleComputeMemoryRequested:
+      description: |
+        The amount of memory requested by the user.
+        The minimum represents the lower limit that the excution requires.
+        The maximum represents the highest amount of memory that the excution can use.
+        The minimal flag indicates that the service should offer the minimum resources it can to match the criteria.
+        The default units are 'GiB'.
+      type: object
+      title: SimpleComputeMemoryRequested
+      allOf:
+        - $ref: '../../components/utils.yaml#/components/schemas/MinMaxComputeLong'
+        - type: object
+          properties:
+            minimal:
+              type: boolean
+              default: false
+
+    SimpleComputeMemoryOffered:
+      description: |
+        The amount of memory offered by the service.
+        The minimum represents the amount of memory that the sessions starts with.
+        The maximum represents the amount of memory that the session is able to expand to.
+        The default units are 'GiB'.
+      type: object
+      title: SimpleComputeMemoryOffered
+      allOf:
+        - $ref: '../../components/utils.yaml#/components/schemas/MinMaxComputeLong'
+
+    SimpleComputeVolume:
+      description: |
+        A class to represent a ComputeResource volume mount.
+      type: object
+      title: SimpleComputeVolume
+      allOf:
+        - $ref: '../../openapi.yaml#/components/schemas/AbstractComponent'
+        - type: object
+          properties:
+            path:
+              description: >
+                The mount point in the target filesystem.
+              type: string
+            mode:
+              description: >
+                The read-write mode.
+              type: string
+              enum:
+                - READONLY
+                - READWRITE
+            resource:
+              description: >
+                The name or UUID of the resource to mount.
+              type: string
+
+
+

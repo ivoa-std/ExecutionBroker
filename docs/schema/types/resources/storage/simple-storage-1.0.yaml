@@ -1,0 +1,96 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2025, Manchester University (http://www.manchester.ac.uk/)
+#
+#     This work is made available under the Creative Commons
+#     Attribution-ShareAlike 4.0 International licence.
+#
+#     For details of the licence terms see:
+#     https://creativecommons.org/licenses/by-sa/4.0/
+#   </meta:licence>
+# </meta:header>
+#
+# AIMetrics: [
+#     {
+#     "name": "ChatGPT",
+#     "contribution": {
+#       "value": 5,
+#       "units": "%"
+#       }
+#     }
+#   ]
+#
+
+openapi: 3.1.0
+info:
+  title: IVOA ExecutionBroker log messages
+  version: "1.0"
+  summary: IVOA ExecutionBroker SimpleStorageResource
+  description: |
+    OpenAPI schema for a simple storage resource in IVOA ExecutionBroker
+  contact:
+    name: Dave Morris
+    url: https://github.com/Zarquan
+  license:
+    name: Creative Commons Attribution Share Alike 4.0 International
+    identifier: CC-BY-SA-4.0
+
+components:
+  schemas:
+
+    SimpleStorageResource:
+      description: |
+        A simple storage resource.
+      type: object
+      name:  SimpleStorageResource
+      title: SimpleStorageResource
+      allOf:
+        - $ref: '../../openapi.yaml#/components/schemas/AbstractStorageResource'
+        - type: object
+          properties:
+            size:
+              $ref: '#/components/schemas/SimpleStorageSize'
+
+    SimpleStorageSize:
+      description: |
+        The size of storage requested and offered.
+      type: object
+      name:  SimpleStorageSize
+      title: SimpleStorageSize
+      properties:
+        requested:
+          $ref: '#/components/schemas/SimpleStorageSizeRequested'
+        offered:
+          $ref: '#/components/schemas/SimpleStorageSizeOffered'
+
+    SimpleStorageSizeRequested:
+      description: |
+        The size of storage requested by the user.
+        The minimum represents the lower limit that the excution requires.
+        The maximum represents the largest size that the excution can use.
+        The minimal flag indicates that the service should offer the minimum resources it can to match the criteria.
+        The default units are 'GiB'.
+      type: object
+      name:  SimpleStorageSizeRequested
+      title: SimpleStorageSizeRequested
+      allOf:
+        - $ref: '../../components/utils.yaml#/components/schemas/MinMaxComputeLong'
+        - type: object
+          properties:
+            minimal:
+              type: boolean
+              default: false
+
+    SimpleStorageSizeOffered:
+      description: |
+        The size of storage offerd by the service.
+        The minimum represents the size that the storage is allocated.
+        The maximum represents the size that the storage is able to expand to.
+        The default units are 'GiB'.
+      type: object
+      name:  SimpleStorageSizeOffered
+      title: SimpleStorageSizeOffered
+      allOf:
+        - $ref: '../../components/utils.yaml#/components/schemas/MinMaxComputeLong'
+
