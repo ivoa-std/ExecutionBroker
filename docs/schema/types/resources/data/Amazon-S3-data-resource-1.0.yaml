@@ -1,0 +1,70 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2025, Manchester University (http://www.manchester.ac.uk/)
+#
+#     This work is made available under the Creative Commons
+#     Attribution-ShareAlike 4.0 International licence.
+#
+#     For details of the licence terms see:
+#     https://creativecommons.org/licenses/by-sa/4.0/
+#   </meta:licence>
+# </meta:header>
+#
+# AIMetrics: [
+#     {
+#     "name": "ChatGPT",
+#     "contribution": {
+#       "value": 5,
+#       "units": "%"
+#       }
+#     }
+#   ]
+#
+
+openapi: 3.1.0
+info:
+  title: IVOA ExecutionBroker S3 data resource
+  version: "1.0"
+  summary: IVOA ExecutionBroker S3 data resource
+  description: |
+    OpenAPI schema for an IVOA ExecutionBroker S3 data resource
+  contact:
+    name: Dave Morris
+    url: https://github.com/Zarquan
+  license:
+    name: Creative Commons Attribution Share Alike 4.0 International
+    identifier: CC-BY-SA-4.0
+
+components:
+  schemas:
+
+    AmazonS3DataResourceSpec:
+      type: object
+      name:  AmazonS3DataResource
+      title: AmazonS3DataResource
+      description: |
+        A data resource in a S3 storage system.
+      properties:
+        endpoint:
+          description: |
+            The endpoint address of the S3 service.
+          type: string
+        template:
+          description: |
+            The URL template for the S3 service.
+          type: string
+        bucket:
+          description: |
+            The target bucket name.
+          type: string
+        object:
+          description: |
+            The target object name.
+            Leaving this blank will mount the whole bucket as a directory.
+          type: string
+# TODO add checksums
+# TODO add a size estimate
+# TODO add download time estimate
+# TODO add status flag ... WAITING|PREPARING|READY|RELEASING|COMPLETED|CANCELLED|FAILED
+

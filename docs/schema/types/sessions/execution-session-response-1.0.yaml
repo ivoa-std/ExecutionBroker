@@ -1,0 +1,103 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2025, Manchester University (http://www.manchester.ac.uk/)
+#
+#     This work is made available under the Creative Commons
+#     Attribution-ShareAlike 4.0 International licence.
+#
+#     For details of the licence terms see:
+#     https://creativecommons.org/licenses/by-sa/4.0/
+#   </meta:licence>
+# </meta:header>
+#
+# AIMetrics: [
+#     {
+#     "name": "ChatGPT",
+#     "contribution": {
+#       "value": 5,
+#       "units": "%"
+#       }
+#     }
+#   ]
+#
+
+openapi: 3.1.0
+info:
+  title: IVOA ExecutionBroker session response
+  version: "1.0"
+  summary: IVOA ExecutionBroker session response
+  description: |
+    OpenAPI schema for an IVOA ExecutionBroker execution session response.
+  contact:
+    name: Dave Morris
+    url: https://github.com/Zarquan
+  license:
+    name: Creative Commons Attribution Share Alike 4.0 International
+    identifier: CC-BY-SA-4.0
+
+components:
+  schemas:
+
+    ExecutionSessionResponse:
+      description: >
+        An execution session response, including uuid, href, and status.
+      type: object
+      title: ExecutionSessionResponse
+      xml:
+        name: execution
+      allOf:
+        - $ref: 'AbstractComponent'
+        - type: object
+          required:
+            - uuid
+            - state
+            - href
+            - type
+          properties:
+            state:
+              $ref: 'ExecutionSessionStatus'
+            expires:
+              description: >
+                The date and time that this execution offer expires.
+                Only valid while the state is OFFERED.
+              xml:
+                name: expires
+              type: string
+              format: date-time
+            executable:
+              xml:
+                name: executable
+              $ref: 'AbstractExecutable'
+            resources:
+              xml:
+                name: resources
+              $ref: 'ExecutionResourceList'
+            schedule:
+              xml:
+                name: schedule
+              type: object
+              properties:
+                requested:
+                  xml:
+                    name: requested
+                  $ref: 'ScheduleRequestBlock'
+                preparing:
+                  xml:
+                    name: preparing
+                  $ref: 'ScheduleOfferItem'
+                executing:
+                  xml:
+                    name: executing
+                  $ref: 'ScheduleOfferItem'
+                releasing:
+                  xml:
+                    name: releasing
+                  $ref: 'ScheduleOfferItem'
+            options:
+              description: >
+                A List of options the client can apply to this Execution.
+              type: array
+              items:
+                $ref: 'AbstractOption'
+

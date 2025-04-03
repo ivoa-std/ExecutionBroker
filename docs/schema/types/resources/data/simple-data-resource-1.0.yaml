@@ -24,11 +24,11 @@
 
 openapi: 3.1.0
 info:
-  title: IVOA ExecutionBroker log messages
+  title: IVOA ExecutionBroker simple data resource
   version: "1.0"
-  summary: IVOA ExecutionBroker SingularityContainer
+  summary: IVOA ExecutionBroker simple data resource
   description: |
-    OpenAPI schema for a Singularity container in IVOA ExecutionBroker
+    OpenAPI schema for an IVOA ExecutionBroker simple data resource
   contact:
     name: Dave Morris
     url: https://github.com/Zarquan
@@ -39,15 +39,18 @@ info:
 components:
   schemas:
 
-    SingularityContainerSpec:
+    SimpleDataResourceSpec:
       description: |
-        Details for a Singularity container executable.
-        See https://docs.sylabs.io/guides/latest/user-guide/
+          A simple downloadable data resource.
       type: object
-      title: SingularContainer
+      title: SimpleDataResource
       properties:
         location:
-          type: string
           description: |
-            The URL to download the container image from.
+            The URL of the data to import.
+          type: string
+# TODO add checksums
+# TODO add a size estimate
+# TODO add download time estimate
+# TODO add status flag ... WAITING|PREPARING|READY|RELEASING|COMPLETED|CANCELLED|FAILED
 

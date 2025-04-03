@@ -39,19 +39,17 @@ info:
 components:
   schemas:
 
-    SimpleStorageResource:
-      description: |
-        A simple storage resource.
+    SimpleStorageSpec:
       type: object
       name:  SimpleStorageResource
       title: SimpleStorageResource
-      allOf:
-        - $ref: '../../openapi.yaml#/components/schemas/AbstractStorageResource'
-        - type: object
-          properties:
-            size:
-              $ref: '#/components/schemas/SimpleStorageSize'
+      description: |
+        A simple storage resource.
+      properties:
+        size:
+          $ref: 'SimpleStorageSize'
 
+    # TODO Move this to the abstract class, all storeage has a size.
     SimpleStorageSize:
       description: |
         The size of storage requested and offered.
@@ -60,37 +58,41 @@ components:
       title: SimpleStorageSize
       properties:
         requested:
-          $ref: '#/components/schemas/SimpleStorageSizeRequested'
+          $ref: 'SimpleStorageSizeRequested'
         offered:
-          $ref: '#/components/schemas/SimpleStorageSizeOffered'
+          $ref: 'SimpleStorageSizeOffered'
 
     SimpleStorageSizeRequested:
       description: |
         The size of storage requested by the user.
-        The minimum represents the lower limit that the excution requires.
-        The maximum represents the largest size that the excution can use.
-        The minimal flag indicates that the service should offer the minimum resources it can to match the criteria.
-        The default units are 'GiB'.
+        The minimum represents the minimum size the excution requires.
+        The maximum represents the maximum size that the excution can use.
+        All values are given in multiples of 'GiB'.
       type: object
       name:  SimpleStorageSizeRequested
       title: SimpleStorageSizeRequested
-      allOf:
-        - $ref: '../../components/utils.yaml#/components/schemas/MinMaxComputeLong'
-        - type: object
-          properties:
-            minimal:
-              type: boolean
-              default: false
+      properties:
+        min:
+          type: integer
+          format: int64
+        max:
+          type: integer
+          format: int64
 
     SimpleStorageSizeOffered:
       description: |
         The size of storage offerd by the service.
-        The minimum represents the size that the storage is allocated.
-        The maximum represents the size that the storage is able to expand to.
-        The default units are 'GiB'.
+        The minimum represents the minimum size that the storage is allocated.
+        The maximum represents the maximum size that the storage is able to expand to.
+        All values are given in multiples of 'GiB'.
       type: object
       name:  SimpleStorageSizeOffered
       title: SimpleStorageSizeOffered
-      allOf:
-        - $ref: '../../components/utils.yaml#/components/schemas/MinMaxComputeLong'
+      properties:
+        min:
+          type: integer
+          format: int64
+        max:
+          type: integer
+          format: int64
 

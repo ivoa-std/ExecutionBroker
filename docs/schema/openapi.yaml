@@ -46,18 +46,12 @@ paths:
         content:
           application/json:
             schema:
-#             $ref: './components/components.yaml#/components/schemas/OfferSetRequest'
-#             $ref: '#/components/schemas/OfferSetRequest'
               $ref: 'OfferSetRequest'
           application/xml:
             schema:
-#             $ref: './components/components.yaml#/components/schemas/OfferSetRequest'
-#             $ref: '#/components/schemas/OfferSetRequest'
               $ref: 'OfferSetRequest'
           application/yaml:
             schema:
-#             $ref: './components/components.yaml#/components/schemas/OfferSetRequest'
-#             $ref: '#/components/schemas/OfferSetRequest'
               $ref: 'OfferSetRequest'
         required: true
       # TODO Errors return error codes and ErrorResponse.
@@ -77,18 +71,12 @@ paths:
           content:
             application/json:
               schema:
-#               $ref: './components/components.yaml#/components/schemas/OfferSetResponse'
-#               $ref: '#/components/schemas/OfferSetResponse'
                 $ref: 'OfferSetResponse'
             application/xml:
               schema:
-#               $ref: './components/components.yaml#/components/schemas/OfferSetResponse'
-#               $ref: '#/components/schemas/OfferSetResponse'
                 $ref: 'OfferSetResponse'
             application/yaml:
               schema:
-#               $ref: './components/components.yaml#/components/schemas/OfferSetResponse'
-#               $ref: '#/components/schemas/OfferSetResponse'
                 $ref: 'OfferSetResponse'
 
   /offersets/{uuid}:
@@ -111,18 +99,12 @@ paths:
           content:
             application/json:
               schema:
-#               $ref: './components/components.yaml#/components/schemas/OfferSetResponse'
-#               $ref: '#/components/schemas/OfferSetResponse'
                 $ref: 'OfferSetResponse'
             application/xml:
               schema:
-#               $ref: './components/components.yaml#/components/schemas/OfferSetResponse'
-#               $ref: '#/components/schemas/OfferSetResponse'
                 $ref: 'OfferSetResponse'
             application/yaml:
               schema:
-#               $ref: './components/components.yaml#/components/schemas/OfferSetResponse'
-#               $ref: '#/components/schemas/OfferSetResponse'
                 $ref: 'OfferSetResponse'
 
   /sessions/{uuid}:
@@ -145,18 +127,12 @@ paths:
           content:
             application/json:
               schema:
-#               $ref: './components/components.yaml#/components/schemas/ExecutionSessionResponse'
-#               $ref: '#/components/schemas/ExecutionSessionResponse'
                 $ref: 'ExecutionSessionResponse'
             application/xml:
               schema:
-#               $ref: './components/components.yaml#/components/schemas/ExecutionSessionResponse'
-#               $ref: '#/components/schemas/ExecutionSessionResponse'
                 $ref: 'ExecutionSessionResponse'
             application/yaml:
               schema:
-#               $ref: './components/components.yaml#/components/schemas/ExecutionSessionResponse'
-#               $ref: '#/components/schemas/ExecutionSessionResponse'
                 $ref: 'ExecutionSessionResponse'
 
     post:
@@ -176,18 +152,12 @@ paths:
         content:
           application/json:
             schema:
-#             $ref: './components/components.yaml#/components/schemas/UpdateRequest'
-#             $ref: '#/components/schemas/UpdateRequest'
               $ref: 'UpdateRequest'
           application/xml:
             schema:
-#             $ref: './components/components.yaml#/components/schemas/UpdateRequest'
-#             $ref: '#/components/schemas/UpdateRequest'
               $ref: 'UpdateRequest'
           application/yaml:
             schema:
-#             $ref: './components/components.yaml#/components/schemas/UpdateRequest'
-#             $ref: '#/components/schemas/UpdateRequest'
               $ref: 'UpdateRequest'
       # TODO Errors return error codes and ErrorResponse.
       responses:
@@ -197,25 +167,18 @@ paths:
           content:
             application/json:
               schema:
-#               $ref: './components/components.yaml#/components/schemas/ExecutionSessionResponse'
-#               $ref: '#/components/schemas/ExecutionSessionResponse'
                 $ref: 'ExecutionSessionResponse'
             application/xml:
               schema:
-#               $ref: './components/components.yaml#/components/schemas/ExecutionSessionResponse'
-#               $ref: '#/components/schemas/ExecutionSessionResponse'
                 $ref: 'ExecutionSessionResponse'
             application/yaml:
               schema:
-#               $ref: './components/components.yaml#/components/schemas/ExecutionSessionResponse'
-#               $ref: '#/components/schemas/ExecutionSessionResponse'
                 $ref: 'ExecutionSessionResponse'
 
 components:
   schemas:
 
 # components.yaml
-# Tried moving this to a separate file, but had issues with generating the polymorphic classes.
 
     AbstractComponent:
       description: >
@@ -230,17 +193,19 @@ components:
             A machine readable UUID, assigned by the server.
           type: string
           format: uuid
-        href:
-          description: >
-            The URL to access this component, assigned by the server.
-          type: string
         name:
           description: >
             A human readable name, assigned by the client.
           type: string
+        type:
+          description: >
+            The component type identifiers.
+          type: string
+          xml:
+            attribute: true
         created:
           description: >
-            The date and time that this component was created.
+            The date and time the component was created.
           type: string
           format: date-time
         messages:
@@ -254,8 +219,21 @@ components:
             xml:
               name: message
 
+    AccessibleComponent:
+      description: >
+        Extends the abstract base class to add href.
+      type: object
+      title: AccessibleComponent
+      allOf:
+        - $ref: 'AbstractComponent'
+        - type: object
+          properties:
+            href:
+              description: >
+                The URL to access this component, assigned by the server.
+              type: string
+
 # compute-resources.yaml
-# Tried moving this to a separate file, but had issues with generating the polymorphic classes.
 
     ComputeResourceList:
       description: >
@@ -265,7 +243,6 @@ components:
       xml:
         name: compute
       items:
-#       $ref: '#/components/schemas/AbstractComputeResource'
         $ref: 'AbstractComputeResource'
 
     AbstractComputeResource:
@@ -278,17 +255,9 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          "https://www.purl.org/ivoa.net/EB/schema/types/resources/compute/simple-compute-1.0.yaml": '#/components/schemas/SimpleComputeResource'
+          "https://www.purl.org/ivoa.net/EB/schema/types/resources/compute/simple-compute-resource-1.0": 'SimpleComputeResource'
       allOf:
-#       - $ref: './components/components.yaml#/components/schemas/AbstractComponent'
-#       - $ref: '#/components/schemas/AbstractComponent'
         - $ref: 'AbstractComponent'
-        - type: object
-          properties:
-            type:
-              type: string
-              xml:
-                attribute: true
 
     SimpleComputeResource:
       description: >
@@ -296,126 +265,10 @@ components:
       type: object
       title: SimpleComputeResource
       allOf:
-#       - $ref: '#/components/schemas/AbstractComputeResource'
         - $ref: 'AbstractComputeResource'
-        - type: object
-          properties:
-            cores:
-              $ref: 'SimpleComputeCores'
-            memory:
-              $ref: 'SimpleComputeMemory'
-            volumes:
-              description: >
-                A list of filesystem volumes.
-              type: array
-              items:
-                $ref: '#/components/schemas/SimpleComputeVolume'
-
-    SimpleComputeCores:
-      description: >
-        The number of CPU cores requested and offered.
-      type: object
-      title: SimpleComputeCores
-      properties:
-        requested:
-          $ref: 'SimpleComputeCoresRequested'
-        offered:
-          $ref: 'SimpleComputeCoresOffered'
-
-    SimpleComputeCoresRequested:
-      description: >
-        The number of CPU cores requested by the user.
-        The minimum represents the lower limit that the excution requires.
-        The maximum represents the highest number of cores that the excution can use.
-        The minimal flag indicates that the service should offer the minimum resources it can to match the criteria.
-      type: object
-      title: SimpleComputeCoresRequested
-      allOf:
-        - $ref: './components/utils.yaml#/components/schemas/MinMaxLong'
-        - type: object
-          properties:
-            minimal:
-              type: boolean
-              default: false
-
-    SimpleComputeCoresOffered:
-      description: >
-        The number of CPU cores offered by the service.
-        The minimum represents the number of cores that the sessions starts with.
-        The maximum represents the number of cores that the session is able to expand to.
-      type: object
-      title: SimpleComputeCoresOffered
-      allOf:
-        - $ref: './components/utils.yaml#/components/schemas/MinMaxLong'
-
-    SimpleComputeMemory:
-      description: >
-        The amount of memory requested and offered.
-      type: object
-      title: SimpleComputeMemory
-      properties:
-        requested:
-          $ref: 'SimpleComputeMemoryRequested'
-        offered:
-          $ref: 'SimpleComputeMemoryOffered'
-
-    SimpleComputeMemoryRequested:
-      description: >
-        The amount of memory requested by the user.
-        The minimum represents the lower limit that the excution requires.
-        The maximum represents the highest amount of memory that the excution can use.
-        The minimal flag indicates that the service should offer the minimum resources it can to match the criteria.
-        The default units are 'GiB'.
-      type: object
-      title: SimpleComputeMemoryRequested
-      allOf:
-        - $ref: './components/utils.yaml#/components/schemas/MinMaxComputeLong'
-        - type: object
-          properties:
-            minimal:
-              type: boolean
-              default: false
-
-    SimpleComputeMemoryOffered:
-      description: >
-        The amount of memory offered by the service.
-        The minimum represents the amount of memory that the sessions starts with.
-        The maximum represents the amount of memory that the session is able to expand to.
-        The default units are 'GiB'.
-      type: object
-      title: SimpleComputeMemoryOffered
-      allOf:
-        - $ref: './components/utils.yaml#/components/schemas/MinMaxComputeLong'
-
-    SimpleComputeVolume:
-      description: >
-        A class to represent a ComputeResource volume mount.
-      type: object
-      title: SimpleComputeVolume
-      allOf:
-#       - $ref: './components/components.yaml#/components/schemas/AbstractComponent'
-#       - $ref: '#/components/schemas/AbstractComponent'
-        - $ref: 'AbstractComponent'
-        - type: object
-          properties:
-            path:
-              description: >
-                The mount point in the target filesystem.
-              type: string
-            mode:
-              description: >
-                The read-write mode.
-              type: string
-              enum:
-                - READONLY
-                - READWRITE
-            resource:
-              description: >
-                The name or UUID of the resource to mount.
-              type: string
+        - $ref: './types/resources/compute/simple-compute-resource-1.0.yaml#/components/schemas/SimpleComputeSpec'
 
 # storage-resources.yaml
-# Tried moving this to a separate file, but had issues with generating the polymorphic classes.
 
     StorageResourceList:
       description: >
@@ -425,7 +278,7 @@ components:
       xml:
         name: storage
       items:
-        $ref: '#/components/schemas/AbstractStorageResource'
+        $ref: 'AbstractStorageResource'
 
     AbstractStorageResource:
       description: >
@@ -437,13 +290,12 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          "https://www.purl.org/ivoa.net/EB/schema/types/resources/storage/simple-storage-1.0.yaml": '#/components/schemas/SimpleStorageResource'
+          "https://www.purl.org/ivoa.net/EB/schema/types/resources/storage/simple-storage-resource-1.0": 'SimpleStorageResource'
       allOf:
-#       - $ref: './components/components.yaml#/components/schemas/AbstractComponent'
-#       - $ref: '#/components/schemas/AbstractComponent'
         - $ref: 'AbstractComponent'
         - type: object
           properties:
+            # TOTO Do we need this here ?
             type:
               type: string
               xml:
@@ -456,56 +308,10 @@ components:
       name:  SimpleStorageResource
       title: SimpleStorageResource
       allOf:
-        - $ref: '#/components/schemas/AbstractStorageResource'
-        - type: object
-          properties:
-            size:
-              $ref: 'SimpleStorageSize'
-
-    SimpleStorageSize:
-      description: >
-        The size of storage requested and offered.
-      type: object
-      name:  SimpleStorageSize
-      title: SimpleStorageSize
-      properties:
-        requested:
-          $ref: 'SimpleStorageSizeRequested'
-        offered:
-          $ref: 'SimpleStorageSizeOffered'
-
-    SimpleStorageSizeRequested:
-      description: >
-        The size of storage requested by the user.
-        The minimum represents the lower limit that the excution requires.
-        The maximum represents the largest size that the excution can use.
-        The minimal flag indicates that the service should offer the minimum resources it can to match the criteria.
-        The default units are 'GiB'.
-      type: object
-      name:  SimpleStorageSizeRequested
-      title: SimpleStorageSizeRequested
-      allOf:
-        - $ref: './components/utils.yaml#/components/schemas/MinMaxComputeLong'
-        - type: object
-          properties:
-            minimal:
-              type: boolean
-              default: false
-
-    SimpleStorageSizeOffered:
-      description: >
-        The size of storage offerd by the service.
-        The minimum represents the size that the storage is allocated.
-        The maximum represents the size that the storage is able to expand to.
-        The default units are 'GiB'.
-      type: object
-      name:  SimpleStorageSizeOffered
-      title: SimpleStorageSizeOffered
-      allOf:
-        - $ref: './components/utils.yaml#/components/schemas/MinMaxComputeLong'
+        - $ref: 'AbstractStorageResource'
+        - $ref: './types/resources/storage/simple-storage-resource-1.0.yaml#/components/schemas/SimpleStorageSpec'
 
 # data-resources.yaml
-# Tried moving this to a separate file, but had issues with generating the polymorphic classes.
 
     DataResourceList:
       description: >
@@ -515,7 +321,6 @@ components:
       xml:
         name: storage
       items:
-#       $ref: '#/components/schemas/AbstractDataResource'
         $ref: 'AbstractDataResource'
 
     AbstractDataResource:
@@ -528,97 +333,50 @@ components:
       discriminator:
         propertyName: type
         mapping:
-#         "uri:simple-data-resource-0.1":  '#/components/schemas/SimpleDataResource'
-#         "uri:Rucio-data-resource-0.1":  '#/components/schemas/RucioDataResource'
-#         "uri:S3-data-resource-0.1":     '#/components/schemas/S3DataResource'
-          "uri:simple-data-resource-0.1": 'SimpleDataResource'
-          "uri:Rucio-data-resource-0.1":  'RucioDataResource'
-          "uri:S3-data-resource-0.1":     'S3DataResource'
-
+          "https://www.purl.org/ivoa.net/EB/schema/types/resources/data/simple-data-resource-1.0": 'SimpleDataResource'
+          "https://www.purl.org/ivoa.net/EB/schema/types/resources/data/Rucio-data-resource-1.0":  'RucioDataResource'
+          "https://www.purl.org/ivoa.net/EB/schema/types/resources/data/S3-data-resource-1.0":     'AmazonS3DataResource'
       allOf:
-#       - $ref: './components/components.yaml#/components/schemas/AbstractComponent'
-#       - $ref: '#/components/schemas/AbstractComponent'
         - $ref: 'AbstractComponent'
         - type: object
           properties:
+            # TOTO Do we need this here ?
             type:
               type: string
               xml:
                 attribute: true
+            storage:
+              type: string
 
     SimpleDataResource:
+      type: object
+      name:  SimpleDataResource
+      title: SimpleDataResource
       description: >
           A simple downloadable data resource.
-          This type of resource should always be mounted read-only.
-      type: object
-      title: SimpleDataResource
       allOf:
-        - $ref: '#/components/schemas/AbstractDataResource'
-        - type: object
-          properties:
-            location:
-              description: |
-                The URL of the data to import.
-              type: string
-# TODO add checksums
-# TODO add a size estimate
-# TODO add download time estimate
-# TODO add status flag ... WAITING|PREPARING|READY|RELEASING|COMPLETED|CANCELLED|FAILED
+        - $ref: 'AbstractDataResource'
+        - $ref: './types/resources/data/simple-data-resource-1.0.yaml#/components/schemas/SimpleDataResourceSpec'
 
-    S3DataResource:
-      description: A S3 data resource.
+    AmazonS3DataResource:
       type: object
-      title: S3DataResource
+      name:  AmazonS3DataResource
+      title: AmazonS3DataResource
+      description: >
+          A data resource in a S3 storage system.
       allOf:
-        - $ref: '#/components/schemas/AbstractDataResource'
-        - type: object
-          properties:
-            endpoint:
-              description: |
-                The endpoint address of the S3 service.
-              type: string
-            template:
-              description: |
-                The URL template for the S3 service.
-              type: string
-            bucket:
-              description: |
-                The target bucket name.
-              type: string
-            object:
-              description: |
-                The target object name.
-                Leaving this blank will mount the whole bucket as a directory.
-              type: string
-# TODO add checksums
-# TODO add a size estimate
-# TODO add download time estimate
-# TODO add status flag ... WAITING|PREPARING|READY|RELEASING|COMPLETED|CANCELLED|FAILED
+        - $ref: 'AbstractDataResource'
+        - $ref: './types/resources/data/Amazon-S3-data-resource-1.0.yaml#/components/schemas/AmazonS3DataResourceSpec'
 
     RucioDataResource:
-      description: A Rucio data resource.
       type: object
+      name:  RucioDataResource
       title: RucioDataResource
+      description: >
+          A data resource in a Rucio storage system.
       allOf:
-        - $ref: '#/components/schemas/AbstractDataResource'
-        - type: object
-          properties:
-            endpoint:
-              description: |
-                The endpoint address of the Rucio service.
-              type: string
-            domain:
-              description: |
-                The domain name.
-              type: string
-            object:
-              description: |
-                The target object name.
-              type: string
-# TODO add checksums
-# TODO add a size estimate
-# TODO add download time estimate
-# TODO add status flag ... WAITING|PREPARING|READY|RELEASING|COMPLETED|CANCELLED|FAILED
+        - $ref: 'AbstractDataResource'
+        - $ref: './types/resources/data/Rucio-data-resource-1.0.yaml#/components/schemas/RucioDataResourceSpec'
 
     AbstractExecutable:
       description: Abstract base class for executables.
@@ -629,23 +387,62 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          "https://www.purl.org/ivoa.net/EB/schema/types/executables/docker-container-1.0.yaml":      '#/components/schemas/DockerContainer'
-          "https://www.purl.org/ivoa.net/EB/schema/types/executables/singularity-container-1.0.yaml": '#/components/schemas/SingularityContainer'
-          "https://www.purl.org/ivoa.net/EB/schema/types/executables/jupyter-notebook-1.0.yaml":      '#/components/schemas/JupyterNotebook'
-          "uri:repo2docker-0.1":     'Repo2DockerContainer'
-          "uri:binder-notebook-0.1": 'BinderNotebook'
+          "https://www.purl.org/ivoa.net/EB/schema/types/executables/docker-container-1.0":      'DockerContainer'
+          "https://www.purl.org/ivoa.net/EB/schema/types/executables/singularity-container-1.0": 'SingularityContainer'
+          "https://www.purl.org/ivoa.net/EB/schema/types/executables/jupyter-notebook-1.0":      'JupyterNotebook'
       allOf:
-#       - $ref: './components/components.yaml#/components/schemas/AbstractComponent'
-#       - $ref: '#/components/schemas/AbstractComponent'
         - $ref: 'AbstractComponent'
         - type: object
           properties:
+            # TOTO Do we need this here ?
             type:
               description: >
                 The component type discriminator
               type: string
               xml:
                 attribute: true
+            access:
+              description: >
+                A list of access methods that the client can use to monitor and interact with the execution.
+              $ref: 'ExecutableAccessList'
+
+    ExecutableAccessList:
+      description: >
+        A list of data access methods.
+      type: array
+      title: ExecutableAccessList
+      xml:
+        name: access
+      items:
+        $ref: 'ExecutableAccessMethod'
+
+    ExecutableAccessMethod:
+      description: |
+        Details of an access method the client can use to monitor and interact with the execution.
+        These details are provided by the service based on the description of the executable and how it is implemented.
+      type: object
+      title: DockerContainer
+      properties:
+        status:
+          type: string
+          enum:
+            - PREPARING
+            - ACTIVE
+            - FINISHED
+          description: >
+            A flag to indicate the staus of the connection.
+        protocol:
+          type: string
+          description: >
+            The access protocol, provided by the server when an offer is made.
+            Typically one of [TCP, HTTP, HTTPS].
+        locations:
+          type: array
+          items:
+            type: string
+          description: >
+            A list of access URLs, provided by the server once the execution is ready to start.
+            This is defined as a list to provide support for internal and external, IPv4 and IPv6 addresses.
 
     DockerContainer:
       description: |
@@ -654,112 +451,8 @@ components:
       type: object
       title: DockerContainer
       allOf:
-        - $ref: '../../openapi.yaml#/components/schemas/AbstractExecutable'
-        - type: object
-          properties:
-            image:
-              ident:
-                type: string
-                description: |
-                  The full image identifier, including repository, namespace and tag.
-              name:
-                type: string
-                description: |
-                  The full image name.
-              namespace:
-                type: string
-                description: |
-                  The namespace within the repository.
-              tag:
-                type: string
-                description: |
-                  The image tag.
-              repository:
-                type: string
-                description: |
-                  The respository hostname.
-              platform:
-                architecture:
-                  type: string
-                  description: |
-                    The CPU architecture the image is built for.
-                    The default is `amd64`.
-                os:
-                  type: string
-                  description: |
-                    The operating system the image is built for.
-                    The default is `linux`.
-              digest:
-                type: string
-                description: |
-                  The image digest, generated as a as sha256 checksum when the image is built.
-                  The unique digest can be used to verify the contents of a downloaded image.
-            privileged:
-              type: boolean
-              default: false
-              description: |
-                Set the privileged flag on execution.
-                The default is `false`.
-                See https://docs.docker.com/reference/cli/docker/container/run/#privileged.
-            entrypoint:
-              type: string
-              description: |
-                Overwrite the default ENTRYPOINT of the image.
-            environment:
-              description: |
-                A name => value map of environment variables to pass to the container.
-              $ref: '../../components/utils.yaml#/components/schemas/NameValueMap'
-            network:
-              description: |
-                Details of the network access available to the container.
-              $ref: '#/components/schemas/DockerNetworkSpec'
-
-    DockerNetworkSpec:
-      description: |
-        Details of the network access available to the container.
-      type: object
-      title: DockerNetworkSpec
-      properties:
-        ports:
-          description: |
-            An array of network ports to publish.
-          type: array
-          items:
-            $ref: '#/components/schemas/DockerNetworkPort'
-
-    DockerNetworkPort:
-      description: |
-        Details of a network port on the container made available for connection from outside.
-      type: object
-      title: DockerNetworkPort
-      properties:
-        address:
-          type: string
-          description: |
-            The IP address of the external network interface.
-            The client should not set this value.
-            The service will update this with a publicly accessible interface address when it sets up the execution.
-        external:
-          type: string
-          description: |
-            The host machine's external port number to connect.
-            The client should not set this value.
-            The service will update this with the corrent port number when it sets up the execution.
-        internal:
-          type: string
-          description: |
-            The port number on the container to publish.
-        protocol:
-          type: string
-          enum:
-            - UDP
-            - TCP
-            - HTTP
-            - HTTPS
-          description: |
-            The network protocol to use, default is `TCP`.
-            The `HTTP` and `HTTPS` values further specify the Protocol to use on top of `TCP`.
-            Specifying `HTTPS` may help to meet firewall restrictions at some sites.
+        - $ref: 'AbstractExecutable'
+        - $ref: './types/executables/docker-container-1.0.yaml#/components/schemas/DockerContainerSpec'
 
     SingularityContainer:
       description: |
@@ -768,28 +461,8 @@ components:
       type: object
       title: SingularContainer
       allOf:
-        - $ref: '../../openapi.yaml#/components/schemas/AbstractExecutable'
-        - type: object
-          properties:
-            location:
-              type: string
-              description: |
-                The URL to download the container image from.
-
-    Repo2DockerContainer:
-      description: |
-        A Repo2Docker executable.
-        See https://repo2docker.readthedocs.io/en/latest/
-      type: object
-      title: Repo2DockerContainer
-      allOf:
-        - $ref: '#/components/schemas/AbstractExecutable'
-        - type: object
-          properties:
-            location:
-              type: string
-              description: |
-                The URL of the source repository.
+        - $ref: 'AbstractExecutable'
+        - $ref: './types/executables/singularity-container-1.0.yaml#/components/schemas/SingularityContainerSpec'
 
     JupyterNotebook:
       description: >
@@ -798,33 +471,8 @@ components:
       type: object
       title: JupyterNotebook
       allOf:
-        - $ref: '#/components/schemas/AbstractExecutable'
-        - type: object
-          properties:
-            location:
-              type: string
-              description: |
-                The URL of the notebook.
-                TODO - This needs to take into account different ways of referring to a notebook.
-
-    BinderNotebook:
-      description: >
-        A Binder notebook executable.
-        See https://the-turing-way.netlify.app/communication/binder/zero-to-binder.html
-      type: object
-      title: BinderNotebook
-      allOf:
-        - $ref: '#/components/schemas/AbstractExecutable'
-        - type: object
-          properties:
-            repository:
-              type: string
-              description: >
-                The URL of the repository to package.
-            notebook:
-              type: string
-              description: >
-                The relative path of the notebook within the repository.
+        - $ref: 'AbstractExecutable'
+        - $ref: './types/executables/jupyter-notebook-1.0.yaml#/components/schemas/JupyterNotebookSpec'
 
 # update-options.yaml
 
@@ -840,10 +488,6 @@ components:
       discriminator:
         propertyName: type
         mapping:
-#         "uri:string-value-option":  '#/components/schemas/StringValueOption'
-#         "uri:enum-value-option":    '#/components/schemas/EnumValueOption'
-#         "uri:integer-value-option": '#/components/schemas/IntegerValueOption'
-#         "uri:integer-delta-option": '#/components/schemas/IntegerDeltaOption'
           "uri:string-value-option":  'StringValueOption'
           "uri:enum-value-option":    'EnumValueOption'
           "uri:integer-value-option": 'IntegerValueOption'
@@ -867,7 +511,7 @@ components:
       type: object
       title: StringValueOption
       allOf:
-        - $ref: '#/components/schemas/AbstractOption'
+        - $ref: 'AbstractOption'
         - type: object
           properties:
             pattern:
@@ -884,7 +528,7 @@ components:
       required:
         - values
       allOf:
-        - $ref: '#/components/schemas/AbstractOption'
+        - $ref: 'AbstractOption'
         - type: object
           properties:
             values:
@@ -901,7 +545,7 @@ components:
       type: object
       title: IntegerValueOption
       allOf:
-        - $ref: '#/components/schemas/AbstractOption'
+        - $ref: 'AbstractOption'
         - type: object
           properties:
             min:
@@ -929,7 +573,7 @@ components:
       type: object
       title: IntegerDeltaOption
       allOf:
-        - $ref: '#/components/schemas/AbstractOption'
+        - $ref: 'AbstractOption'
         - type: object
           properties:
             min:
@@ -964,10 +608,6 @@ components:
       discriminator:
         propertyName: type
         mapping:
-#         "uri:string-value-update":  '#/components/schemas/StringValueUpdate'
-#         "uri:enum-value-update":    '#/components/schemas/EnumValueUpdate'
-#         "uri:integer-value-update": '#/components/schemas/IntegerValueUpdate'
-#         "uri:integer-delta-update": '#/components/schemas/IntegerDeltaUpdate'
           "uri:string-value-update":  'StringValueUpdate'
           "uri:enum-value-update":    'EnumValueUpdate'
           "uri:integer-value-update": 'IntegerValueUpdate'
@@ -992,7 +632,7 @@ components:
       required:
         - value
       allOf:
-        - $ref: '#/components/schemas/AbstractUpdate'
+        - $ref: 'AbstractUpdate'
         - type: object
           properties:
             value:
@@ -1008,7 +648,7 @@ components:
       required:
         - value
       allOf:
-        - $ref: '#/components/schemas/AbstractUpdate'
+        - $ref: 'AbstractUpdate'
         - type: object
           properties:
             value:
@@ -1024,7 +664,7 @@ components:
       required:
         - value
       allOf:
-        - $ref: '#/components/schemas/AbstractUpdate'
+        - $ref: 'AbstractUpdate'
         - type: object
           properties:
             value:
@@ -1046,7 +686,7 @@ components:
       required:
         - delta
       allOf:
-        - $ref: '#/components/schemas/AbstractUpdate'
+        - $ref: 'AbstractUpdate'
         - type: object
           properties:
             delta:
@@ -1059,6 +699,7 @@ components:
                 The units to use for the change.
               type: string
 
+    # TODO Move this to utils ?
     MinMaxDuration:
       description: >
         A duration time block describing how long the execution will take.
@@ -1086,51 +727,7 @@ components:
         update:
           xml:
             name: update
-          $ref: '#/components/schemas/AbstractUpdate'
-
-# schedule-blocks.yaml
-
-#   StringScheduleBlockValue:
-#     description: >
-#       Used for the predicted and observed times.
-#     type: object
-#     title: StringScheduleBlockValue
-#     xml:
-#       name: date-time
-#     properties:
-#       start:
-#         type: string
-#       duration:
-#         type: string
-#
-#   StringScheduleBlockItem:
-#     description: >
-#       Used for the predicted and observed times.
-#     type: object
-#     title: StringScheduleBlockItem
-#     xml:
-#       name: date-time
-#     properties:
-#       preparing:
-#         $ref: '#/components/schemas/StringScheduleBlockValue'
-#       executing:
-#         $ref: '#/components/schemas/StringScheduleBlockValue'
-#       finishing:
-#         $ref: '#/components/schemas/StringScheduleBlockValue'
-#
-#   StringScheduleBlock:
-#     description: >
-#       Schedule ...
-#     type: object
-#     title: StringScheduleBlock
-#     xml:
-#       name: schedule
-#     properties:
-#       requested:
-#         $ref: '#/components/schemas/StringScheduleBlockItem'
-#       offered:
-#         $ref: '#/components/schemas/StringScheduleBlockItem'
-
+          $ref: 'AbstractUpdate'
 
     ScheduleRequestBlock:
       description: >
@@ -1186,7 +783,7 @@ components:
         data:
           $ref: 'DataResourceList'
 
-    ExecutionSessionStatus:
+    ExecutionSessionPhase:
       description: >
         Status code for an execution session.
       type: string
@@ -1208,36 +805,6 @@ components:
         - FAILED
         - CANCELLED
 
-    ExecutionSessionRequest:
-      description: >
-        The base class for an execution. Used in both requests and responses.
-      type: object
-      title: ExecutionSessionRequest
-      xml:
-        name: execution
-      properties:
-        name:
-          description: >
-            A human readable name.
-          type: string
-        executable:
-          xml:
-            name: executable
-          $ref: '#/components/schemas/AbstractExecutable'
-        resources:
-          xml:
-            name: resources
-          $ref: '#/components/schemas/ExecutionResourceList'
-        schedule:
-          xml:
-            name: schedule
-          type: object
-          properties:
-            requested:
-              xml:
-                name: requested
-              $ref: '#/components/schemas/ScheduleRequestBlock'
-
     ExecutionSessionResponse:
       description: >
         An Execution session, including uuid, href, and status.
@@ -1246,23 +813,16 @@ components:
       xml:
         name: execution
       allOf:
-#       - $ref: './components/components.yaml#/components/schemas/AbstractComponent'
-#       - $ref: '#/components/schemas/AbstractComponent'
-        - $ref: 'AbstractComponent'
+        - $ref: 'AccessibleComponent'
         - type: object
           required:
             - uuid
             - state
             - href
+            - type
           properties:
-            offerset:
-              description: >
-                A reference to the parent OfferSet.
-              xml:
-                name: offerset
-              $ref: '#/components/schemas/OfferSetLink'
-            state:
-              $ref: '#/components/schemas/ExecutionSessionStatus'
+            phase:
+              $ref: 'ExecutionSessionPhase'
             expires:
               description: >
                 The date and time that this execution offer expires.
@@ -1274,11 +834,11 @@ components:
             executable:
               xml:
                 name: executable
-              $ref: '#/components/schemas/AbstractExecutable'
+              $ref: 'AbstractExecutable'
             resources:
               xml:
                 name: resources
-              $ref: '#/components/schemas/ExecutionResourceList'
+              $ref: 'ExecutionResourceList'
             schedule:
               xml:
                 name: schedule
@@ -1287,43 +847,27 @@ components:
                 requested:
                   xml:
                     name: requested
-                  $ref: '#/components/schemas/ScheduleRequestBlock'
+                  $ref: 'ScheduleRequestBlock'
                 preparing:
                   xml:
                     name: preparing
-                  $ref: '#/components/schemas/ScheduleOfferItem'
+                  $ref: 'ScheduleOfferItem'
                 executing:
                   xml:
                     name: executing
-                  $ref: '#/components/schemas/ScheduleOfferItem'
+                  $ref: 'ScheduleOfferItem'
                 releasing:
                   xml:
                     name: releasing
-                  $ref: '#/components/schemas/ScheduleOfferItem'
+                  $ref: 'ScheduleOfferItem'
             options:
               description: >
                 A List of options the client can apply to this Execution.
               type: array
               items:
-                $ref: '#/components/schemas/AbstractOption'
+                $ref: 'AbstractOption'
 
 # offersets.yaml
-
-    OfferSetLink:
-      description: >
-        A reference from an offer to it's parent offerset.
-      type: object
-      title: OfferSetLink
-      properties:
-        uuid:
-          description: >
-            The UUID identifier of the parent OfferSet.
-          type: string
-          format: uuid
-        href:
-          description: >
-            The URL of the parent OfferSet.
-          type: string
 
     OfferSetRequest:
       description: >
@@ -1332,8 +876,28 @@ components:
       title: OfferSetRequest
       xml:
         name: offers-request
-      allOf:
-        - $ref: '#/components/schemas/ExecutionSessionRequest'
+      properties:
+        name:
+          description: >
+            A human readable name.
+          type: string
+        executable:
+          xml:
+            name: executable
+          $ref: 'AbstractExecutable'
+        resources:
+          xml:
+            name: resources
+          $ref: 'ExecutionResourceList'
+        schedule:
+          xml:
+            name: schedule
+          type: object
+          properties:
+            requested:
+              xml:
+                name: requested
+              $ref: 'ScheduleRequestBlock'
 
     OfferSetResponse:
       description: >
@@ -1344,13 +908,10 @@ components:
       required:
         - uuid
         - href
-        - expires
       xml:
         name: offers-response
       allOf:
-#       - $ref: './components/components.yaml#/components/schemas/AbstractComponent'
-#       - $ref: '#/components/schemas/AbstractComponent'
-        - $ref: 'AbstractComponent'
+        - $ref: 'AccessibleComponent'
         - type: object
           properties:
             result:
@@ -1364,14 +925,13 @@ components:
               enum:
                 - "YES"
                 - "NO"
-#           # TODO Add simplified state OFFERED, ACCEPTED, REJECTED, EXPIRED, ..
             offers:
               type: array
               xml:
                 name: offers
                 wrapped: true
               items:
-                $ref: '#/components/schemas/ExecutionSessionResponse'
+                $ref: 'ExecutionSessionResponse'
                 xml:
                   name: execution
 
