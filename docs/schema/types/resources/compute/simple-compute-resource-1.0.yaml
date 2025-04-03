@@ -24,9 +24,9 @@
 
 openapi: 3.1.0
 info:
-  title: IVOA ExecutionBroker log messages
+  title: IVOA ExecutionBroker simple compute resource
   version: "1.0"
-  summary: IVOA ExecutionBroker SimpleComputeResource
+  summary: IVOA ExecutionBroker simple compute resource
   description: |
     OpenAPI schema for a simple compute resource in IVOA ExecutionBroker
   contact:
@@ -39,25 +39,23 @@ info:
 components:
   schemas:
 
-    SimpleComputeResource:
+    SimpleComputeSpec:
+      type: object
+      name:  SimpleComputeResource
+      title: SimpleComputeResource
       description: |
         A simple compute resource.
-      type: object
-      title: SimpleComputeResource
-      allOf:
-        - $ref: '../../openapi.yaml#/components/schemas/AbstractComputeResource'
-        - type: object
-          properties:
-            cores:
-              $ref: '#/components/schemas/SimpleComputeCores'
-            memory:
-              $ref: '#/components/schemas/SimpleComputeMemory'
-            volumes:
-              description: >
-                A list of filesystem volumes.
-              type: array
-              items:
-                $ref: '#/components/schemas/SimpleComputeVolume'
+      properties:
+        cores:
+          $ref: 'SimpleComputeCores'
+        memory:
+          $ref: 'SimpleComputeMemory'
+        volumes:
+          description: |
+            A list of filesystem volumes.
+          type: array
+          items:
+            $ref: 'SimpleComputeVolume'
 
     SimpleComputeCores:
       description: |
@@ -66,25 +64,28 @@ components:
       title: SimpleComputeCores
       properties:
         requested:
-          $ref: '#/components/schemas/SimpleComputeCoresRequested'
+          $ref: 'SimpleComputeCoresRequested'
         offered:
-          $ref: '#/components/schemas/SimpleComputeCoresOffered'
+          $ref: 'SimpleComputeCoresOffered'
 
     SimpleComputeCoresRequested:
       description: |
         The number of CPU cores requested by the user.
         The minimum represents the lower limit that the excution requires.
         The maximum represents the highest number of cores that the excution can use.
-        The minimal flag indicates that the service should offer the minimum resources it can to match the criteria.
       type: object
       title: SimpleComputeCoresRequested
-      allOf:
-        - $ref: '../../components/utils.yaml#/components/schemas/MinMaxLong'
-        - type: object
-          properties:
-            minimal:
-              type: boolean
-              default: false
+#     allOf:
+#       - $ref: '../../../components/utils.yaml#/components/schemas/MinMaxLong'
+#       - $ref: 'SimpleMinMaxLong'
+#       - type: object
+      properties:
+        min:
+          type: integer
+          format: int64
+        max:
+          type: integer
+          format: int64
 
     SimpleComputeCoresOffered:
       description: |
@@ -93,8 +94,28 @@ components:
         The maximum represents the number of cores that the session is able to expand to.
       type: object
       title: SimpleComputeCoresOffered
-      allOf:
-        - $ref: '../../components/utils.yaml#/components/schemas/MinMaxLong'
+#     allOf:
+#       - $ref: '../../../components/utils.yaml#/components/schemas/MinMaxLong'
+#       - $ref: 'SimpleMinMaxLong'
+      properties:
+        min:
+          type: integer
+          format: int64
+        max:
+          type: integer
+          format: int64
+
+#   SimpleMinMaxLong:
+#     description: >
+#       A 64bit integer minimum and maximum pair.
+#     type: object
+#     properties:
+#       min:
+#         type: integer
+#         format: int64
+#       max:
+#         type: integer
+#         format: int64
 
     SimpleComputeMemory:
       description: |
@@ -103,37 +124,45 @@ components:
       title: SimpleComputeMemory
       properties:
         requested:
-          $ref: '#/components/schemas/SimpleComputeMemoryRequested'
+          $ref: 'SimpleComputeMemoryRequested'
         offered:
-          $ref: '#/components/schemas/SimpleComputeMemoryOffered'
+          $ref: 'SimpleComputeMemoryOffered'
 
     SimpleComputeMemoryRequested:
       description: |
         The amount of memory requested by the user.
         The minimum represents the lower limit that the excution requires.
         The maximum represents the highest amount of memory that the excution can use.
-        The minimal flag indicates that the service should offer the minimum resources it can to match the criteria.
-        The default units are 'GiB'.
+        All values are given in multiples of 'GiB'.
       type: object
       title: SimpleComputeMemoryRequested
-      allOf:
-        - $ref: '../../components/utils.yaml#/components/schemas/MinMaxComputeLong'
-        - type: object
-          properties:
-            minimal:
-              type: boolean
-              default: false
+      properties:
+        min:
+          type: integer
+          format: int64
+        max:
+          type: integer
+          format: int64
+#       units:
+#         $ref: '../../../components/utils.yaml#/components/schemas/ComputeUnitsEnum'
 
     SimpleComputeMemoryOffered:
       description: |
         The amount of memory offered by the service.
         The minimum represents the amount of memory that the sessions starts with.
         The maximum represents the amount of memory that the session is able to expand to.
-        The default units are 'GiB'.
+        All values are given in multiples of 'GiB'.
       type: object
       title: SimpleComputeMemoryOffered
-      allOf:
-        - $ref: '../../components/utils.yaml#/components/schemas/MinMaxComputeLong'
+      properties:
+        min:
+          type: integer
+          format: int64
+        max:
+          type: integer
+          format: int64
+#       units:
+#         $ref: '../../../components/utils.yaml#/components/schemas/ComputeUnitsEnum'
 
     SimpleComputeVolume:
       description: |
@@ -141,7 +170,7 @@ components:
       type: object
       title: SimpleComputeVolume
       allOf:
-        - $ref: '../../openapi.yaml#/components/schemas/AbstractComponent'
+        - $ref: '../../../openapi.yaml#/components/schemas/AbstractComponent'
         - type: object
           properties:
             path:

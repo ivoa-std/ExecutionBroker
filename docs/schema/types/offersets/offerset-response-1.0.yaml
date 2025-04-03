@@ -1,0 +1,77 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2025, Manchester University (http://www.manchester.ac.uk/)
+#
+#     This work is made available under the Creative Commons
+#     Attribution-ShareAlike 4.0 International licence.
+#
+#     For details of the licence terms see:
+#     https://creativecommons.org/licenses/by-sa/4.0/
+#   </meta:licence>
+# </meta:header>
+#
+# AIMetrics: [
+#     {
+#     "name": "ChatGPT",
+#     "contribution": {
+#       "value": 5,
+#       "units": "%"
+#       }
+#     }
+#   ]
+#
+
+openapi: 3.1.0
+info:
+  title: IVOA ExecutionBroker offerset response
+  version: "1.0"
+  summary: IVOA ExecutionBroker offerset response
+  description: |
+    OpenAPI schema for an IVOA ExecutionBroker execution offerset response.
+  contact:
+    name: Dave Morris
+    url: https://github.com/Zarquan
+  license:
+    name: Creative Commons Attribution Share Alike 4.0 International
+    identifier: CC-BY-SA-4.0
+
+components:
+  schemas:
+
+    OfferSetResponse:
+      description: >
+        A set of execution sessions offered in response to a request,
+        including a uuid, href, and an expiry date for the set.
+      type: object
+      title: OfferSetResponse
+      required:
+        - uuid
+        - href
+      xml:
+        name: offers-response
+      allOf:
+        - $ref: 'AbstractComponent'
+        - type: object
+          properties:
+            result:
+              description: >
+                A flag to indicate whether the request can be handled by this service.
+                If service is able to handle the request, then the `result` will be `YES`
+                and the `offers` block should contain one or more offers.
+                If service is not able to handle the request, the `result` will be `NO`
+                and the `messages` block should contain one or more reasons explaining why.
+              type: string
+              enum:
+                - "YES"
+                - "NO"
+            offers:
+              type: array
+              xml:
+                name: offers
+                wrapped: true
+              items:
+                $ref: 'ExecutionSessionResponse'
+                xml:
+                  name: execution
+

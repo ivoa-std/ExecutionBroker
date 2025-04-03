@@ -26,9 +26,9 @@ openapi: 3.1.0
 info:
   title: IVOA ExecutionBroker log messages
   version: "1.0"
-  summary: IVOA ExecutionBroker SingularityContainer
+  summary: IVOA ExecutionBroker SimpleStorageResource
   description: |
-    OpenAPI schema for a Singularity container in IVOA ExecutionBroker
+    OpenAPI schema for a simple storage resource in IVOA ExecutionBroker
   contact:
     name: Dave Morris
     url: https://github.com/Zarquan
@@ -39,15 +39,27 @@ info:
 components:
   schemas:
 
-    SingularityContainerSpec:
-      description: |
-        Details for a Singularity container executable.
-        See https://docs.sylabs.io/guides/latest/user-guide/
+    RucioDataResourceSpec:
       type: object
-      title: SingularContainer
+      name:  RucioDataResource
+      title: RucioDataResource
+      description: |
+        A data resource in a Rucio storage platform.
       properties:
-        location:
-          type: string
+        endpoint:
           description: |
-            The URL to download the container image from.
+            The endpoint address of the Rucio service.
+          type: string
+        domain:
+          description: |
+            The domain name.
+          type: string
+        object:
+          description: |
+            The target object name.
+          type: string
+# TODO add checksums
+# TODO add a size estimate
+# TODO add download time estimate
+# TODO add status flag ... WAITING|PREPARING|READY|RELEASING|COMPLETED|CANCELLED|FAILED
 

@@ -1,0 +1,72 @@
+#
+# <meta:header>
+#   <meta:licence>
+#     Copyright (c) 2025, Manchester University (http://www.manchester.ac.uk/)
+#
+#     This work is made available under the Creative Commons
+#     Attribution-ShareAlike 4.0 International licence.
+#
+#     For details of the licence terms see:
+#     https://creativecommons.org/licenses/by-sa/4.0/
+#   </meta:licence>
+# </meta:header>
+#
+# AIMetrics: [
+#     {
+#     "name": "ChatGPT",
+#     "contribution": {
+#       "value": 5,
+#       "units": "%"
+#       }
+#     }
+#   ]
+#
+
+openapi: 3.1.0
+info:
+  title: IVOA ExecutionBroker offerset request
+  version: "1.0"
+  summary: IVOA ExecutionBroker offerset request
+  description: |
+    OpenAPI schema for an IVOA ExecutionBroker execution offerset request.
+  contact:
+    name: Dave Morris
+    url: https://github.com/Zarquan
+  license:
+    name: Creative Commons Attribution Share Alike 4.0 International
+    identifier: CC-BY-SA-4.0
+
+components:
+  schemas:
+
+    OfferSetRequest:
+      description: >
+        A request for a set of execution session offers.
+      type: object
+      title: OfferSetRequest
+      xml:
+        name: offers-request
+      properties:
+        name:
+          description: >
+            A human readable name.
+          type: string
+        executable:
+          xml:
+            name: executable
+          $ref: 'AbstractExecutable'
+        resources:
+          xml:
+            name: resources
+          $ref: 'ExecutionResourceList'
+        schedule:
+          xml:
+            name: schedule
+          type: object
+          properties:
+            requested:
+              xml:
+                name: requested
+              $ref: ScheduleRequestBlock'
+
+

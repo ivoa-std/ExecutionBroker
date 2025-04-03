@@ -39,72 +39,83 @@ info:
 components:
   schemas:
 
-    DockerContainer:
+    DockerContainerSpec:
       description: |
-        A Docker or OCI container executable.
+        Details for a Docker or OCI container executable.
         See https://opencontainers.org/
       type: object
       title: DockerContainer
-      allOf:
-        - $ref: '../../openapi.yaml#/components/schemas/AbstractExecutable'
-        - type: object
-          properties:
-            image:
-              ident:
-                type: string
-                description: |
-                  The full image identifier, including repository, namespace and tag.
-              name:
-                type: string
-                description: |
-                  The full image name.
-              namespace:
-                type: string
-                description: |
-                  The namespace within the repository.
-              tag:
-                type: string
-                description: |
-                  The image tag.
-              repository:
-                type: string
-                description: |
-                  The respository hostname.
-              platform:
-                architecture:
-                  type: string
-                  description: |
-                    The CPU architecture the image is built for.
-                    The default is `amd64`.
-                os:
-                  type: string
-                  description: |
-                    The operating system the image is built for.
-                    The default is `linux`.
-              digest:
-                type: string
-                description: |
-                  The image digest, generated as a as sha256 checksum when the image is built.
-                  The unique digest can be used to verify the contents of a downloaded image.
-            privileged:
-              type: boolean
-              default: false
-              description: |
-                Set the privileged flag on execution.
-                The default is `false`.
-                See https://docs.docker.com/reference/cli/docker/container/run/#privileged.
-            entrypoint:
-              type: string
-              description: |
-                Overwrite the default ENTRYPOINT of the image.
-            environment:
-              description: |
-                A name => value map of environment variables to pass to the container.
-              $ref: '../../components/utils.yaml#/components/schemas/NameValueMap'
-            network:
-              description: |
-                Details of the network access available to the container.
-              $ref: '#/components/schemas/DockerNetworkSpec'
+      properties:
+        image:
+          description: |
+            Details of the container image.
+          $ref: 'DockerImageSpec'
+        privileged:
+          type: boolean
+          default: false
+          description: |
+            Set the privileged flag on execution.
+            The default is `false`.
+            See https://docs.docker.com/reference/cli/docker/container/run/#privileged.
+        entrypoint:
+          type: string
+          description: |
+            Overwrite the default ENTRYPOINT of the image.
+        environment:
+          description: |
+            A name => value map of environment variables to pass to the container.
+          $ref: '../../components/utils.yaml#/components/schemas/NameValueMap'
+        network:
+          description: |
+            Details of the network access available to the container.
+          $ref: 'DockerNetworkSpec'
+
+    DockerImageSpec:
+      description: |
+        Details of the container image.
+      type: object
+      title: DockerImageSpec
+      properties:
+        locations:
+          description: |
+            An array of repository locations.
+            <repository>/<namespace>/<container>:<tag>
+            e.g.
+            ghcr.io/ivoa/oligia-webtop:ubuntu-2022.01.13
+          type: array
+          items:
+            type: string
+        digest:
+          type: string
+          description: |
+            Images that use the v2 or later format have a content-addressable identifier called a digest.
+            As long as the input used to generate the image is unchanged, the digest value is predictable.
+            The digest is generated as a sha256 checksum when the image is built.
+            The digest can be used to verify the contents of an image.
+        platform:
+          $ref: 'DockerPlatformSpec'
+
+    DockerPlatformSpec:
+      description: |
+        Details of the platform the container image is built for.
+        Debatable whether we need to have this here.
+        The information will be in the container, and the platform will probably need to check it anyway to make sure.
+        So why have the duplicate information ?
+      type: object
+      title: DockerPlatformSpec
+      properties:
+        architecture:
+          type: string
+          default: amd64
+          description: |
+            The CPU architecture the image is built for.
+            The default is `amd64`.
+        os:
+          type: string
+          default: linux
+          description: |
+            The operating system the image is built for.
+            The default is `linux`.
 
     DockerNetworkSpec:
       description: |
@@ -117,7 +128,7 @@ components:
             An array of network ports to publish.
           type: array
           items:
-            $ref: '#/components/schemas/DockerNetworkPort'
+            $ref: 'DockerNetworkPort'
 
     DockerNetworkPort:
       description: |
@@ -125,32 +136,58 @@ components:
       type: object
       title: DockerNetworkPort
       properties:
-        address:
-          type: string
+        access:
+          type: boolean
           description: |
-            The IP address of the external network interface.
-            The client should not set this value.
-            The service will update this with a publicly accessible interface address when it sets up the execution.
-        external:
-          type: string
-          description: |
-            The host machine's external port number to connect.
-            The client should not set this value.
-            The service will update this with the corrent port number when it sets up the execution.
+            A flag to indicate whether this port should be listed in the access methods for the execution.
         internal:
-          type: string
-          description: |
-            The port number on the container to publish.
+          $ref: 'DockerInternalPort'
+        external:
+          $ref: 'DockerExternalPort'
         protocol:
           type: string
-          enum:
-            - UDP
-            - TCP
-            - HTTP
-            - HTTPS
           description: |
-            The network protocol to use, default is `TCP`.
-            The `HTTP` and `HTTPS` values further specify the Protocol to use on top of `TCP`.
+            The network protocol to use, typically one of [UDP, TCP, HTTP, HTTPS], with a default of `TCP`.
+            This should be defined as part of the description of the executable supplied by the client.
+            The `HTTP` and `HTTPS` values further specify the protocol to use on top of `TCP`.
             Specifying `HTTPS` may help to meet firewall restrictions at some sites.
+        path:
+          type: string
+          description: |
+            The path component of an access URL.
+            This should be defined as part of the description of the executable supplied by the client.
+            This can be used to provide the path of a notebook within a JupyterNotebook container.
 
+    DockerInternalPort:
+      description: |
+        Details of an internal network port on a container.
+      type: object
+      title: DockerInternalPort
+      properties:
+        port:
+          type: integer
+          format: int32
+          description: |
+            The port number on the container to publish.
+            This should be defined as part of the description of the executable.
+
+    DockerExternalPort:
+      description: |
+        Details of an external network port accessible from outside.
+      type: object
+      title: DockerExternalPort
+      properties:
+        port:
+          type: integer
+          format: int32
+          description: |
+            The port number of the external interface.
+            The service will populate this value when it sets up the execution.
+        addresses:
+          type: array
+          items:
+            type: string
+          description: |
+            A list of public hostnames or IPv4 or IPv6 addresses for the external interface.
+            The service will populate this list when it sets up the execution.
 
